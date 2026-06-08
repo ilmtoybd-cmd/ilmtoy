@@ -55,6 +55,7 @@
   --line:#EFE3D6;
   --accent:#FF6B4A;       /* প্রধান রঙ */
   --accent-deep:#E8492A;
+  --accent-soft:#FFE7E0;
   --green:#16A34A;        /* ছাড়/সফল */
   --yellow:#FFD23F;
   --shadow:0 6px 24px rgba(120,80,40,.10);
@@ -300,12 +301,35 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .done h3{font-size:1.25rem;margin-bottom:6px}
 .done p{color:var(--ink-soft)}
 
+/* ---------- Customer Reviews ---------- */
+.review-add-btn{border:none;background:var(--accent);color:#fff;font-family:'Baloo Da 2';font-weight:700;font-size:.92rem;padding:9px 16px;border-radius:11px;cursor:pointer;transition:.18s;white-space:nowrap}
+.review-add-btn:hover{background:var(--accent-deep);transform:translateY(-1px)}
+.review-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.rv-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 16px 18px;box-shadow:0 5px 14px rgba(120,80,40,.06)}
+.rv-top{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+.rv-ava{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-weight:700;font-size:1.15rem;flex-shrink:0;overflow:hidden}
+.rv-ava img{width:100%;height:100%;object-fit:cover}
+.rv-name{font-weight:700;color:var(--ink);font-size:.96rem}
+.rv-stars{color:#F5B301;font-size:.95rem;letter-spacing:1px}
+.rv-stars .off{color:#E0D6C8}
+.rv-text{color:var(--ink-soft);font-size:.92rem;line-height:1.6;margin-top:4px}
+.rv-media{margin-top:11px;border-radius:12px;overflow:hidden}
+.rv-media iframe{width:100%;aspect-ratio:16/9;border:0;display:block;border-radius:12px}
+.rv-media img{width:100%;border-radius:12px;display:block}
+.rv-watch{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:var(--accent-soft);color:var(--accent-deep);font-weight:700;font-size:.88rem;padding:8px 13px;border-radius:10px;text-decoration:none}
+.rv-watch:hover{background:var(--accent);color:#fff}
+.star-pick{display:flex;gap:6px;font-size:2rem;cursor:pointer;user-select:none}
+.star-pick span{color:#E0D6C8;transition:.12s}
+.star-pick span.on{color:#F5B301}
+.review-modal-title{font-family:'Baloo Da 2';font-size:1.3rem;color:var(--ink);margin-bottom:16px}
+
 /* ---------- Footer ---------- */
 footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24px}
 .foot{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:26px}
 .foot h4{font-family:'Baloo Da 2';color:#fff;margin-bottom:12px;font-size:1.1rem}
 .foot a,.foot p{color:#C9BBAB;font-size:.92rem;margin-bottom:7px;display:block}
 .foot a:hover{color:var(--yellow)}
+.foot-quote{font-style:italic;color:#C9BBAB;font-size:.92rem;line-height:1.6;margin-bottom:10px;display:block}
 .copy{max-width:1180px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);text-align:center;color:#A99B8B;font-size:.85rem}
 
 /* ---------- Floating WhatsApp ---------- */
@@ -424,25 +448,64 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
   <div id="status" class="loading" data-i18n="loading">Loading products...</div>
 </div>
 
+<!-- ===== Customer Reviews ===== -->
+<div class="wrap reviews-wrap" id="reviewsSection" style="display:none">
+  <div class="section-h">
+    <h2 data-i18n="reviews_title">Customer Reviews</h2>
+    <button class="review-add-btn" id="openReviewBtn" data-i18n="write_review" style="display:none">✍️ Write a Review</button>
+  </div>
+  <div id="reviewGrid" class="review-grid"></div>
+</div>
+
+<!-- Review submit modal -->
+<div class="overlay" id="reviewOverlay">
+  <div class="modal" style="position:relative">
+    <button class="x" id="reviewCloseX">×</button>
+    <div id="reviewForm">
+      <h3 class="review-modal-title" data-i18n="write_review">Write a Review</h3>
+      <div class="field"><label data-i18n="name_label">Your Name *</label><input id="rvName" placeholder="Enter your name" data-i18n-ph="name_ph" /></div>
+      <div class="field">
+        <label data-i18n="your_rating">Your Rating *</label>
+        <div class="star-pick" id="starPick"><span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div>
+      </div>
+      <div class="field"><label data-i18n="review_text_label">Your Review *</label><textarea id="rvText" rows="3" placeholder="Write your experience..." data-i18n-ph="review_text_ph"></textarea></div>
+      <button class="submit" id="rvSubmit" data-i18n="submit_review">Submit Review</button>
+    </div>
+    <div id="reviewDone" class="done" style="display:none">
+      <div class="check">✓</div>
+      <h3 data-i18n="review_thanks">Thanks! Your review will appear after approval.</h3>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div class="foot">
-    <div>
+    <div class="foot-col">
       <h4 id="fName">Ilm Toy</h4>
       <p id="fAddr"></p>
-      <p id="fPhone"></p>
     </div>
-    <div>
+    <div class="foot-col">
       <h4 data-i18n="contact">Contact</h4>
-      <a id="fWa" href="#" target="_blank">WhatsApp</a>
-      <a id="fMsg" href="#" target="_blank">Messenger</a>
-      <a id="fFb" href="#" target="_blank">Facebook</a>
-      <a id="fIg" href="#" target="_blank">Instagram</a>
-      <a id="fYt" href="#" target="_blank">YouTube</a>
-      <a id="fEmail" href="#">Email</a>
+      <a id="fEmail" href="#">✉️ Email</a>
+      <a id="fWa" href="#" target="_blank">💬 WhatsApp</a>
+      <a id="fPhoneLink" href="#">📞 <span id="fPhone"></span></a>
     </div>
-    <div>
-      <h4 data-i18n="how_to_order">How to Order</h4>
-      <p data-i18n="how_to_order_desc">Tap a product → enter your details → confirm the order. Cash on delivery.</p>
+    <div class="foot-col">
+      <h4 data-i18n="follow_us">Follow Us</h4>
+      <a id="fFb" href="#" target="_blank">Facebook</a>
+      <a id="fYt" href="#" target="_blank">YouTube</a>
+      <a id="fIg" href="#" target="_blank">Instagram</a>
+      <a id="fMsg" href="#" target="_blank">Messenger</a>
+    </div>
+    <div class="foot-col" id="salesCol">
+      <h4 data-i18n="sales_heading">Sales</h4>
+      <a id="fCorp" href="#"><span data-i18n="corporate_sales">Corporate Sales</span>: <span id="fCorpNum"></span></a>
+      <a id="fRetail" href="#"><span data-i18n="retail_sales">Retail Sales</span>: <span id="fRetailNum"></span></a>
+    </div>
+    <div class="foot-col" id="aboutCol">
+      <h4 data-i18n="about_us">About Us</h4>
+      <p id="fQuote" class="foot-quote"></p>
+      <a id="fMap" href="#" target="_blank" data-i18n="view_on_map">📍 View on Google Maps</a>
     </div>
   </div>
   <div class="copy" id="copy"></div>
@@ -534,6 +597,10 @@ const CONFIG = {
   couponsCsvUrl  : "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyFHZIchS7qw8EHxHAk53SiQfbqF0g6OKF2j2QQV8ejqnifPChisg6Q6W_cxxzO3aHZwKFzSH7FUw9/pub?gid=216761155&single=true&output=csv",   // Coupons ট্যাব
   // অর্ডার শিটে জমা করার Apps Script ওয়েব-অ্যাপ লিঙ্ক — খালি থাকলে শুধু WhatsApp যাবে
   orderEndpoint  : "https://script.google.com/macros/s/AKfycbyyTWi4aD1gDAIh5R1OeDOPDGc7eHiwS2a2zWvEcp4DNCcWL0mbLdogDiPcx7_WSN2g/exec",
+  // রিভিউ পড়ার জন্য Reviews ট্যাবের CSV (গুগল শিটে "Reviews" নামে একটা ট্যাব বানাও)
+  reviewsCsvUrl  : "https://docs.google.com/spreadsheets/d/1T7XIGcZdwBqzvf1k-D010o0Jv9OK7sB5ErG9wJ3Pz2E/gviz/tq?tqx=out:csv&sheet=Reviews",
+  // কাস্টমার রিভিউ জমা নেওয়ার Apps Script লিঙ্ক — খালি থাকলে "রিভিউ লিখুন" বাটন লুকানো থাকবে
+  reviewEndpoint : "https://script.google.com/macros/s/AKfycbxDk1nd0d0wse_l_aivNPZVOmgoNraT6R9-kuZReR43m43P8xQCuCrlAdGE9TRTAW8bMQ/exec",
 };
 
 /* শিট লিঙ্ক না দেওয়া পর্যন্ত এই ডিফল্ট মান দিয়ে সাইট দেখাবে */
@@ -545,7 +612,8 @@ const DEFAULTS = {
   currency:"৳", delivery_dhaka:60, delivery_outside:120,
   banner1:"", banner2:"", banner3:"", banner4:"", banner5:"",
   trust1:"প্যারেন্টিং এক্সপার্টদের রিকমেন্ডেড", trust2:"বাচ্চার জন্য নিরাপদ (Non-Toxic)", trust3:"সারা দেশে হোম ডেলিভারি", trust4:"পণ্য হাতে পেয়ে মূল্য পরিশোধ",
-  instagram:"", youtube:"", email:""
+  instagram:"", youtube:"", email:"",
+  corporate_sales:"", retail_sales:"", owner_quote:"", owner_name:"", map_link:""
 };
 let S = {...DEFAULTS};
 let COUPONS = [
@@ -568,6 +636,7 @@ const SAMPLE = [
    ============================================================ */
 const $ = s => document.querySelector(s);
 let PRODUCTS = [], activeCat = "all", current = null;
+let REVIEWS = [], rvRating = 0;   // কাস্টমার রিভিউ
 let galImgs = [], galIdx = 0;   // প্রোডাক্ট গ্যালারির ছবি
 let cur = DEFAULTS.currency;
 const bnNum = n => Number(n).toLocaleString('en-US');
@@ -590,6 +659,8 @@ const T = {
     search_ph:"Search products...", cart:"Cart", hero_badge:"🚚 Nationwide Delivery",
     shop_by_cat:"Shop By Category", all_products:"All Products", loading:"Loading products...",
     no_products:"No products found.", items:"items", contact:"Contact",
+    follow_us:"Follow Us", sales_heading:"Sales", corporate_sales:"Corporate Sales", retail_sales:"Retail Sales", about_us:"About Us", view_on_map:"📍 View on Google Maps",
+    reviews_title:"Customer Reviews", write_review:"✍️ Write a Review", your_rating:"Your Rating *", review_text_label:"Your Review *", review_text_ph:"Write your experience...", submit_review:"Submit Review", review_thanks:"Thanks! Your review will appear after approval.", watch_video:"▶ Watch Video", review_fill:"Please add your name, rating and review.",
     how_to_order:"How to Order",
     how_to_order_desc:"Tap a product → enter your details → confirm the order. Cash on delivery.",
     your_cart:"🛒 Your Cart", subtotal:"Subtotal", discount:"Discount",
@@ -611,6 +682,8 @@ const T = {
     search_ph:"পণ্য খুঁজুন...", cart:"কার্ট", hero_badge:"🚚 সারা দেশে ডেলিভারি",
     shop_by_cat:"ক্যাটাগরি অনুযায়ী কিনুন", all_products:"সব পণ্য", loading:"পণ্য লোড হচ্ছে...",
     no_products:"কোনো পণ্য পাওয়া যায়নি।", items:"টি পণ্য", contact:"যোগাযোগ",
+    follow_us:"ফলো করুন", sales_heading:"বিক্রয়", corporate_sales:"কর্পোরেট সেলস", retail_sales:"রিটেইল সেলস", about_us:"আমাদের সম্পর্কে জানুন", view_on_map:"📍 গুগল ম্যাপে দেখুন",
+    reviews_title:"কাস্টমার রিভিউ", write_review:"✍️ রিভিউ লিখুন", your_rating:"আপনার রেটিং *", review_text_label:"আপনার মতামত *", review_text_ph:"আপনার অভিজ্ঞতা লিখুন...", submit_review:"রিভিউ জমা দিন", review_thanks:"ধন্যবাদ! অ্যাপ্রুভের পর আপনার রিভিউ দেখা যাবে।", watch_video:"▶ ভিডিও দেখুন", review_fill:"নাম, রেটিং ও মতামত দিন।",
     how_to_order:"কীভাবে অর্ডার করবেন",
     how_to_order_desc:"পণ্যে ট্যাপ করুন → আপনার তথ্য দিন → অর্ডার নিশ্চিত করুন। ক্যাশ অন ডেলিভারি।",
     your_cart:"🛒 আপনার কার্ট", subtotal:"সাবটোটাল", discount:"ছাড়",
@@ -644,6 +717,7 @@ function setLang(l){
   try{ localStorage.setItem('ilmtoy_lang', LANG); }catch(e){}
   applyLang();
   buildCats(); buildShopCats(); render();
+  renderReviews();
   $("#cats").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on", x.dataset.c===activeCat));
   $("#secTitle").textContent = activeCat==="all" ? t('all_products') : activeCat;
   if(document.getElementById("cartOverlay").classList.contains("show")){ renderCartBody(); updateCartTotal(); }
@@ -664,7 +738,6 @@ function applyConfig(){
   $("#heroSub").textContent = S.hero_sub;
   $("#fName").textContent = S.store_name;
   $("#fAddr").textContent = S.address;
-  $("#fPhone").textContent = "📞 " + S.phone;
   const wa = "https://wa.me/" + S.whatsapp;
   $("#fab").href = wa;
   const setLink = (id, url) => {
@@ -672,12 +745,32 @@ function applyConfig(){
     if(!url || /your-page|01XXXX|8801XXXX/.test(url)){ el.style.display="none"; }
     else { el.href = url; el.style.display=""; }
   };
-  setLink("fWa", wa);
-  setLink("fMsg", S.messenger);
-  setLink("fFb", S.facebook);
-  setLink("fIg", S.instagram);
-  setLink("fYt", S.youtube);
+  // Contact
   setLink("fEmail", S.email ? ("mailto:" + S.email) : "");
+  setLink("fWa", wa);
+  const phoneEl = $("#fPhoneLink");
+  if(!S.phone || /01XXXX/.test(S.phone)){ phoneEl.style.display="none"; }
+  else { $("#fPhone").textContent = S.phone; phoneEl.href = "tel:"+S.phone; phoneEl.style.display=""; }
+  // Follow Us
+  setLink("fFb", S.facebook);
+  setLink("fYt", S.youtube);
+  setLink("fIg", S.instagram);
+  setLink("fMsg", S.messenger);
+  // Sales (Corporate + Retail)
+  const setSales = (linkId, numId, val) => {
+    const a = $("#"+linkId);
+    if(!val || !(""+val).trim()){ a.style.display="none"; }
+    else { $("#"+numId).textContent = (""+val).trim(); a.href = "tel:"+(""+val).replace(/[^0-9+]/g,''); a.style.display=""; }
+  };
+  setSales("fCorp","fCorpNum", S.corporate_sales);
+  setSales("fRetail","fRetailNum", S.retail_sales);
+  $("#salesCol").style.display = ([S.corporate_sales,S.retail_sales].some(v=>v&&(""+v).trim())) ? "" : "none";
+  // About Us (owner quote + Google Maps)
+  const quote = (S.owner_quote||"").trim();
+  if(quote){ $("#fQuote").textContent = "“"+quote+"”"+(S.owner_name?(" — "+S.owner_name):""); $("#fQuote").style.display=""; }
+  else { $("#fQuote").style.display="none"; }
+  setLink("fMap", S.map_link);
+  $("#aboutCol").style.display = (quote || (S.map_link && (""+S.map_link).trim())) ? "" : "none";
   $("#copy").textContent = "© " + new Date().getFullYear() + " " + S.store_name + ". All rights reserved.";
 
   // Trust badges — শিটে trust1, trust2, trust3 ... যত খুশি দেওয়া যাবে, সব দেখাবে
@@ -802,6 +895,59 @@ async function loadProducts(){
     }).filter(p=>p.name && p.status!=="hidden");
     if(!PRODUCTS.length) PRODUCTS = SAMPLE;
   }catch(e){ PRODUCTS = SAMPLE; }
+}
+
+/* ---- কাস্টমার রিভিউ ---- */
+async function loadReviews(){
+  if(!CONFIG.reviewsCsvUrl) return;
+  try{
+    const data = await fetchCSV(CONFIG.reviewsCsvUrl);
+    const ok = s => ['approved','approve','show','active','yes','published'].includes((s||"").toLowerCase().trim());
+    REVIEWS = data.filter(d => (d.name||d.review) && ok(d.status)).map(d=>({
+      name:(d.name||"").trim(),
+      rating:Math.max(0,Math.min(5, Math.round(parseFloat(d.rating)||0))),
+      review:(d.review||"").trim(),
+      photo:(d.photo||"").trim(),
+      video:(d.video||"").trim()
+    }));
+  }catch(e){ REVIEWS = []; }
+}
+function ytId(url){
+  const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return m ? m[1] : "";
+}
+function starHTML(n){
+  let s="";
+  for(let i=1;i<=5;i++){ s += `<span class="${i<=n?'':'off'}">★</span>`; }
+  return s;
+}
+function renderReviews(){
+  const sec = $("#reviewsSection"), grid = $("#reviewGrid");
+  if(!sec) return;
+  // রিভিউ লিখুন বাটন — endpoint থাকলে দেখাও
+  const addBtn = $("#openReviewBtn");
+  if(addBtn) addBtn.style.display = CONFIG.reviewEndpoint ? "" : "none";
+  if(!REVIEWS.length && !CONFIG.reviewEndpoint){ sec.style.display="none"; return; }
+  sec.style.display = "";
+  grid.innerHTML = REVIEWS.map(r=>{
+    const initial = (r.name[0]||"★").toUpperCase();
+    const ava = r.photo ? `<img src="${r.photo}" alt="${r.name}">` : initial;
+    let media = "";
+    const yt = ytId(r.video);
+    if(yt){
+      media = `<div class="rv-media"><iframe src="https://www.youtube.com/embed/${yt}" allowfullscreen loading="lazy"></iframe></div>`;
+    } else if(r.video){
+      media = `<a class="rv-watch" href="${r.video}" target="_blank" rel="noopener">${t('watch_video')}</a>`;
+    }
+    return `<div class="rv-card">
+      <div class="rv-top">
+        <div class="rv-ava">${ava}</div>
+        <div><div class="rv-name">${r.name||"Customer"}</div><div class="rv-stars">${starHTML(r.rating)}</div></div>
+      </div>
+      ${r.review?`<div class="rv-text">${r.review}</div>`:""}
+      ${media}
+    </div>`;
+  }).join("");
 }
 
 
@@ -968,13 +1114,51 @@ async function submitCartOrder(){
 document.getElementById("cartOverlay").onclick=e=>{if(e.target===document.getElementById("cartOverlay"))closeCart();};
 
 async function boot(){
-  await Promise.all([loadSettings(), loadCoupons(), loadProducts()]);
+  await Promise.all([loadSettings(), loadCoupons(), loadProducts(), loadReviews()]);
   cur = S.currency || "৳";
   applyConfig();
   buildCats();
   buildShopCats();
   render();
+  renderReviews();
+  initReviewModal();
   applyLang();
+}
+
+/* ---- রিভিউ লিখুন মডাল ---- */
+function initReviewModal(){
+  const ov = $("#reviewOverlay"), openBtn = $("#openReviewBtn");
+  if(!ov || !openBtn) return;
+  const stars = $("#starPick").querySelectorAll('span');
+  const paint = n => stars.forEach(s=>s.classList.toggle('on', parseInt(s.dataset.v)<=n));
+  stars.forEach(s=>{
+    s.onmouseover = ()=>paint(parseInt(s.dataset.v));
+    s.onclick = ()=>{ rvRating = parseInt(s.dataset.v); paint(rvRating); };
+  });
+  $("#starPick").onmouseleave = ()=>paint(rvRating);
+  const close = ()=>ov.classList.remove("show");
+  openBtn.onclick = ()=>{
+    rvRating=0; paint(0);
+    $("#rvName").value=""; $("#rvText").value="";
+    $("#reviewForm").style.display="block"; $("#reviewDone").style.display="none";
+    $("#rvSubmit").disabled=false;
+    ov.classList.add("show");
+  };
+  $("#reviewCloseX").onclick = close;
+  ov.onclick = e=>{ if(e.target===ov) close(); };
+  $("#rvSubmit").onclick = async ()=>{
+    const name=$("#rvName").value.trim(), text=$("#rvText").value.trim();
+    if(!name || !rvRating || !text){ alert(t('review_fill')); return; }
+    $("#rvSubmit").disabled=true;
+    if(CONFIG.reviewEndpoint){
+      try{
+        const fd=new URLSearchParams({ time:new Date().toLocaleString('en-GB'), name, rating:rvRating, review:text, status:"pending" });
+        fetch(CONFIG.reviewEndpoint,{method:"POST",mode:"no-cors",body:fd});
+      }catch(e){}
+    }
+    $("#reviewForm").style.display="none";
+    $("#reviewDone").style.display="block";
+  };
 }
 
 function buildCats(){
