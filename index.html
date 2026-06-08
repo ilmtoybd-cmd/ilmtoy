@@ -260,6 +260,34 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
   .bar{flex-wrap:wrap}
   .title{font-size:.9rem}
 }
+
+/* ---------- Product Gallery (multiple images) ---------- */
+.modal-head{flex-direction:column;align-items:stretch;gap:12px}
+.modal-head .gallery{width:100%}
+.gal-main{position:relative;width:100%;aspect-ratio:1/1;background:#FBF2E9;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.modal-head .gal-main img{width:100%;height:100%;border-radius:14px;object-fit:cover}
+.gal-main .ph-big{font-family:'Baloo Da 2';font-weight:800;font-size:3.4rem;color:var(--accent);opacity:.55}
+.gal-nav{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.92);color:var(--ink);font-size:1.5rem;line-height:1;cursor:pointer;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;padding:0;z-index:2}
+.gal-nav:hover{background:#fff;color:var(--accent-deep)}
+.gal-nav.prev{left:8px}
+.gal-nav.next{right:8px}
+.gal-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2}
+.gal-dots button{width:7px;height:7px;border-radius:50%;border:none;background:rgba(255,255,255,.65);cursor:pointer;padding:0;transition:.2s}
+.gal-dots button.on{background:#fff;width:18px;border-radius:4px}
+.gal-thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.gal-thumbs::-webkit-scrollbar{display:none}
+.gal-thumb{flex:0 0 auto;width:54px;height:54px;border-radius:10px;border:2px solid transparent;background:#FBF2E9;overflow:hidden;cursor:pointer;padding:0;transition:.18s}
+.gal-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.gal-thumb.on{border-color:var(--accent)}
+.m-title h3{font-size:1.1rem;line-height:1.3}
+.m-title .mp{color:var(--accent-deep);font-family:'Baloo Da 2';font-weight:700;margin-top:3px;font-size:1.15rem}
+/* multiple-image badge on product cards */
+.multi-badge{position:absolute;top:10px;right:10px;background:rgba(40,33,24,.72);color:#fff;font-weight:700;font-size:.72rem;padding:3px 8px;border-radius:50px;display:flex;align-items:center;gap:4px;z-index:2;backdrop-filter:blur(2px)}
+.multi-badge svg{width:12px;height:12px}
+/* ---------- Add-to-cart toast ---------- */
+.toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-weight:700;font-size:.9rem;padding:11px 20px;border-radius:50px;box-shadow:var(--shadow-lg);z-index:120;opacity:0;pointer-events:none;transition:.28s;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .tk{color:#fff;background:var(--green);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem}
 </style>
 </head>
 <body>
@@ -356,6 +384,8 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
 <a class="fab" id="fab" href="#" target="_blank" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.51 5.26l-.999 3.648 3.978-.985-.001-.022zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
 </a>
+
+<div class="toast" id="toast"></div>
 
 <div class="cart-overlay" id="cartOverlay">
   <div class="cart-modal">
@@ -499,8 +529,19 @@ const SAMPLE = [
    ============================================================ */
 const $ = s => document.querySelector(s);
 let PRODUCTS = [], activeCat = "all", current = null;
+let galImgs = [], galIdx = 0;   // প্রোডাক্ট গ্যালারির ছবি
 let cur = DEFAULTS.currency;
 const bnNum = n => Number(n).toLocaleString('en-US');
+
+let __toastT;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.innerHTML = '<span class="tk">✓</span>' + msg;
+  t.classList.add('show');
+  clearTimeout(__toastT);
+  __toastT = setTimeout(()=>t.classList.remove('show'), 1600);
+}
 
 function applyConfig(){
   $("#announce").textContent = S.announce;
@@ -637,13 +678,16 @@ async function loadProducts(){
   if(!CONFIG.productsCsvUrl){ PRODUCTS = SAMPLE; return; }
   try{
     const data = await fetchCSV(CONFIG.productsCsvUrl);
-    PRODUCTS = data.map(d=>({
-      id:d.id, name:d.name, category:d.category||"",
-      price:parseFloat(String(d.price).replace(/[^0-9.]/g,''))||0,
-      old_price:parseFloat(String(d.old_price).replace(/[^0-9.]/g,''))||0,
-      image_url:d.image_url||"", description:d.description||"",
-      status:(d.status||"active").toLowerCase()
-    })).filter(p=>p.name && p.status!=="hidden");
+    PRODUCTS = data.map(d=>{
+      const imgs = String(d.image_url||"").split(/[|\n,]+/).map(s=>s.trim()).filter(Boolean);
+      return {
+        id:d.id, name:d.name, category:d.category||"",
+        price:parseFloat(String(d.price).replace(/[^0-9.]/g,''))||0,
+        old_price:parseFloat(String(d.old_price).replace(/[^0-9.]/g,''))||0,
+        images:imgs, image_url:imgs[0]||"", description:d.description||"",
+        status:(d.status||"active").toLowerCase()
+      };
+    }).filter(p=>p.name && p.status!=="hidden");
     if(!PRODUCTS.length) PRODUCTS = SAMPLE;
   }catch(e){ PRODUCTS = SAMPLE; }
 }
@@ -661,6 +705,7 @@ function addToCart(id){
   const ex = CART.find(x=>x.id===p.id);
   if(ex){ ex.qty++; } else { CART.push({...p, qty:1}); }
   updateCartUI();
+  showToast("Added to cart");
   // bounce animation on cart buttons
   ["cartBadge","cartFabBadge"].forEach(bid=>{ const el=document.getElementById(bid); if(el){el.style.transform="scale(1.5)"; setTimeout(()=>el.style.transform="",250); } });
 }
@@ -837,8 +882,11 @@ function render(){
     const img = p.image_url
       ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" onerror="this.parentNode.innerHTML='<div class=&quot;ph&quot;>${(p.name[0]||'?')}</div>'">`
       : `<div class="ph">${p.name[0]||'?'}</div>`;
+    const multi = (p.images && p.images.length>1)
+      ? `<span class="multi-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M21 7v12a2 2 0 0 1-2 2H7"/></svg>${p.images.length}</span>`
+      : "";
     return `<div class="card" data-id="${p.id}" style="cursor:pointer">
-      <div class="thumb">${sale?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${img}</div>
+      <div class="thumb">${sale?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${multi}${img}</div>
       <div class="body">
         ${p.category?`<div class="cat-tag">${p.category}</div>`:""}
         <div class="title">${p.name}</div>
@@ -864,10 +912,25 @@ function render(){
 function openModal(id){
   current = PRODUCTS.find(p=>String(p.id)===String(id));
   if(!current) return;
-  const img = current.image_url
-    ? `<img src="${current.image_url}" alt="">`
-    : `<div class="ph">${current.name[0]||'?'}</div>`;
-  $("#mHead").innerHTML = `${img}<div><h3>${current.name}</h3><div class="mp">${bnNum(current.price)}${cur}</div></div>`;
+  // ছবির গ্যালারি তৈরি (একাধিক ছবি)
+  galImgs = (current.images && current.images.length) ? current.images.slice() : (current.image_url ? [current.image_url] : []);
+  galIdx = 0;
+  let galInner;
+  if(galImgs.length){
+    const nav = galImgs.length>1
+      ? `<button type="button" class="gal-nav prev" onclick="showGalImg(galIdx-1)">‹</button><button type="button" class="gal-nav next" onclick="showGalImg(galIdx+1)">›</button>`
+      : "";
+    const dots = galImgs.length>1
+      ? `<div class="gal-dots">${galImgs.map((_,i)=>`<button type="button" class="${i===0?'on':''}" onclick="showGalImg(${i})"></button>`).join("")}</div>`
+      : "";
+    const thumbs = galImgs.length>1
+      ? `<div class="gal-thumbs">${galImgs.map((u,i)=>`<button type="button" class="gal-thumb${i===0?' on':''}" onclick="showGalImg(${i})"><img src="${u}" alt="" loading="lazy"></button>`).join("")}</div>`
+      : "";
+    galInner = `<div class="gal-main"><img id="galImg" src="${galImgs[0]}" alt="${current.name}">${nav}${dots}</div>${thumbs}`;
+  } else {
+    galInner = `<div class="gal-main"><div class="ph-big">${current.name[0]||'?'}</div></div>`;
+  }
+  $("#mHead").innerHTML = `<div class="gallery">${galInner}</div><div class="m-title"><h3>${current.name}</h3><div class="mp">${bnNum(current.price)}${cur}</div></div>`;
   const desc = (current.description||"").trim();
   if(desc){ $("#mDesc").textContent = desc; $("#mDesc").style.display="block"; }
   else { $("#mDesc").textContent=""; $("#mDesc").style.display="none"; }
@@ -881,6 +944,14 @@ function openModal(id){
   $("#overlay").classList.add("show");
 }
 function closeModal(){ $("#overlay").classList.remove("show"); }
+function showGalImg(i){
+  if(!galImgs.length) return;
+  galIdx = ((i % galImgs.length) + galImgs.length) % galImgs.length;
+  const main = document.getElementById('galImg');
+  if(main) main.src = galImgs[galIdx];
+  document.querySelectorAll('.gal-thumb').forEach((t,j)=>t.classList.toggle('on', j===galIdx));
+  document.querySelectorAll('.gal-dots button').forEach((d,j)=>d.classList.toggle('on', j===galIdx));
+}
 let appliedCoupon=null;
 
 function calc(){
