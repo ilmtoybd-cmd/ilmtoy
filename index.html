@@ -1,9 +1,45 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
+<!-- Google tag (gtag.js) — Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CBD8JYS62G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-CBD8JYS62G');
+</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ilm Toy</title>
+
+<!-- SEO + Social share preview (Open Graph / Twitter) -->
+<meta name="description" content="ilm Toy — শিশুদের জন্য শিক্ষামূলক ও মজার খেলনার অনলাইন দোকান। সারা দেশে হোম ডেলিভারি, ক্যাশ অন ডেলিভারি।" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="ilm Toy" />
+<meta property="og:title" content="ilm Toy — শিক্ষামূলক খেলনার অনলাইন দোকান" />
+<meta property="og:description" content="শিশুদের জন্য শিক্ষামূলক ও মজার খেলনা। সারা দেশে হোম ডেলিভারি, ক্যাশ অন ডেলিভারি।" />
+<meta property="og:image" content="https://i.ibb.co/m56yG9FV/Gemini-Generated-Image-obctykobctykobct.png" />
+<meta property="og:url" content="https://ilmtoy.com" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="ilm Toy — শিক্ষামূলক খেলনার অনলাইন দোকান" />
+<meta name="twitter:description" content="শিশুদের জন্য শিক্ষামূলক ও মজার খেলনা। সারা দেশে হোম ডেলিভারি।" />
+<meta name="twitter:image" content="https://i.ibb.co/m56yG9FV/Gemini-Generated-Image-obctykobctykobct.png" />
+<link rel="icon" type="image/png" href="https://i.ibb.co/m56yG9FV/Gemini-Generated-Image-obctykobctykobct.png" />
+
+<!-- Meta Pixel (Facebook) — নিচের "" এর ভিতরে তোমার Pixel ID বসাও, যেমন "123456789012345" -->
+<script>
+  window.META_PIXEL_ID = "1576007224572033";
+  if(window.META_PIXEL_ID){
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', window.META_PIXEL_ID);
+    fbq('track', 'PageView');
+  }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -69,6 +105,8 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 /* ---------- Cart Header Button ---------- */
 .cart-hbtn{position:relative;display:flex;align-items:center;gap:7px;background:var(--accent);color:#fff;padding:10px 16px;border-radius:50px;font-weight:700;font-size:.9rem;white-space:nowrap;cursor:pointer;border:none;font-family:inherit;transition:.18s}
 .cart-hbtn:hover{background:var(--accent-deep)}
+.lang-btn{background:#fff;border:1.5px solid var(--line);color:var(--ink);font-family:'Baloo Da 2';font-weight:700;font-size:.85rem;padding:9px 14px;border-radius:50px;cursor:pointer;white-space:nowrap;transition:.18s}
+.lang-btn:hover{border-color:var(--accent);color:var(--accent-deep)}
 .cart-hbtn svg{width:18px;height:18px;flex-shrink:0}
 .cart-badge{position:absolute;top:-6px;right:-6px;background:var(--green);color:#fff;font-size:.7rem;font-weight:800;min-width:18px;height:18px;border-radius:50px;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1}
 /* ---------- Cart Floating Button ---------- */
@@ -175,6 +213,10 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .card:hover .thumb img{transform:scale(1.06)}
 .thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-size:2.6rem;font-weight:800;color:var(--accent);opacity:.55}
 .saleflag{position:absolute;top:10px;left:10px;background:var(--green);color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.sold-flag{position:absolute;top:10px;left:10px;background:#6B5E50;color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12);z-index:2}
+.card.is-sold .thumb img{filter:grayscale(.65);opacity:.72}
+.soldout-btn{background:#D8D0C5 !important;color:#7A6F60 !important;cursor:not-allowed}
+.soldout-btn:hover{background:#D8D0C5 !important;transform:none !important;filter:none !important}
 .body{padding:13px 14px 16px;display:flex;flex-direction:column;flex:1}
 .cat-tag{font-size:.72rem;color:var(--accent-deep);font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
 .title{font-weight:600;font-size:.98rem;color:var(--ink);min-height:2.6em;margin-bottom:10px}
@@ -322,12 +364,13 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
     <a href="#" class="logo"><img id="logoImg" alt="logo" style="display:none" /><span id="logoEmoji">🧸</span><span id="logoName">Ilm Toy</span></a>
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="search" type="text" placeholder="Search products..." />
+      <input id="search" type="text" placeholder="Search products..." data-i18n-ph="search_ph" />
     </div>
     <a class="callbtn" id="callBtn" href="#"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span id="callNum">Call Now</span></a>
+    <button class="lang-btn" id="langToggle" type="button" onclick="setLang(LANG==='en'?'bn':'en')" aria-label="Change language">বাংলা</button>
     <button class="cart-hbtn" id="cartHBtn" onclick="openCart()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-      Cart
+      <span data-i18n="cart">Cart</span>
       <span class="cart-badge" id="cartBadge" style="display:none">0</span>
     </button>
   </div>
@@ -337,7 +380,7 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
 <div class="hero">
   <div class="hero-in" id="heroText">
     <div>
-      <span class="badge" id="heroBadge">🚚 Nationwide Delivery</span>
+      <span class="badge" id="heroBadge" data-i18n="hero_badge">🚚 Nationwide Delivery</span>
       <h1 id="heroTitle">Best Products, Best Prices</h1>
       <p id="heroSub">Tap a product to order easily.</p>
     </div>
@@ -368,17 +411,17 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
 </div>
 
 <div class="wrap shopcat-wrap" id="shopcatWrap" style="display:none">
-  <div class="section-h"><h2>Shop By Category</h2></div>
+  <div class="section-h"><h2 data-i18n="shop_by_cat">Shop By Category</h2></div>
   <div class="shopcat" id="shopcat"></div>
 </div>
 
 <div class="wrap">
   <div class="section-h">
-    <h2 id="secTitle">All Products</h2>
+    <h2 id="secTitle" data-i18n="all_products">All Products</h2>
     <span id="count"></span>
   </div>
   <div id="grid" class="grid"></div>
-  <div id="status" class="loading">Loading products...</div>
+  <div id="status" class="loading" data-i18n="loading">Loading products...</div>
 </div>
 
 <footer>
@@ -389,7 +432,7 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
       <p id="fPhone"></p>
     </div>
     <div>
-      <h4>Contact</h4>
+      <h4 data-i18n="contact">Contact</h4>
       <a id="fWa" href="#" target="_blank">WhatsApp</a>
       <a id="fMsg" href="#" target="_blank">Messenger</a>
       <a id="fFb" href="#" target="_blank">Facebook</a>
@@ -398,8 +441,8 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
       <a id="fEmail" href="#">Email</a>
     </div>
     <div>
-      <h4>How to Order</h4>
-      <p>Tap a product → enter your details → confirm the order. Cash on delivery.</p>
+      <h4 data-i18n="how_to_order">How to Order</h4>
+      <p data-i18n="how_to_order_desc">Tap a product → enter your details → confirm the order. Cash on delivery.</p>
     </div>
   </div>
   <div class="copy" id="copy"></div>
@@ -407,7 +450,7 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
 
 <button class="cart-fab" id="cartFab" onclick="openCart()">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-  Cart <span class="cart-fab-badge" id="cartFabBadge">0</span>
+  <span data-i18n="cart">Cart</span> <span class="cart-fab-badge" id="cartFabBadge">0</span>
 </button>
 <a class="fab" id="fab" href="#" target="_blank" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.51 5.26l-.999 3.648 3.978-.985-.001-.022zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
@@ -418,42 +461,42 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
 <div class="cart-overlay" id="cartOverlay">
   <div class="cart-modal">
     <div class="cart-modal-head">
-      <h3>🛒 Your Cart</h3>
+      <h3 data-i18n="your_cart">🛒 Your Cart</h3>
       <button class="x" style="position:static;box-shadow:none;background:#FBF2E9" onclick="closeCart()">×</button>
     </div>
     <div class="cart-body" id="cartBody"></div>
     <div class="cart-checkout" id="cartCheckout" style="display:none">
       <div class="breakdown">
-        <div class="brow"><span>Subtotal</span><span id="cSumSub">0৳</span></div>
-        <div class="brow" id="cRowDisc" style="display:none"><span>Discount</span><span id="cSumDisc" style="color:var(--green);font-weight:700">−0৳</span></div>
-        <div class="brow"><span>Delivery Charge</span><span id="cSumShip">0৳</span></div>
-        <div class="brow total-row"><span>Total</span><b id="cGrand">0৳</b></div>
+        <div class="brow"><span data-i18n="subtotal">Subtotal</span><span id="cSumSub">0৳</span></div>
+        <div class="brow" id="cRowDisc" style="display:none"><span data-i18n="discount">Discount</span><span id="cSumDisc" style="color:var(--green);font-weight:700">−0৳</span></div>
+        <div class="brow"><span data-i18n="delivery_charge">Delivery Charge</span><span id="cSumShip">0৳</span></div>
+        <div class="brow total-row"><span data-i18n="total">Total</span><b id="cGrand">0৳</b></div>
       </div>
       <div class="field">
-        <label>Delivery Area</label>
+        <label data-i18n="delivery_area">Delivery Area</label>
         <select id="cDelivery" onchange="updateCartTotal()">
-          <option value="dhaka">Inside Dhaka</option>
-          <option value="outside">Outside Dhaka</option>
+          <option value="dhaka" data-i18n="inside_dhaka">Inside Dhaka</option>
+          <option value="outside" data-i18n="outside_dhaka">Outside Dhaka</option>
         </select>
       </div>
       <div class="field">
-        <label>Coupon Code (if any)</label>
+        <label data-i18n="coupon_label">Coupon Code (if any)</label>
         <div class="coupon-row">
-          <input id="cCoupon" placeholder="Enter code" />
-          <button type="button" onclick="applyCartCoupon()">Apply</button>
+          <input id="cCoupon" placeholder="Enter code" data-i18n-ph="coupon_ph" />
+          <button type="button" onclick="applyCartCoupon()" data-i18n="apply">Apply</button>
         </div>
         <div id="cCouponMsg" class="coupon-msg"></div>
       </div>
-      <div class="field"><label>Your Name *</label><input id="ccName" placeholder="Enter your name" /></div>
-      <div class="field"><label>Mobile Number *</label><input id="ccPhone" type="tel" placeholder="01XXXXXXXXX" /></div>
-      <div class="field"><label>Full Address *</label><textarea id="ccAddr" rows="2" placeholder="House/Village, Thana, District"></textarea></div>
-      <div class="field"><label>Note (optional)</label><input id="ccNote" placeholder="Anything else to add" /></div>
-      <button class="submit" id="cartSubmitBtn" onclick="submitCartOrder()">Confirm Order</button>
-      <p class="note-line">Cash on delivery. We'll contact you shortly.</p>
+      <div class="field"><label data-i18n="name_label">Your Name *</label><input id="ccName" placeholder="Enter your name" data-i18n-ph="name_ph" /></div>
+      <div class="field"><label data-i18n="phone_label">Mobile Number *</label><input id="ccPhone" type="tel" placeholder="01XXXXXXXXX" /></div>
+      <div class="field"><label data-i18n="addr_label">Full Address *</label><textarea id="ccAddr" rows="2" placeholder="House/Village, Thana, District" data-i18n-ph="addr_ph"></textarea></div>
+      <div class="field"><label data-i18n="note_label">Note (optional)</label><input id="ccNote" placeholder="Anything else to add" data-i18n-ph="note_ph" /></div>
+      <button class="submit" id="cartSubmitBtn" onclick="submitCartOrder()" data-i18n="confirm_order">Confirm Order</button>
+      <p class="note-line" data-i18n="cod_note">Cash on delivery. We'll contact you shortly.</p>
       <div id="cartDone" class="done" style="display:none">
         <div class="check">✓</div>
-        <h3>Order Sent!</h3>
-        <p>We'll contact you shortly.</p>
+        <h3 data-i18n="order_sent">Order Sent!</h3>
+        <p data-i18n="contact_soon">We'll contact you shortly.</p>
       </div>
     </div>
   </div>
@@ -466,48 +509,16 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
       <div class="modal-desc" id="mDesc"></div>
       <div class="modal-body">
         <div class="field">
-          <label>Quantity</label>
+          <label data-i18n="quantity">Quantity</label>
           <div class="qty">
             <button type="button" id="minus">−</button>
             <input id="qty" type="number" value="1" min="1" />
             <button type="button" id="plus">+</button>
           </div>
         </div>
-        <div class="field"><label>Your Name *</label><input id="cName" placeholder="Enter your name" /></div>
-        <div class="field"><label>Mobile Number *</label><input id="cPhone" type="tel" placeholder="01XXXXXXXXX" /></div>
-        <div class="field"><label>Full Address *</label><textarea id="cAddr" rows="2" placeholder="House/Village, Thana, District"></textarea></div>
-        <div class="field"><label>Note (optional)</label><input id="cNote" placeholder="Anything else to add" /></div>
-        <div class="field">
-          <label>Delivery Area</label>
-          <select id="delivery">
-            <option value="dhaka">Inside Dhaka</option>
-            <option value="outside">Outside Dhaka</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Coupon Code (if any)</label>
-          <div class="coupon-row">
-            <input id="coupon" placeholder="Enter code" />
-            <button type="button" id="applyCoupon">Apply</button>
-          </div>
-          <div id="couponMsg" class="coupon-msg"></div>
-        </div>
-        <div class="breakdown">
-          <div class="brow"><span>Subtotal</span><span id="sumSub">0৳</span></div>
-          <div class="brow" id="rowDisc" style="display:none"><span>Discount</span><span id="sumDisc">−0৳</span></div>
-          <div class="brow"><span>Delivery Charge</span><span id="sumShip">0৳</span></div>
-          <div class="brow total-row"><span>Total</span><b id="grand">0৳</b></div>
-        </div>
-        <button class="submit" id="submitBtn">
-          Confirm Order
-        </button>
-        <p class="note-line">Cash on delivery. We'll contact you shortly to confirm your order.</p>
+        <button class="submit" id="modalAddBtn" data-i18n="add_to_cart">Add to Cart</button>
+        <p class="note-line" data-i18n="cod_note_long">Cash on delivery. We'll contact you shortly to confirm your order.</p>
       </div>
-    </div>
-    <div id="doneView" class="done" style="display:none">
-      <div class="check">✓</div>
-      <h3>Order Sent!</h3>
-      <p>We'll contact you shortly.</p>
     </div>
   </div>
 </div>
@@ -569,6 +580,73 @@ function showToast(msg){
   t.classList.add('show');
   clearTimeout(__toastT);
   __toastT = setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+/* ============================================================
+   ভাষা (English / বাংলা) — UI টেক্সট অনুবাদ
+   ============================================================ */
+const T = {
+  en:{
+    search_ph:"Search products...", cart:"Cart", hero_badge:"🚚 Nationwide Delivery",
+    shop_by_cat:"Shop By Category", all_products:"All Products", loading:"Loading products...",
+    no_products:"No products found.", items:"items", contact:"Contact",
+    how_to_order:"How to Order",
+    how_to_order_desc:"Tap a product → enter your details → confirm the order. Cash on delivery.",
+    your_cart:"🛒 Your Cart", subtotal:"Subtotal", discount:"Discount",
+    delivery_charge:"Delivery Charge", total:"Total", delivery_area:"Delivery Area",
+    inside_dhaka:"Inside Dhaka", outside_dhaka:"Outside Dhaka", coupon_label:"Coupon Code (if any)",
+    coupon_ph:"Enter code", apply:"Apply", name_label:"Your Name *", name_ph:"Enter your name",
+    phone_label:"Mobile Number *", addr_label:"Full Address *", addr_ph:"House/Village, Thana, District",
+    note_label:"Note (optional)", note_ph:"Anything else to add", confirm_order:"Confirm Order",
+    quantity:"Quantity", order_now:"Order Now", add_to_cart:"Add to Cart", out_of_stock:"Out of Stock", add_more:"+ Add more products",
+    cod_note:"Cash on delivery. We'll contact you shortly.",
+    cod_note_long:"Cash on delivery. We'll contact you shortly to confirm your order.",
+    order_sent:"Order Sent!", contact_soon:"We'll contact you shortly.",
+    cart_empty:"🛒 Cart is empty.<br>Add products to order!", added_cart:"Added to cart",
+    fill_required:"Please fill in name, mobile, and address.", cart_empty_alert:"Cart is empty!",
+    coupon_invalid:"❌ Invalid coupon code.", coupon_min:"❌ Minimum order {x} required.",
+    coupon_applied:"✅ Applied — {x}!", off_percent:"{v}% off", off_flat:"{v} off"
+  },
+  bn:{
+    search_ph:"পণ্য খুঁজুন...", cart:"কার্ট", hero_badge:"🚚 সারা দেশে ডেলিভারি",
+    shop_by_cat:"ক্যাটাগরি অনুযায়ী কিনুন", all_products:"সব পণ্য", loading:"পণ্য লোড হচ্ছে...",
+    no_products:"কোনো পণ্য পাওয়া যায়নি।", items:"টি পণ্য", contact:"যোগাযোগ",
+    how_to_order:"কীভাবে অর্ডার করবেন",
+    how_to_order_desc:"পণ্যে ট্যাপ করুন → আপনার তথ্য দিন → অর্ডার নিশ্চিত করুন। ক্যাশ অন ডেলিভারি।",
+    your_cart:"🛒 আপনার কার্ট", subtotal:"সাবটোটাল", discount:"ছাড়",
+    delivery_charge:"ডেলিভারি চার্জ", total:"মোট", delivery_area:"ডেলিভারি এলাকা",
+    inside_dhaka:"ঢাকার ভিতরে", outside_dhaka:"ঢাকার বাইরে", coupon_label:"কুপন কোড (থাকলে)",
+    coupon_ph:"কোড লিখুন", apply:"প্রয়োগ", name_label:"আপনার নাম *", name_ph:"আপনার নাম লিখুন",
+    phone_label:"মোবাইল নম্বর *", addr_label:"সম্পূর্ণ ঠিকানা *", addr_ph:"বাসা/গ্রাম, থানা, জেলা",
+    note_label:"নোট (ঐচ্ছিক)", note_ph:"আর কিছু যোগ করতে চাইলে", confirm_order:"অর্ডার নিশ্চিত করুন",
+    quantity:"পরিমাণ", order_now:"অর্ডার করুন", add_to_cart:"কার্টে যোগ করুন", out_of_stock:"স্টক শেষ", add_more:"+ আরও পণ্য যোগ করুন",
+    cod_note:"ক্যাশ অন ডেলিভারি। আমরা শীঘ্রই যোগাযোগ করব।",
+    cod_note_long:"ক্যাশ অন ডেলিভারি। অর্ডার নিশ্চিত করতে আমরা শীঘ্রই যোগাযোগ করব।",
+    order_sent:"অর্ডার পাঠানো হয়েছে!", contact_soon:"আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।",
+    cart_empty:"🛒 কার্ট খালি।<br>অর্ডার করতে পণ্য যোগ করুন!", added_cart:"কার্টে যোগ হয়েছে",
+    fill_required:"অনুগ্রহ করে নাম, মোবাইল ও ঠিকানা পূরণ করুন।", cart_empty_alert:"কার্ট খালি!",
+    coupon_invalid:"❌ ভুল কুপন কোড।", coupon_min:"❌ ন্যূনতম অর্ডার {x} প্রয়োজন।",
+    coupon_applied:"✅ প্রয়োগ হয়েছে — {x}!", off_percent:"{v}% ছাড়", off_flat:"{v} ছাড়"
+  }
+};
+let LANG = 'en';
+try{ const s = localStorage.getItem('ilmtoy_lang'); if(s==='bn'||s==='en') LANG = s; }catch(e){}
+function t(k){ return (T[LANG] && T[LANG][k]) || T.en[k] || k; }
+function applyLang(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.innerHTML = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'))); });
+  const tg = document.getElementById('langToggle');
+  if(tg) tg.textContent = (LANG==='en') ? 'বাংলা' : 'EN';
+}
+function setLang(l){
+  LANG = (l==='bn') ? 'bn' : 'en';
+  try{ localStorage.setItem('ilmtoy_lang', LANG); }catch(e){}
+  applyLang();
+  buildCats(); buildShopCats(); render();
+  $("#cats").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on", x.dataset.c===activeCat));
+  $("#secTitle").textContent = activeCat==="all" ? t('all_products') : activeCat;
+  if(document.getElementById("cartOverlay").classList.contains("show")){ renderCartBody(); updateCartTotal(); }
 }
 
 function applyConfig(){
@@ -708,12 +786,14 @@ async function loadProducts(){
     const data = await fetchCSV(CONFIG.productsCsvUrl);
     PRODUCTS = data.map(d=>{
       const imgs = String(d.image_url||"").split(/[|\n,]+/).map(s=>s.trim()).filter(Boolean);
+      const st = (d.status||"active").toLowerCase().trim();
       return {
         id:d.id, name:d.name, category:d.category||"",
         price:parseFloat(String(d.price).replace(/[^0-9.]/g,''))||0,
         old_price:parseFloat(String(d.old_price).replace(/[^0-9.]/g,''))||0,
         images:imgs, image_url:imgs[0]||"", description:d.description||"",
-        status:(d.status||"active").toLowerCase()
+        status:st,
+        soldout:['soldout','sold out','stockout','stock out','out','out of stock','no stock','nostock'].includes(st)
       };
     }).filter(p=>p.name && p.status!=="hidden");
     if(!PRODUCTS.length) PRODUCTS = SAMPLE;
@@ -727,13 +807,17 @@ async function loadProducts(){
 let CART = []; // [{id, name, price, image_url, qty}]
 let cartCoupon = null;
 
-function addToCart(id){
+function addToCart(id, qty){
   const p = PRODUCTS.find(x=>String(x.id)===String(id));
-  if(!p) return;
+  if(!p || p.soldout) return;
+  qty = Math.max(1, parseInt(qty)||1);
   const ex = CART.find(x=>x.id===p.id);
-  if(ex){ ex.qty++; } else { CART.push({...p, qty:1}); }
+  if(ex){ ex.qty += qty; } else { CART.push({...p, qty:qty}); }
   updateCartUI();
-  showToast("Added to cart");
+  showToast(t('added_cart'));
+  // Analytics: AddToCart ইভেন্ট (Meta Pixel + GA4)
+  try{ if(window.fbq) fbq('track','AddToCart',{ content_name:p.name, value:p.price*qty, currency:'BDT', contents:[{id:String(p.id), quantity:qty}], content_type:'product' }); }catch(e){}
+  try{ if(window.gtag) gtag('event','add_to_cart',{ value:p.price*qty, currency:'BDT', items:[{item_id:String(p.id), item_name:p.name, quantity:qty}] }); }catch(e){}
   // bounce animation on cart buttons
   ["cartBadge","cartFabBadge"].forEach(bid=>{ const el=document.getElementById(bid); if(el){el.style.transform="scale(1.5)"; setTimeout(()=>el.style.transform="",250); } });
 }
@@ -777,7 +861,7 @@ function renderCartBody(){
   const body = document.getElementById("cartBody");
   const checkout = document.getElementById("cartCheckout");
   if(!CART.length){
-    body.innerHTML = '<div class="cart-empty">🛒 Cart is empty.<br>Add products to order!</div>';
+    body.innerHTML = '<div class="cart-empty">'+t('cart_empty')+'</div>';
     checkout.style.display="none"; return;
   }
   checkout.style.display="block";
@@ -798,7 +882,7 @@ function renderCartBody(){
       </div>
       <button class="ci-del" onclick="removeFromCart('${item.id}')" title="Remove">×</button>
     </div>`;
-  }).join("") + `<button class="add-btn" onclick="closeCart()">+ আরও পণ্য যোগ করুন</button>`;
+  }).join("") + `<button class="add-btn" onclick="closeCart()">${t('add_more')}</button>`;
 }
 
 function calcCart(){
@@ -832,11 +916,11 @@ function applyCartCoupon(){
   if(!code){ cartCoupon=null; m.textContent=""; updateCartTotal(); return; }
   const found = (COUPONS||[]).find(c=>c.code.toUpperCase()===code);
   const sub = CART.reduce((s,x)=>s+x.price*x.qty,0);
-  if(!found){ cartCoupon=null; m.style.color="var(--accent-deep)"; m.textContent="❌ Invalid coupon code."; updateCartTotal(); return; }
-  if(found.min && sub<found.min){ cartCoupon=null; m.style.color="var(--accent-deep)"; m.textContent="❌ Min order "+bnNum(found.min)+cur+" required."; updateCartTotal(); return; }
+  if(!found){ cartCoupon=null; m.style.color="var(--accent-deep)"; m.textContent=t('coupon_invalid'); updateCartTotal(); return; }
+  if(found.min && sub<found.min){ cartCoupon=null; m.style.color="var(--accent-deep)"; m.textContent=t('coupon_min').replace('{x}', bnNum(found.min)+cur); updateCartTotal(); return; }
   cartCoupon=found; m.style.color="var(--green)";
-  const off = found.type==='percent' ? found.value+"% off" : bnNum(found.value)+cur+" off";
-  m.textContent="✅ Applied — "+off+"!";
+  const off = found.type==='percent' ? t('off_percent').replace('{v}', found.value) : t('off_flat').replace('{v}', bnNum(found.value)+cur);
+  m.textContent=t('coupon_applied').replace('{x}', off);
   updateCartTotal();
 }
 
@@ -844,8 +928,8 @@ async function submitCartOrder(){
   const name = document.getElementById("ccName").value.trim();
   const phone = document.getElementById("ccPhone").value.trim();
   const addr = document.getElementById("ccAddr").value.trim();
-  if(!name||!phone||!addr){ alert("Please fill in name, mobile, and address."); return; }
-  if(!CART.length){ alert("Cart is empty!"); return; }
+  if(!name||!phone||!addr){ alert(t('fill_required')); return; }
+  if(!CART.length){ alert(t('cart_empty_alert')); return; }
   const c = calcCart();
   const note = document.getElementById("ccNote").value.trim();
   const locText = c.loc==='outside' ? 'Outside Dhaka' : 'Inside Dhaka';
@@ -866,6 +950,9 @@ async function submitCartOrder(){
       fetch(CONFIG.orderEndpoint,{method:"POST",mode:"no-cors",body:fd});
     }catch(e){}
   }
+  // Analytics: অর্ডার ইভেন্ট (GA4 + Meta Pixel)
+  try{ if(window.gtag) gtag('event','purchase',{ value:c.grand, currency:'BDT', items_count:qtyTotal }); }catch(e){}
+  try{ if(window.fbq) fbq('track','Purchase',{ value:c.grand, currency:'BDT', num_items:qtyTotal }); }catch(e){}
   // clear cart
   CART=[]; cartCoupon=null; updateCartUI();
   document.getElementById("cartSubmitBtn").style.display="none";
@@ -883,12 +970,13 @@ async function boot(){
   buildCats();
   buildShopCats();
   render();
+  applyLang();
 }
 
 function buildCats(){
   const cats = [...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
   const el = $("#cats");
-  el.innerHTML = `<button class="chip on" data-c="all">All Products</button>` +
+  el.innerHTML = `<button class="chip on" data-c="all">${t('all_products')}</button>` +
     cats.map(c=>`<button class="chip" data-c="${c}">${c}</button>`).join("");
   el.querySelectorAll(".chip").forEach(b=>b.onclick=()=>selectCategory(b.dataset.c));
 }
@@ -897,7 +985,7 @@ function buildCats(){
 function selectCategory(cat){
   activeCat = cat;
   $("#cats").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on", x.dataset.c===cat));
-  $("#secTitle").textContent = cat==="all" ? "All Products" : cat;
+  $("#secTitle").textContent = cat==="all" ? t('all_products') : cat;
   render();
   const prod = document.querySelector(".wrap:not(.shopcat-wrap)");
   if(prod) prod.scrollIntoView({behavior:"smooth", block:"start"});
@@ -935,7 +1023,7 @@ function buildShopCats(){
     return `<button class="scat" data-c="${c}">
       <span class="ic" style="background:${col}">${icon}</span>
       <span class="nm">${c}</span>
-      <span class="ct">${bnNum(n)} items</span>
+      <span class="ct">${bnNum(n)} ${t('items')}</span>
     </button>`;
   }).join("");
   box.querySelectorAll(".scat").forEach(b=>b.onclick=()=>selectCategory(b.dataset.c));
@@ -946,8 +1034,8 @@ function render(){
   let list = PRODUCTS.filter(p=>activeCat==="all"||p.category===activeCat);
   if(q) list = list.filter(p=>p.name.toLowerCase().includes(q));
   $("#status").style.display="none";
-  $("#count").textContent = bnNum(list.length)+" items";
-  if(!list.length){ $("#grid").innerHTML=`<div class="empty" style="grid-column:1/-1">No products found.</div>`; return; }
+  $("#count").textContent = bnNum(list.length)+" "+t('items');
+  if(!list.length){ $("#grid").innerHTML=`<div class="empty" style="grid-column:1/-1">${t('no_products')}</div>`; return; }
   $("#grid").innerHTML = list.map(p=>{
     const sale = p.old_price && p.old_price>p.price;
     const off = sale ? Math.round((1-p.price/p.old_price)*100) : 0;
@@ -957,8 +1045,12 @@ function render(){
     const multi = (p.images && p.images.length>1)
       ? `<span class="multi-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M21 7v12a2 2 0 0 1-2 2H7"/></svg>${p.images.length}</span>`
       : "";
-    return `<div class="card" data-id="${p.id}" style="cursor:pointer">
-      <div class="thumb">${sale?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${multi}${img}</div>
+    const soldFlag = p.soldout ? `<span class="sold-flag">${t('out_of_stock')}</span>` : "";
+    const actionBtn = p.soldout
+      ? `<button class="order-btn soldout-btn" disabled>${t('out_of_stock')}</button>`
+      : `<button class="order-btn" data-cart="${p.id}">${t('add_to_cart')}</button>`;
+    return `<div class="card${p.soldout?' is-sold':''}" data-id="${p.id}" style="cursor:pointer">
+      <div class="thumb">${(sale && !p.soldout)?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${soldFlag}${multi}${img}</div>
       <div class="body">
         ${p.category?`<div class="cat-tag">${p.category}</div>`:""}
         <div class="title">${p.name}</div>
@@ -967,15 +1059,11 @@ function render(){
           ${sale?`<span class="was">${bnNum(p.old_price)}${cur}</span>`:""}
         </div>
         <div class="card-actions">
-          <button class="order-btn" data-id="${p.id}">Order Now</button>
-          <button class="cart-btn" data-cart="${p.id}" title="Add to Cart" aria-label="Add to cart">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-          </button>
+          ${actionBtn}
         </div>
       </div>
     </div>`;
   }).join("");
-  $("#grid").querySelectorAll(".order-btn").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); openModal(b.dataset.id); });
   $("#grid").querySelectorAll("[data-cart]").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); addToCart(b.dataset.cart); });
   $("#grid").querySelectorAll(".card").forEach(c=>c.onclick=()=>openModal(c.dataset.id));
 }
@@ -1007,12 +1095,9 @@ function openModal(id){
   if(desc){ $("#mDesc").textContent = desc; $("#mDesc").style.display="block"; }
   else { $("#mDesc").textContent=""; $("#mDesc").style.display="none"; }
   $("#qty").value=1;
-  appliedCoupon=null; $("#coupon").value=""; $("#couponMsg").textContent="";
-  $("#delivery").value="dhaka";
-  updateTotal();
-  $("#cName").value=$("#cPhone").value=$("#cAddr").value=$("#cNote").value="";
-  $("#orderForm").style.display="block"; $("#doneView").style.display="none";
-  $("#submitBtn").disabled=false;
+  const addBtn = $("#modalAddBtn");
+  if(current.soldout){ addBtn.disabled=true; addBtn.textContent=t('out_of_stock'); addBtn.classList.add('soldout-btn'); }
+  else { addBtn.disabled=false; addBtn.textContent=t('add_to_cart'); addBtn.classList.remove('soldout-btn'); }
   $("#overlay").classList.add("show");
 }
 function closeModal(){ $("#overlay").classList.remove("show"); }
@@ -1024,78 +1109,16 @@ function showGalImg(i){
   document.querySelectorAll('.gal-thumb').forEach((t,j)=>t.classList.toggle('on', j===galIdx));
   document.querySelectorAll('.gal-dots button').forEach((d,j)=>d.classList.toggle('on', j===galIdx));
 }
-let appliedCoupon=null;
 
-function calc(){
-  const q=Math.max(1,parseInt($("#qty").value)||1);
-  const subtotal=current.price*q;
-  let discount=0;
-  if(appliedCoupon){
-    discount = appliedCoupon.type==='percent'
-      ? Math.round(subtotal*appliedCoupon.value/100)
-      : appliedCoupon.value;
-    if(discount>subtotal) discount=subtotal;
-  }
-  const loc=$("#delivery").value;
-  const ship = loc==='outside' ? (Number(S.delivery_outside)||0) : (Number(S.delivery_dhaka)||0);
-  const grand = subtotal - discount + ship;
-  return {q,subtotal,discount,ship,grand,loc};
-}
-function updateTotal(){
-  const c=calc();
-  $("#sumSub").textContent  = bnNum(c.subtotal)+cur;
-  $("#sumShip").textContent = bnNum(c.ship)+cur;
-  $("#rowDisc").style.display = c.discount>0 ? "flex" : "none";
-  $("#sumDisc").textContent = "−"+bnNum(c.discount)+cur;
-  $("#grand").textContent   = bnNum(c.grand)+cur;
-}
-function applyCoupon(){
-  const code=$("#coupon").value.trim().toUpperCase();
-  const m=$("#couponMsg");
-  if(!code){ appliedCoupon=null; m.textContent=""; updateTotal(); return; }
-  const found=(COUPONS||[]).find(c=>c.code.toUpperCase()===code);
-  const sub=current.price*Math.max(1,parseInt($("#qty").value)||1);
-  if(!found){ appliedCoupon=null; m.style.color="var(--accent-deep)"; m.textContent="❌ Invalid coupon code."; updateTotal(); return; }
-  if(found.min && sub<found.min){ appliedCoupon=null; m.style.color="var(--accent-deep)"; m.textContent="❌ This coupon applies to orders of "+bnNum(found.min)+cur+" or more."; updateTotal(); return; }
-  appliedCoupon=found; m.style.color="var(--green)";
-  const off = found.type==='percent' ? found.value+"% off" : bnNum(found.value)+cur+" off";
-  m.textContent="✅ Coupon applied — "+off+"!";
-  updateTotal();
-}
-$("#plus").onclick=()=>{$("#qty").value=(parseInt($("#qty").value)||1)+1;updateTotal();};
-$("#minus").onclick=()=>{$("#qty").value=Math.max(1,(parseInt($("#qty").value)||1)-1);updateTotal();};
-$("#qty").oninput=()=>{ if(appliedCoupon) applyCoupon(); else updateTotal(); };
-$("#applyCoupon").onclick=applyCoupon;
-$("#delivery").onchange=updateTotal;
+$("#plus").onclick=()=>{$("#qty").value=(parseInt($("#qty").value)||1)+1;};
+$("#minus").onclick=()=>{$("#qty").value=Math.max(1,(parseInt($("#qty").value)||1)-1);};
 $("#closeX").onclick=closeModal;
 $("#overlay").onclick=e=>{if(e.target===$("#overlay"))closeModal();};
-
-$("#submitBtn").onclick=async ()=>{
-  const name=$("#cName").value.trim(), phone=$("#cPhone").value.trim(), addr=$("#cAddr").value.trim();
-  if(!name||!phone||!addr){ alert("Please fill in name, mobile, and address."); return; }
+$("#modalAddBtn").onclick=()=>{
+  if(!current || current.soldout) return;
   const qty=Math.max(1,parseInt($("#qty").value)||1);
-  const c=calc();
-  const note=$("#cNote").value.trim();
-  const locText = c.loc==='outside' ? 'Outside Dhaka' : 'Inside Dhaka';
-  const couponCode = appliedCoupon ? appliedCoupon.code : "";
-  $("#submitBtn").disabled=true;
-
-  // অর্ডার শিটে জমা (Apps Script)
-  if(CONFIG.orderEndpoint){
-    try{
-      const fd=new URLSearchParams({
-        time:new Date().toLocaleString('en-GB'),
-        product:current.name, qty, price:current.price,
-        subtotal:c.subtotal, coupon:couponCode, discount:c.discount,
-        delivery_area:locText, delivery_charge:c.ship, total:c.grand,
-        name, phone, address:addr, note
-      });
-      fetch(CONFIG.orderEndpoint,{method:"POST",mode:"no-cors",body:fd});
-    }catch(e){}
-  }
-
-  $("#orderForm").style.display="none";
-  $("#doneView").style.display="block";
+  addToCart(current.id, qty);
+  closeModal();
 };
 
 $("#search").oninput=render;
