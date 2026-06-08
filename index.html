@@ -187,6 +187,29 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
   cursor:pointer;transition:.18s;
 }
 .order-btn:hover{background:var(--accent-deep);transform:translateY(-1px)}
+/* refined card action row */
+.card-actions{display:flex;gap:8px;margin-top:12px;align-items:stretch}
+.card-actions .order-btn{margin-top:0;flex:1;width:auto;padding:10px 8px;font-size:.92rem;white-space:nowrap;border-radius:11px}
+.cart-btn{flex:0 0 auto;width:42px;height:42px;display:flex;align-items:center;justify-content:center;padding:0;border:1.5px solid var(--accent);background:#FFEEE4;color:var(--accent-deep);border-radius:11px;cursor:pointer;transition:.18s}
+.cart-btn:hover{background:var(--accent);color:#fff;transform:translateY(-1px)}
+.cart-btn:active{transform:scale(.94)}
+.cart-btn svg{width:18px;height:18px}
+
+/* ---------- Shop By Category ---------- */
+.shopcat-wrap{margin-top:6px}
+.shopcat{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.scat{display:flex;flex-direction:column;align-items:center;gap:9px;padding:18px 12px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;transition:.18s;font-family:inherit;text-align:center}
+.scat:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--accent)}
+.scat .ic{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-family:'Baloo Da 2';font-weight:800;color:#fff;box-shadow:0 6px 14px rgba(120,80,40,.18)}
+.scat .nm{font-weight:700;font-size:.9rem;color:var(--ink);line-height:1.25}
+.scat .ct{font-size:.72rem;color:var(--ink-soft);font-weight:600}
+@media(max-width:640px){
+  .shopcat{grid-template-columns:repeat(3,1fr);gap:10px}
+  .scat{padding:14px 8px;gap:7px}
+  .scat .ic{width:46px;height:46px;font-size:1.4rem}
+  .scat .nm{font-size:.8rem}
+  .scat .ct{font-size:.66rem}
+}
 
 .empty{text-align:center;padding:60px 20px;color:var(--ink-soft)}
 .loading{text-align:center;padding:60px;color:var(--ink-soft);font-weight:600}
@@ -342,6 +365,11 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
     <text x="60" y="64" text-anchor="middle" fill="#fff" font-family="'Baloo Da 2',Arial" font-weight="800" font-size="13" letter-spacing="1">TRUSTED</text>
   </svg>
   <div class="trust-list" id="trust"></div>
+</div>
+
+<div class="wrap shopcat-wrap" id="shopcatWrap" style="display:none">
+  <div class="section-h"><h2>Shop By Category</h2></div>
+  <div class="shopcat" id="shopcat"></div>
 </div>
 
 <div class="wrap">
@@ -853,6 +881,7 @@ async function boot(){
   cur = S.currency || "৳";
   applyConfig();
   buildCats();
+  buildShopCats();
   render();
 }
 
@@ -861,12 +890,55 @@ function buildCats(){
   const el = $("#cats");
   el.innerHTML = `<button class="chip on" data-c="all">All Products</button>` +
     cats.map(c=>`<button class="chip" data-c="${c}">${c}</button>`).join("");
-  el.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
-    el.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));
-    b.classList.add("on"); activeCat=b.dataset.c;
-    $("#secTitle").textContent = activeCat==="all" ? "All Products" : activeCat;
-    render();
-  });
+  el.querySelectorAll(".chip").forEach(b=>b.onclick=()=>selectCategory(b.dataset.c));
+}
+
+/* একটা ক্যাটাগরি বাছাই (chip আর Shop-By-Category টাইল — দুটোই এটা ব্যবহার করে) */
+function selectCategory(cat){
+  activeCat = cat;
+  $("#cats").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on", x.dataset.c===cat));
+  $("#secTitle").textContent = cat==="all" ? "All Products" : cat;
+  render();
+  const prod = document.querySelector(".wrap:not(.shopcat-wrap)");
+  if(prod) prod.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+/* Shop By Category — শিটের ক্যাটাগরি থেকে অটো টাইল */
+function buildShopCats(){
+  const wrap = document.getElementById("shopcatWrap");
+  const box = document.getElementById("shopcat");
+  if(!wrap || !box) return;
+  const cats = [...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
+  if(cats.length < 2){ wrap.style.display="none"; return; }
+  wrap.style.display="";
+  const palette = ['#FF6B4A','#16A34A','#F59E0B','#6366F1','#EC4899','#0EA5E9','#8B5CF6','#EF4444'];
+  const pickEmoji = c=>{
+    const s = (""+c).toLowerCase();
+    if(/science|kit|বিজ্ঞান/.test(s)) return '🔬';
+    if(/\bcar|গাড়|vehicle/.test(s)) return '🚗';
+    if(/book|বই/.test(s)) return '📚';
+    if(/block|lego|ব্লক/.test(s)) return '🧱';
+    if(/brain|puzzle|memory|ব্রেইন|ধাঁধা|focus/.test(s)) return '🧠';
+    if(/fan|ফ্যান/.test(s)) return '🌀';
+    if(/early|kids|শিশু|baby|বেবি|educational/.test(s)) return '🧸';
+    if(/best|seller|বেস্ট/.test(s)) return '⭐';
+    if(/diy/.test(s)) return '🛠️';
+    if(/combo|package|প্যাকেজ/.test(s)) return '🎁';
+    if(/art|craft|আঁকা|color|রঙ/.test(s)) return '🎨';
+    return '';
+  };
+  box.innerHTML = cats.map((c,i)=>{
+    const col = palette[i % palette.length];
+    const e = pickEmoji(c);
+    const icon = e || (("" + c)[0] || '?');
+    const n = PRODUCTS.filter(p=>p.category===c).length;
+    return `<button class="scat" data-c="${c}">
+      <span class="ic" style="background:${col}">${icon}</span>
+      <span class="nm">${c}</span>
+      <span class="ct">${bnNum(n)} items</span>
+    </button>`;
+  }).join("");
+  box.querySelectorAll(".scat").forEach(b=>b.onclick=()=>selectCategory(b.dataset.c));
 }
 
 function render(){
@@ -894,10 +966,10 @@ function render(){
           <span class="now">${bnNum(p.price)}${cur}</span>
           ${sale?`<span class="was">${bnNum(p.old_price)}${cur}</span>`:""}
         </div>
-        <div style="display:flex;gap:7px;margin-top:12px">
-          <button class="order-btn" style="flex:1" data-id="${p.id}">Order Now</button>
-          <button class="order-btn" style="flex:0 0 auto;padding:11px 14px;background:var(--ink)" data-cart="${p.id}" title="Add to Cart">
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <div class="card-actions">
+          <button class="order-btn" data-id="${p.id}">Order Now</button>
+          <button class="cart-btn" data-cart="${p.id}" title="Add to Cart" aria-label="Add to cart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           </button>
         </div>
       </div>
