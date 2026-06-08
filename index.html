@@ -198,13 +198,11 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 @media(max-width:640px){.trust .seal{width:90px}.trust-list{grid-template-columns:1fr;gap:10px}.trust-point{font-size:.9rem}}
 
 /* ব্যানারের নিচে: ট্রাস্ট (বামে) + রিভিউ (ডানে) পাশাপাশি */
-.top-row{display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start;margin-top:18px}
-.top-row .trust{max-width:none;margin:0;padding:24px 18px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 5px 14px rgba(120,80,40,.06)}
-.top-row .trust .seal{width:78px;margin:0 auto 14px}
-.top-row .trust-list{display:grid;grid-template-columns:1fr;gap:12px;text-align:left}
-.top-row .reviews-wrap{margin:0;padding:0}
-.top-row .review-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
-@media(max-width:860px){.top-row{grid-template-columns:1fr;gap:18px}.top-row .trust{padding:20px 16px}.top-row .trust-list{grid-template-columns:1fr 1fr;gap:12px 30px}}
+.reviews-wrap{margin-top:2px}
+.reviews-head{text-align:center;max-width:640px;margin:6px auto 22px;display:flex;flex-direction:column;align-items:center}
+.reviews-head h2{font-size:1.55rem;color:var(--ink)}
+.reviews-sub{color:var(--ink-soft);font-size:.95rem;margin-top:5px}
+.reviews-head .review-add-btn{margin-top:14px;display:inline-block}
 
 /* ---------- Grid ---------- */
 .wrap{max-width:1180px;margin:0 auto;padding:18px}
@@ -318,9 +316,13 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .rv-top{display:flex;align-items:center;gap:11px;margin-bottom:9px}
 .rv-ava{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-weight:700;font-size:1.15rem;flex-shrink:0;overflow:hidden}
 .rv-ava img{width:100%;height:100%;object-fit:cover}
-.rv-name{font-weight:700;color:var(--ink);font-size:.96rem}
-.rv-stars{color:#F5B301;font-size:.95rem;letter-spacing:1px}
+.rv-name{font-weight:700;color:var(--ink);font-size:.96rem;line-height:1.2}
+.rv-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
+.rv-prof{font-size:.8rem;color:var(--accent-deep);font-weight:600;line-height:1.35}
+.rv-date{font-size:.78rem;color:#a89684;line-height:1.35}
+.rv-stars{display:block;color:#F5B301;font-size:.98rem;letter-spacing:1px;margin:2px 0}
 .rv-stars .off{color:#E0D6C8}
+.rv-prod{display:inline-flex;align-items:center;gap:5px;margin-top:12px;background:var(--accent-soft);color:var(--accent-deep);font-size:.8rem;font-weight:600;padding:5px 11px;border-radius:20px}
 .rv-text{color:var(--ink-soft);font-size:.92rem;line-height:1.6;margin-top:4px}
 .rv-media{margin-top:11px;border-radius:12px;overflow:hidden}
 .rv-media iframe{width:100%;aspect-ratio:16/9;border:0;display:block;border-radius:12px}
@@ -431,8 +433,7 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
   </div>
 </div>
 
-<div class="wrap top-row" id="topRow">
-  <div class="trust">
+<div class="trust">
     <svg class="seal" viewBox="0 0 120 124" xmlns="http://www.w3.org/2000/svg">
       <g fill="#FFB89F">
         <circle cx="106" cy="58" r="9"/><circle cx="100" cy="81" r="9"/><circle cx="83" cy="98" r="9"/>
@@ -451,13 +452,14 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
     </svg>
     <div class="trust-list" id="trust"></div>
   </div>
-  <div class="reviews-wrap" id="reviewsSection" style="display:none">
-    <div class="section-h">
-      <h2 data-i18n="reviews_title">Customer Reviews</h2>
-      <button class="review-add-btn" id="openReviewBtn" data-i18n="write_review" style="display:none">✍️ Write a Review</button>
-    </div>
-    <div id="reviewGrid" class="review-grid"></div>
+
+<div class="wrap reviews-wrap" id="reviewsSection" style="display:none">
+  <div class="reviews-head">
+    <h2 data-i18n="reviews_title">⭐ Customer Reviews</h2>
+    <p class="reviews-sub" data-i18n="reviews_sub">What our happy customers say</p>
+    <button class="review-add-btn" id="openReviewBtn" data-i18n="write_review" style="display:none">✍️ Write a Review</button>
   </div>
+  <div id="reviewGrid" class="review-grid"></div>
 </div>
 
 <div class="wrap shopcat-wrap" id="shopcatWrap" style="display:none">
@@ -481,6 +483,7 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
     <div id="reviewForm">
       <h3 class="review-modal-title" data-i18n="write_review">Write a Review</h3>
       <div class="field"><label data-i18n="name_label">Your Name *</label><input id="rvName" placeholder="Enter your name" data-i18n-ph="name_ph" /></div>
+      <div class="field"><label data-i18n="prof_label">Profession (optional)</label><input id="rvProf" placeholder="e.g. Teacher, Student, Businessman" data-i18n-ph="prof_ph" /></div>
       <div class="field">
         <label data-i18n="your_rating">Your Rating *</label>
         <div class="star-pick" id="starPick"><span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div>
@@ -679,7 +682,7 @@ const T = {
     shop_by_cat:"Shop By Category", all_products:"All Products", loading:"Loading products...",
     no_products:"No products found.", items:"items", contact:"Contact",
     follow_us:"Follow Us", sales_heading:"Sales", corporate_sales:"Corporate Sales", retail_sales:"Retail Sales", about_us:"About Us", view_on_map:"📍 View on Google Maps",
-    reviews_title:"Customer Reviews", write_review:"✍️ Write a Review", your_rating:"Your Rating *", review_text_label:"Your Review *", review_text_ph:"Write your experience...", submit_review:"Submit Review", review_thanks:"Thanks! Your review will appear after approval.", watch_video:"▶ Watch Video", review_fill:"Please add your name, rating and review.",
+    reviews_title:"⭐ Customer Reviews", reviews_sub:"What our happy customers say", prof_label:"Profession (optional)", prof_ph:"e.g. Teacher, Student, Businessman", write_review:"✍️ Write a Review", your_rating:"Your Rating *", review_text_label:"Your Review *", review_text_ph:"Write your experience...", submit_review:"Submit Review", review_thanks:"Thanks! Your review will appear after approval.", watch_video:"▶ Watch Video", review_fill:"Please add your name, rating and review.",
     how_to_order:"How to Order",
     how_to_order_desc:"Tap a product → enter your details → confirm the order. Cash on delivery.",
     your_cart:"🛒 Your Cart", subtotal:"Subtotal", discount:"Discount",
@@ -702,7 +705,7 @@ const T = {
     shop_by_cat:"ক্যাটাগরি অনুযায়ী কিনুন", all_products:"সব পণ্য", loading:"পণ্য লোড হচ্ছে...",
     no_products:"কোনো পণ্য পাওয়া যায়নি।", items:"টি পণ্য", contact:"যোগাযোগ",
     follow_us:"ফলো করুন", sales_heading:"বিক্রয়", corporate_sales:"কর্পোরেট সেলস", retail_sales:"রিটেইল সেলস", about_us:"আমাদের সম্পর্কে জানুন", view_on_map:"📍 গুগল ম্যাপে দেখুন",
-    reviews_title:"কাস্টমার রিভিউ", write_review:"✍️ রিভিউ লিখুন", your_rating:"আপনার রেটিং *", review_text_label:"আপনার মতামত *", review_text_ph:"আপনার অভিজ্ঞতা লিখুন...", submit_review:"রিভিউ জমা দিন", review_thanks:"ধন্যবাদ! অ্যাপ্রুভের পর আপনার রিভিউ দেখা যাবে।", watch_video:"▶ ভিডিও দেখুন", review_fill:"নাম, রেটিং ও মতামত দিন।",
+    reviews_title:"⭐ গ্রাহকদের মতামত", reviews_sub:"আমাদের সন্তুষ্ট গ্রাহকরা কী বলছেন", prof_label:"পেশা (ঐচ্ছিক)", prof_ph:"যেমন: শিক্ষক, ছাত্র, ব্যবসায়ী", write_review:"✍️ রিভিউ লিখুন", your_rating:"আপনার রেটিং *", review_text_label:"আপনার মতামত *", review_text_ph:"আপনার অভিজ্ঞতা লিখুন...", submit_review:"রিভিউ জমা দিন", review_thanks:"ধন্যবাদ! অ্যাপ্রুভের পর আপনার রিভিউ দেখা যাবে।", watch_video:"▶ ভিডিও দেখুন", review_fill:"নাম, রেটিং ও মতামত দিন।",
     how_to_order:"কীভাবে অর্ডার করবেন",
     how_to_order_desc:"পণ্যে ট্যাপ করুন → আপনার তথ্য দিন → অর্ডার নিশ্চিত করুন। ক্যাশ অন ডেলিভারি।",
     your_cart:"🛒 আপনার কার্ট", subtotal:"সাবটোটাল", discount:"ছাড়",
@@ -927,7 +930,10 @@ async function loadReviews(){
       rating:Math.max(0,Math.min(5, Math.round(parseFloat(d.rating)||0))),
       review:(d.review||"").trim(),
       photo:(d.photo||"").trim(),
-      video:(d.video||"").trim()
+      video:(d.video||"").trim(),
+      profession:(d.profession||d.profesion||d.designation||"").trim(),
+      date:(d.timestamp||d.time||d.date||"").trim(),
+      product:(d.product||d.item||"").trim()
     }));
   }catch(e){ REVIEWS = []; }
 }
@@ -939,6 +945,27 @@ function starHTML(n){
   let s="";
   for(let i=1;i<=5;i++){ s += `<span class="${i<=n?'':'off'}">★</span>`; }
   return s;
+}
+function bnDigits(s){
+  if(LANG!=='bn') return String(s);
+  const d="০১২৩৪৫৬৭৮৯";
+  return String(s).replace(/[0-9]/g,c=>d[+c]);
+}
+function fmtReviewDate(raw){
+  if(!raw) return "";
+  const str = String(raw).trim();
+  const first = str.split(",")[0].trim();
+  let dd,mm,yy,m;
+  if((m = first.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/))){          // YYYY-MM-DD
+    yy=m[1]; mm=m[2].padStart(2,'0'); dd=m[3].padStart(2,'0');
+  } else if((m = first.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/))){ // DD-MM-YYYY (en-GB)
+    dd=m[1].padStart(2,'0'); mm=m[2].padStart(2,'0'); yy=m[3].length===2?('20'+m[3]):m[3];
+  } else {
+    const dt=new Date(str);
+    if(isNaN(dt.getTime())) return bnDigits(first);
+    dd=String(dt.getDate()).padStart(2,'0'); mm=String(dt.getMonth()+1).padStart(2,'0'); yy=dt.getFullYear();
+  }
+  return bnDigits(dd+"-"+mm+"-"+yy);
 }
 function renderReviews(){
   const sec = $("#reviewsSection"), grid = $("#reviewGrid");
@@ -958,13 +985,22 @@ function renderReviews(){
     } else if(r.video){
       media = `<a class="rv-watch" href="${r.video}" target="_blank" rel="noopener">${t('watch_video')}</a>`;
     }
+    const dateHTML = r.date ? `<div class="rv-date">${fmtReviewDate(r.date)}</div>` : "";
+    const profHTML = r.profession ? `<div class="rv-prof">${r.profession}</div>` : "";
+    const prodHTML = r.product ? `<div class="rv-prod">📦 ${r.product}</div>` : "";
     return `<div class="rv-card">
       <div class="rv-top">
         <div class="rv-ava">${ava}</div>
-        <div><div class="rv-name">${r.name||"Customer"}</div><div class="rv-stars">${starHTML(r.rating)}</div></div>
+        <div class="rv-meta">
+          <div class="rv-name">${r.name||"Customer"}</div>
+          ${profHTML}
+          ${dateHTML}
+        </div>
       </div>
+      <div class="rv-stars">${starHTML(r.rating)}</div>
       ${r.review?`<div class="rv-text">${r.review}</div>`:""}
       ${media}
+      ${prodHTML}
     </div>`;
   }).join("");
 }
@@ -1158,7 +1194,7 @@ function initReviewModal(){
   const close = ()=>ov.classList.remove("show");
   openBtn.onclick = ()=>{
     rvRating=0; paint(0);
-    $("#rvName").value=""; $("#rvText").value="";
+    $("#rvName").value=""; $("#rvText").value=""; $("#rvProf").value="";
     $("#reviewForm").style.display="block"; $("#reviewDone").style.display="none";
     $("#rvSubmit").disabled=false;
     ov.classList.add("show");
@@ -1166,12 +1202,12 @@ function initReviewModal(){
   $("#reviewCloseX").onclick = close;
   ov.onclick = e=>{ if(e.target===ov) close(); };
   $("#rvSubmit").onclick = async ()=>{
-    const name=$("#rvName").value.trim(), text=$("#rvText").value.trim();
+    const name=$("#rvName").value.trim(), text=$("#rvText").value.trim(), profession=$("#rvProf").value.trim();
     if(!name || !rvRating || !text){ alert(t('review_fill')); return; }
     $("#rvSubmit").disabled=true;
     if(CONFIG.reviewEndpoint){
       try{
-        const fd=new URLSearchParams({ time:new Date().toLocaleString('en-GB'), name, rating:rvRating, review:text, status:"pending" });
+        const fd=new URLSearchParams({ time:new Date().toLocaleString('en-GB'), name, profession, rating:rvRating, review:text, status:"pending" });
         fetch(CONFIG.reviewEndpoint,{method:"POST",mode:"no-cors",body:fd});
       }catch(e){}
     }
