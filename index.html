@@ -680,9 +680,13 @@ function applyConfig(){
   setLink("fEmail", S.email ? ("mailto:" + S.email) : "");
   $("#copy").textContent = "© " + new Date().getFullYear() + " " + S.store_name + ". All rights reserved.";
 
-  // Trust badges
+  // Trust badges — শিটে trust1, trust2, trust3 ... যত খুশি দেওয়া যাবে, সব দেখাবে
   const tIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>';
-  const trusts = [S.trust1,S.trust2,S.trust3,S.trust4].filter(t=>t && (""+t).trim());
+  const trusts = Object.keys(S)
+    .filter(k=>/^trust\d+$/i.test(k))
+    .sort((a,b)=>parseInt(a.replace(/\D/g,''))-parseInt(b.replace(/\D/g,'')))
+    .map(k=>S[k])
+    .filter(t=>t && (""+t).trim());
   if(trusts.length){
     $("#trust").innerHTML = trusts.map(t=>`<div class="trust-point">${tIcon}<span>${t}</span></div>`).join("");
   } else { $("#trust").parentNode.style.display="none"; }
