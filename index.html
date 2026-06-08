@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ilm Toy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   থিম — রঙ বদলাতে চাইলে এখানে বদলাও
+   ============================================================ */
+:root{
+  --bg:#FFF8F0;
+  --card:#FFFFFF;
+  --ink:#2A2118;
+  --ink-soft:#6B5E50;
+  --line:#EFE3D6;
+  --accent:#FF6B4A;       /* প্রধান রঙ */
+  --accent-deep:#E8492A;
+  --green:#16A34A;        /* ছাড়/সফল */
+  --yellow:#FFD23F;
+  --shadow:0 6px 24px rgba(120,80,40,.10);
+  --shadow-lg:0 18px 50px rgba(120,80,40,.18);
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Hind Siliguri',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255,210,63,.18), transparent 40%),
+    radial-gradient(circle at 88% 0%, rgba(255,107,74,.12), transparent 42%);
+}
+h1,h2,h3,.display{font-family:'Baloo Da 2',cursive;font-weight:700;letter-spacing:-.01em}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ---------- Announcement ---------- */
+.announce{
+  background:linear-gradient(90deg,var(--accent),var(--accent-deep));
+  color:#fff;text-align:center;font-weight:600;font-size:.9rem;
+  padding:9px 14px;
+}
+
+/* ---------- Header ---------- */
+header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{max-width:1180px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:16px}
+.logo{font-family:'Baloo Da 2',cursive;font-weight:800;font-size:1.55rem;color:var(--accent-deep);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.logo img{height:80px;width:auto;display:block}
+.logo span{font-size:1.7rem}
+.search{flex:1;position:relative;max-width:460px}
+.search input{
+  width:100%;padding:11px 16px 11px 42px;border:1.5px solid var(--line);border-radius:50px;
+  font-family:inherit;font-size:.95rem;background:#fff;color:var(--ink);outline:none;transition:.2s;
+}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,107,74,.12)}
+.search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--ink-soft)}
+.callbtn{display:flex;align-items:center;gap:7px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:50px;font-weight:600;font-size:.9rem;white-space:nowrap}
+.callbtn:hover{background:var(--accent-deep)}
+/* ---------- Cart Header Button ---------- */
+.cart-hbtn{position:relative;display:flex;align-items:center;gap:7px;background:var(--accent);color:#fff;padding:10px 16px;border-radius:50px;font-weight:700;font-size:.9rem;white-space:nowrap;cursor:pointer;border:none;font-family:inherit;transition:.18s}
+.cart-hbtn:hover{background:var(--accent-deep)}
+.cart-hbtn svg{width:18px;height:18px;flex-shrink:0}
+.cart-badge{position:absolute;top:-6px;right:-6px;background:var(--green);color:#fff;font-size:.7rem;font-weight:800;min-width:18px;height:18px;border-radius:50px;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1}
+/* ---------- Cart Floating Button ---------- */
+.cart-fab{position:fixed;bottom:86px;right:20px;background:var(--accent);color:#fff;border:none;border-radius:50px;padding:13px 20px;font-family:'Baloo Da 2';font-weight:700;font-size:1rem;cursor:pointer;display:none;align-items:center;gap:9px;box-shadow:0 8px 24px rgba(255,107,74,.45);z-index:50;transition:.2s}
+.cart-fab:hover{background:var(--accent-deep);transform:scale(1.05)}
+.cart-fab.visible{display:flex}
+.cart-fab svg{width:22px;height:22px}
+.cart-fab-badge{background:#fff;color:var(--accent-deep);border-radius:50px;font-size:.78rem;font-weight:800;padding:1px 7px;margin-left:2px}
+/* ---------- Cart Modal ---------- */
+.cart-overlay{position:fixed;inset:0;background:rgba(40,33,24,.55);backdrop-filter:blur(3px);z-index:91;display:none;align-items:flex-end;justify-content:center;padding:0}
+.cart-overlay.show{display:flex}
+@media(min-width:600px){.cart-overlay{align-items:center;padding:16px}}
+.cart-modal{background:#fff;border-radius:22px 22px 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:slideup .28s ease}
+@media(min-width:600px){.cart-modal{border-radius:22px;max-height:88vh}}
+@keyframes slideup{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.cart-modal-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.cart-modal-head h3{font-family:'Baloo Da 2';font-size:1.2rem}
+.cart-body{padding:16px 20px}
+.cart-empty{text-align:center;padding:40px 20px;color:var(--ink-soft);font-weight:600}
+.ci{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.ci:last-child{border-bottom:none}
+.ci-img{width:52px;height:52px;border-radius:10px;background:#FBF2E9;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-weight:800;color:var(--accent);font-size:1.3rem;overflow:hidden}
+.ci-img img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.ci-info{flex:1;min-width:0}
+.ci-name{font-weight:600;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-price{color:var(--accent-deep);font-family:'Baloo Da 2';font-weight:700;font-size:.95rem;margin-top:2px}
+.ci-qty{display:flex;align-items:center;gap:0;border:1.5px solid var(--line);border-radius:9px;overflow:hidden}
+.ci-qty button{width:32px;height:32px;border:none;background:#FBF2E9;font-size:1.1rem;font-weight:700;cursor:pointer;color:var(--accent-deep)}
+.ci-qty span{width:34px;text-align:center;font-weight:700;font-size:.95rem}
+.ci-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:1.3rem;padding:4px;line-height:1;transition:.15s}
+.ci-del:hover{color:var(--accent-deep)}
+.cart-checkout{padding:14px 20px 24px;border-top:1px solid var(--line)}
+.add-btn{margin-top:12px;width:100%;border:1.5px dashed var(--accent);background:#FFF8F0;color:var(--accent-deep);font-family:'Baloo Da 2';font-weight:700;font-size:.9rem;padding:9px;border-radius:12px;cursor:pointer;transition:.18s}
+.add-btn:hover{background:#FFE8DC}
+
+
+/* ---------- Categories ---------- */
+.cats{max-width:1180px;margin:0 auto;padding:14px 18px 4px;display:flex;gap:9px;overflow-x:auto;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.chip{
+  border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);
+  padding:8px 16px;border-radius:50px;font-family:inherit;font-weight:600;font-size:.88rem;
+  cursor:pointer;white-space:nowrap;transition:.18s;
+}
+.chip:hover{border-color:var(--accent)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(255,107,74,.3)}
+
+/* ---------- Hero ---------- */
+.hero{max-width:1180px;margin:18px auto 6px;padding:0 18px}
+.hero-in{
+  background:linear-gradient(120deg,#fff,#FFF1E6);border:1px solid var(--line);
+  border-radius:var(--radius);padding:30px 28px;display:flex;justify-content:space-between;
+  align-items:center;gap:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.hero-in::after{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,var(--yellow),transparent 70%);opacity:.6}
+.hero h1{font-size:1.7rem;line-height:1.25;color:var(--ink)}
+.hero p{color:var(--ink-soft);margin-top:6px;font-weight:500}
+.hero .badge{display:inline-block;background:var(--green);color:#fff;font-weight:700;font-size:.78rem;padding:5px 12px;border-radius:50px;margin-bottom:10px}
+
+/* ---------- Hero slider ---------- */
+.hero-slider{position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#FBF2E9;aspect-ratio:8/3}
+.hero-slider .slide{position:absolute;inset:0;opacity:0;transition:opacity .7s ease}
+.hero-slider .slide.on{opacity:1}
+.hero-slider .slide img{width:100%;height:100%;object-fit:contain;object-position:center;background:#FBF2E9;display:block}
+.hero-slider .slide .ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center;gap:10px;padding:0 7% 28px;background:linear-gradient(0deg,rgba(40,33,24,.7),rgba(40,33,24,.2) 45%,transparent 75%)}
+.hero-slider .slide .ov h2{font-family:'Baloo Da 2',cursive;color:#fff;font-size:2.05rem;line-height:1.15;max-width:90%;text-shadow:0 2px 14px rgba(0,0,0,.45);margin:0}
+.hero-slider .slide .ov p{color:#fff;font-size:1.02rem;font-weight:600;max-width:80%;text-shadow:0 1px 10px rgba(0,0,0,.45);margin:0}
+.hero-slider .slide .ov a.cta{align-self:center;background:var(--accent);color:#fff;font-family:'Baloo Da 2';font-weight:700;font-size:1rem;padding:11px 26px;border-radius:50px;margin-top:4px;box-shadow:0 6px 18px rgba(255,107,74,.5);transition:.18s}
+.hero-slider .slide .ov a.cta:hover{background:var(--accent-deep);transform:translateY(-2px)}
+.hero-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2}
+.hero-dots button{width:9px;height:9px;border-radius:50%;border:none;background:rgba(255,255,255,.6);cursor:pointer;padding:0;transition:.2s}
+.hero-dots button.on{background:#fff;width:22px;border-radius:5px}
+@media(max-width:640px){
+  .hero-slider{aspect-ratio:16/9;border-radius:14px}
+  .hero-slider .slide .ov{padding:0 6% 16px;gap:6px;background:linear-gradient(0deg,rgba(40,33,24,.78),rgba(40,33,24,.3) 50%,transparent 80%)}
+  .hero-slider .slide .ov h2{font-size:1.1rem;max-width:96%}
+  .hero-slider .slide .ov p{font-size:.78rem;max-width:92%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .hero-slider .slide .ov a.cta{font-size:.8rem;padding:7px 16px}
+}
+
+
+/* ---------- Trust badges ---------- */
+.trust{max-width:1180px;margin:20px auto 0;padding:26px 18px 8px;text-align:center}
+.trust .seal{width:112px;height:auto;display:block;margin:0 auto 16px;filter:drop-shadow(0 6px 14px rgba(255,107,74,.3))}
+.trust-list{display:inline-grid;grid-template-columns:1fr 1fr;gap:14px 46px;text-align:left}
+.trust-point{display:flex;align-items:center;gap:10px;font-weight:600;font-size:1rem;color:var(--ink)}
+.trust-point svg{width:20px;height:20px;color:var(--accent);flex-shrink:0}
+@media(max-width:640px){.trust .seal{width:90px}.trust-list{grid-template-columns:1fr;gap:10px}.trust-point{font-size:.9rem}}
+
+/* ---------- Grid ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:18px}
+.section-h{display:flex;align-items:baseline;justify-content:space-between;margin:10px 2px 16px}
+.section-h h2{font-size:1.35rem}
+.section-h span{color:var(--ink-soft);font-size:.9rem;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;display:flex;flex-direction:column;transition:.22s;box-shadow:var(--shadow);
+}
+.card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.thumb{position:relative;aspect-ratio:1/1;background:#FBF2E9;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.card:hover .thumb img{transform:scale(1.06)}
+.thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-size:2.6rem;font-weight:800;color:var(--accent);opacity:.55}
+.saleflag{position:absolute;top:10px;left:10px;background:var(--green);color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.body{padding:13px 14px 16px;display:flex;flex-direction:column;flex:1}
+.cat-tag{font-size:.72rem;color:var(--accent-deep);font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+.title{font-weight:600;font-size:.98rem;color:var(--ink);min-height:2.6em;margin-bottom:10px}
+.price{display:flex;align-items:baseline;gap:8px;margin-top:auto}
+.price .now{font-family:'Baloo Da 2';font-weight:700;font-size:1.18rem;color:var(--ink)}
+.price .was{font-size:.85rem;color:var(--ink-soft);text-decoration:line-through}
+.order-btn{
+  margin-top:12px;width:100%;border:none;background:var(--accent);color:#fff;
+  font-family:'Baloo Da 2';font-weight:700;font-size:.98rem;padding:11px;border-radius:12px;
+  cursor:pointer;transition:.18s;
+}
+.order-btn:hover{background:var(--accent-deep);transform:translateY(-1px)}
+
+.empty{text-align:center;padding:60px 20px;color:var(--ink-soft)}
+.loading{text-align:center;padding:60px;color:var(--ink-soft);font-weight:600}
+
+/* ---------- Modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(40,33,24,.55);backdrop-filter:blur(3px);z-index:90;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:22px;max-width:430px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.94) translateY(10px);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:center}
+.modal-head img,.modal-head .ph{width:58px;height:58px;border-radius:12px;object-fit:cover;background:#FBF2E9;flex-shrink:0}
+.modal-head .ph{display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-weight:800;color:var(--accent)}
+.modal-head h3{font-size:1.05rem;line-height:1.3}
+.modal-head .mp{color:var(--accent-deep);font-family:'Baloo Da 2';font-weight:700;margin-top:2px}
+.modal-body{padding:18px 20px 22px}
+.modal-desc{padding:14px 20px 0;color:var(--ink);font-size:.92rem;line-height:1.55;white-space:pre-line}
+.field{margin-bottom:13px}
+.field label{display:block;font-weight:600;font-size:.85rem;margin-bottom:5px;color:var(--ink)}
+.field input,.field textarea{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;font-family:inherit;font-size:.95rem;outline:none;transition:.18s;color:var(--ink)}
+.field input:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,107,74,.1)}
+.qty{display:flex;align-items:center;gap:0;width:fit-content;border:1.5px solid var(--line);border-radius:11px;overflow:hidden}
+.qty button{width:42px;height:42px;border:none;background:#FBF2E9;font-size:1.3rem;font-weight:700;cursor:pointer;color:var(--accent-deep)}
+.qty input{width:54px;text-align:center;border:none;border-radius:0;font-size:1rem;font-weight:700}
+.qty input:focus{box-shadow:none}
+.total{background:#FBF2E9;border-radius:12px;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;margin:6px 0 16px;font-weight:600}
+.total b{font-family:'Baloo Da 2';font-size:1.25rem;color:var(--accent-deep)}
+.field select{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;font-family:inherit;font-size:.95rem;background:#fff;color:var(--ink);outline:none;cursor:pointer}
+.field select:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,107,74,.1)}
+.coupon-row{display:flex;gap:8px}
+.coupon-row input{flex:1}
+.coupon-row button{border:none;background:var(--ink);color:#fff;font-family:'Baloo Da 2';font-weight:700;padding:0 20px;border-radius:11px;cursor:pointer;transition:.18s}
+.coupon-row button:hover{background:var(--accent-deep)}
+.coupon-msg{font-size:.82rem;font-weight:600;margin-top:6px}
+.breakdown{background:#FBF2E9;border-radius:12px;padding:13px 16px;margin:8px 0 16px}
+.brow{display:flex;justify-content:space-between;align-items:center;font-size:.93rem;font-weight:500;color:var(--ink-soft);padding:3px 0}
+#sumDisc{color:var(--green);font-weight:700}
+.brow.total-row{border-top:1px dashed #E0CFBC;margin-top:7px;padding-top:10px;color:var(--ink);font-weight:600}
+.brow.total-row b{font-family:'Baloo Da 2';font-size:1.3rem;color:var(--accent-deep)}
+.submit{width:100%;border:none;background:var(--green);color:#fff;font-family:'Baloo Da 2';font-weight:700;font-size:1.05rem;padding:14px;border-radius:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:.18s}
+.submit:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.submit:disabled{opacity:.6;cursor:default;transform:none}
+.x{position:absolute;top:14px;right:16px;width:34px;height:34px;border-radius:50%;border:none;background:#fff;color:var(--ink);font-size:1.3rem;cursor:pointer;box-shadow:var(--shadow);z-index:2}
+.note-line{font-size:.8rem;color:var(--ink-soft);text-align:center;margin-top:10px}
+.done{text-align:center;padding:34px 22px}
+.done .check{width:66px;height:66px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 16px}
+.done h3{font-size:1.25rem;margin-bottom:6px}
+.done p{color:var(--ink-soft)}
+
+/* ---------- Footer ---------- */
+footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24px}
+.foot{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:26px}
+.foot h4{font-family:'Baloo Da 2';color:#fff;margin-bottom:12px;font-size:1.1rem}
+.foot a,.foot p{color:#C9BBAB;font-size:.92rem;margin-bottom:7px;display:block}
+.foot a:hover{color:var(--yellow)}
+.copy{max-width:1180px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);text-align:center;color:#A99B8B;font-size:.85rem}
+
+/* ---------- Floating WhatsApp ---------- */
+.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(37,211,102,.45);z-index:50;transition:.2s}
+.fab:hover{transform:scale(1.08)}
+.fab svg{width:30px;height:30px;fill:#fff}
+
+@media(max-width:640px){
+  .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .logo{font-size:1.25rem}
+  .logo img{height:56px}
+  .callbtn span{display:none}
+  .callbtn{padding:10px}
+  .hero h1{font-size:1.3rem}
+  .hero-in{padding:22px 18px}
+  .search{order:3;flex-basis:100%;max-width:100%}
+  .bar{flex-wrap:wrap}
+  .title{font-size:.9rem}
+}
+</style>
+</head>
+<body>
+
+<div class="announce" id="announce"></div>
+
+<header>
+  <div class="bar">
+    <a href="#" class="logo"><img id="logoImg" alt="logo" style="display:none" /><span id="logoEmoji">🧸</span><span id="logoName">Ilm Toy</span></a>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="search" type="text" placeholder="Search products..." />
+    </div>
+    <a class="callbtn" id="callBtn" href="#"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span id="callNum">Call Now</span></a>
+    <button class="cart-hbtn" id="cartHBtn" onclick="openCart()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Cart
+      <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+    </button>
+  </div>
+  <div class="cats" id="cats"></div>
+</header>
+
+<div class="hero">
+  <div class="hero-in" id="heroText">
+    <div>
+      <span class="badge" id="heroBadge">🚚 Nationwide Delivery</span>
+      <h1 id="heroTitle">Best Products, Best Prices</h1>
+      <p id="heroSub">Tap a product to order easily.</p>
+    </div>
+  </div>
+  <div class="hero-slider" id="heroSlider" style="display:none">
+    <div class="hero-dots" id="heroDots"></div>
+  </div>
+</div>
+
+<div class="trust">
+  <svg class="seal" viewBox="0 0 120 124" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#FFB89F">
+      <circle cx="106" cy="58" r="9"/><circle cx="100" cy="81" r="9"/><circle cx="83" cy="98" r="9"/>
+      <circle cx="60" cy="104" r="9"/><circle cx="37" cy="98" r="9"/><circle cx="20" cy="81" r="9"/>
+      <circle cx="14" cy="58" r="9"/><circle cx="20" cy="35" r="9"/><circle cx="37" cy="18" r="9"/>
+      <circle cx="60" cy="12" r="9"/><circle cx="83" cy="18" r="9"/><circle cx="100" cy="35" r="9"/>
+    </g>
+    <path d="M16 56 L3 49 L3 71 L20 63 Z" fill="var(--accent-deep)"/>
+    <path d="M104 56 L117 49 L117 71 L100 63 Z" fill="var(--accent-deep)"/>
+    <circle cx="60" cy="58" r="42" fill="var(--accent)"/>
+    <circle cx="60" cy="58" r="35" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2"/>
+    <text x="60" y="41" text-anchor="middle" fill="#fff" font-size="12" font-family="Arial">★ ★ ★</text>
+    <text x="60" y="88" text-anchor="middle" fill="#fff" font-size="12" font-family="Arial">★ ★ ★</text>
+    <rect x="15" y="50" width="90" height="20" rx="3" fill="var(--accent-deep)"/>
+    <text x="60" y="64" text-anchor="middle" fill="#fff" font-family="'Baloo Da 2',Arial" font-weight="800" font-size="13" letter-spacing="1">TRUSTED</text>
+  </svg>
+  <div class="trust-list" id="trust"></div>
+</div>
+
+<div class="wrap">
+  <div class="section-h">
+    <h2 id="secTitle">All Products</h2>
+    <span id="count"></span>
+  </div>
+  <div id="grid" class="grid"></div>
+  <div id="status" class="loading">Loading products...</div>
+</div>
+
+<footer>
+  <div class="foot">
+    <div>
+      <h4 id="fName">Ilm Toy</h4>
+      <p id="fAddr"></p>
+      <p id="fPhone"></p>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <a id="fWa" href="#" target="_blank">WhatsApp</a>
+      <a id="fMsg" href="#" target="_blank">Messenger</a>
+      <a id="fFb" href="#" target="_blank">Facebook</a>
+      <a id="fIg" href="#" target="_blank">Instagram</a>
+      <a id="fYt" href="#" target="_blank">YouTube</a>
+      <a id="fEmail" href="#">Email</a>
+    </div>
+    <div>
+      <h4>How to Order</h4>
+      <p>Tap a product → enter your details → confirm the order. Cash on delivery.</p>
+    </div>
+  </div>
+  <div class="copy" id="copy"></div>
+</footer>
+
+<button class="cart-fab" id="cartFab" onclick="openCart()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+  Cart <span class="cart-fab-badge" id="cartFabBadge">0</span>
+</button>
+<a class="fab" id="fab" href="#" target="_blank" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.51 5.26l-.999 3.648 3.978-.985-.001-.022zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+</a>
+
+<div class="cart-overlay" id="cartOverlay">
+  <div class="cart-modal">
+    <div class="cart-modal-head">
+      <h3>🛒 Your Cart</h3>
+      <button class="x" style="position:static;box-shadow:none;background:#FBF2E9" onclick="closeCart()">×</button>
+    </div>
+    <div class="cart-body" id="cartBody"></div>
+    <div class="cart-checkout" id="cartCheckout" style="display:none">
+      <div class="breakdown">
+        <div class="brow"><span>Subtotal</span><span id="cSumSub">0৳</span></div>
+        <div class="brow" id="cRowDisc" style="display:none"><span>Discount</span><span id="cSumDisc" style="color:var(--green);font-weight:700">−0৳</span></div>
+        <div class="brow"><span>Delivery Charge</span><span id="cSumShip">0৳</span></div>
+        <div class="brow total-row"><span>Total</span><b id="cGrand">0৳</b></div>
+      </div>
+      <div class="field">
+        <label>Delivery Area</label>
+        <select id="cDelivery" onchange="updateCartTotal()">
+          <option value="dhaka">Inside Dhaka</option>
+          <option value="outside">Outside Dhaka</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Coupon Code (if any)</label>
+        <div class="coupon-row">
+          <input id="cCoupon" placeholder="Enter code" />
+          <button type="button" onclick="applyCartCoupon()">Apply</button>
+        </div>
+        <div id="cCouponMsg" class="coupon-msg"></div>
+      </div>
+      <div class="field"><label>Your Name *</label><input id="ccName" placeholder="Enter your name" /></div>
+      <div class="field"><label>Mobile Number *</label><input id="ccPhone" type="tel" placeholder="01XXXXXXXXX" /></div>
+      <div class="field"><label>Full Address *</label><textarea id="ccAddr" rows="2" placeholder="House/Village, Thana, District"></textarea></div>
+      <div class="field"><label>Note (optional)</label><input id="ccNote" placeholder="Anything else to add" /></div>
+      <button class="submit" id="cartSubmitBtn" onclick="submitCartOrder()">Confirm Order</button>
+      <p class="note-line">Cash on delivery. We'll contact you shortly.</p>
+      <div id="cartDone" class="done" style="display:none">
+        <div class="check">✓</div>
+        <h3>Order Sent!</h3>
+        <p>We'll contact you shortly.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="overlay">
+  <div class="modal" style="position:relative">
+    <button class="x" id="closeX">×</button>
+    <div id="orderForm">
+      <div class="modal-head" id="mHead"></div>
+      <div class="modal-desc" id="mDesc"></div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Quantity</label>
+          <div class="qty">
+            <button type="button" id="minus">−</button>
+            <input id="qty" type="number" value="1" min="1" />
+            <button type="button" id="plus">+</button>
+          </div>
+        </div>
+        <div class="field"><label>Your Name *</label><input id="cName" placeholder="Enter your name" /></div>
+        <div class="field"><label>Mobile Number *</label><input id="cPhone" type="tel" placeholder="01XXXXXXXXX" /></div>
+        <div class="field"><label>Full Address *</label><textarea id="cAddr" rows="2" placeholder="House/Village, Thana, District"></textarea></div>
+        <div class="field"><label>Note (optional)</label><input id="cNote" placeholder="Anything else to add" /></div>
+        <div class="field">
+          <label>Delivery Area</label>
+          <select id="delivery">
+            <option value="dhaka">Inside Dhaka</option>
+            <option value="outside">Outside Dhaka</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Coupon Code (if any)</label>
+          <div class="coupon-row">
+            <input id="coupon" placeholder="Enter code" />
+            <button type="button" id="applyCoupon">Apply</button>
+          </div>
+          <div id="couponMsg" class="coupon-msg"></div>
+        </div>
+        <div class="breakdown">
+          <div class="brow"><span>Subtotal</span><span id="sumSub">0৳</span></div>
+          <div class="brow" id="rowDisc" style="display:none"><span>Discount</span><span id="sumDisc">−0৳</span></div>
+          <div class="brow"><span>Delivery Charge</span><span id="sumShip">0৳</span></div>
+          <div class="brow total-row"><span>Total</span><b id="grand">0৳</b></div>
+        </div>
+        <button class="submit" id="submitBtn">
+          Confirm Order
+        </button>
+        <p class="note-line">Cash on delivery. We'll contact you shortly to confirm your order.</p>
+      </div>
+    </div>
+    <div id="doneView" class="done" style="display:none">
+      <div class="check">✓</div>
+      <h3>Order Sent!</h3>
+      <p>We'll contact you shortly.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ১) তোমার তথ্য এখানে বসাও  (CONFIG)
+   ============================================================ */
+const CONFIG = {
+  // Google Sheet "Publish to web (CSV)" লিঙ্ক — প্রতিটা ট্যাবের আলাদা CSV লিঙ্ক বসাও
+  productsCsvUrl : "https://docs.google.com/spreadsheets/d/1T7XIGcZdwBqzvf1k-D010o0Jv9OK7sB5ErG9wJ3Pz2E/gviz/tq?tqx=out:csv&sheet=Products",   // Products ট্যাব
+  settingsCsvUrl : "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyFHZIchS7qw8EHxHAk53SiQfbqF0g6OKF2j2QQV8ejqnifPChisg6Q6W_cxxzO3aHZwKFzSH7FUw9/pub?gid=2009011128&single=true&output=csv",   // Settings ট্যাব (দোকানের তথ্য + ডেলিভারি চার্জ)
+  couponsCsvUrl  : "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyFHZIchS7qw8EHxHAk53SiQfbqF0g6OKF2j2QQV8ejqnifPChisg6Q6W_cxxzO3aHZwKFzSH7FUw9/pub?gid=216761155&single=true&output=csv",   // Coupons ট্যাব
+  // অর্ডার শিটে জমা করার Apps Script ওয়েব-অ্যাপ লিঙ্ক — খালি থাকলে শুধু WhatsApp যাবে
+  orderEndpoint  : "https://script.google.com/macros/s/AKfycbyyTWi4aD1gDAIh5R1OeDOPDGc7eHiwS2a2zWvEcp4DNCcWL0mbLdogDiPcx7_WSN2g/exec",
+};
+
+/* শিট লিঙ্ক না দেওয়া পর্যন্ত এই ডিফল্ট মান দিয়ে সাইট দেখাবে */
+const DEFAULTS = {
+  store_name:"Ilm Toy", logo_url:"", phone:"01XXXXXXXXX", whatsapp:"8801XXXXXXXXX",
+  messenger:"https://m.me/your-page", facebook:"https://facebook.com/your-page",
+  address:"Dhaka, Bangladesh", announce:"🎉 Welcome! Tap a product to place your order.",
+  hero_title:"Best Products, Best Prices", hero_sub:"Tap a product to order easily.",
+  currency:"৳", delivery_dhaka:60, delivery_outside:120,
+  banner1:"", banner2:"", banner3:"", banner4:"", banner5:"",
+  trust1:"প্যারেন্টিং এক্সপার্টদের রিকমেন্ডেড", trust2:"বাচ্চার জন্য নিরাপদ (Non-Toxic)", trust3:"সারা দেশে হোম ডেলিভারি", trust4:"পণ্য হাতে পেয়ে মূল্য পরিশোধ",
+  instagram:"", youtube:"", email:""
+};
+let S = {...DEFAULTS};
+let COUPONS = [
+  { code:"EID5",  type:"percent", value:5,  min:0 },
+  { code:"SAVE50", type:"flat",   value:50, min:500 },
+];
+
+/* নমুনা পণ্য — শিট যুক্ত করলে এগুলো এমনিতেই বদলে যাবে */
+const SAMPLE = [
+  {id:1,name:"DIY ফায়ার কার সেট",category:"DIY",price:950,old_price:1020,image_url:"",description:"নিজে হাতে তৈরি করার মজার সেট।",status:"active"},
+  {id:2,name:"মিনি হ্যান্ড ফ্যান",category:"Fan",price:750,old_price:800,image_url:"",description:"রিচার্জেবল পোর্টেবল ফ্যান।",status:"active"},
+  {id:3,name:"আলোর ঝলক",category:"Science Kit",price:875,old_price:925,image_url:"",description:"আলো নিয়ে মজার বিজ্ঞান কিট।",status:"active"},
+  {id:4,name:"মেমরি চেস",category:"Brain Boosting Toys",price:550,old_price:0,image_url:"",description:"স্মৃতিশক্তি বাড়ানোর খেলা।",status:"active"},
+  {id:5,name:"Tracing ABC",category:"Books",price:230,old_price:280,image_url:"",description:"হাতের লেখা চর্চার বই।",status:"active"},
+  {id:6,name:"সুপার কার",category:"Cars",price:770,old_price:850,image_url:"",description:"গিয়ার সহ রেসিং কার।",status:"active"},
+];
+
+/* ============================================================
+   ২) কোড — এর নিচে সাধারণত হাত দিতে হবে না
+   ============================================================ */
+const $ = s => document.querySelector(s);
+let PRODUCTS = [], activeCat = "all", current = null;
+let cur = DEFAULTS.currency;
+const bnNum = n => Number(n).toLocaleString('en-US');
+
+function applyConfig(){
+  $("#announce").textContent = S.announce;
+  if(S.logo_url){
+    $("#logoImg").src = S.logo_url;
+    $("#logoImg").style.display = "block";
+    $("#logoEmoji").style.display = "none";
+  }
+  $("#logoName").textContent = S.store_name;
+  document.title = S.store_name;
+  $("#callNum").textContent = S.phone;
+  $("#callBtn").href = "tel:" + S.phone;
+  $("#heroTitle").textContent = S.hero_title;
+  $("#heroSub").textContent = S.hero_sub;
+  $("#fName").textContent = S.store_name;
+  $("#fAddr").textContent = S.address;
+  $("#fPhone").textContent = "📞 " + S.phone;
+  const wa = "https://wa.me/" + S.whatsapp;
+  $("#fab").href = wa;
+  const setLink = (id, url) => {
+    const el = $("#"+id);
+    if(!url || /your-page|01XXXX|8801XXXX/.test(url)){ el.style.display="none"; }
+    else { el.href = url; el.style.display=""; }
+  };
+  setLink("fWa", wa);
+  setLink("fMsg", S.messenger);
+  setLink("fFb", S.facebook);
+  setLink("fIg", S.instagram);
+  setLink("fYt", S.youtube);
+  setLink("fEmail", S.email ? ("mailto:" + S.email) : "");
+  $("#copy").textContent = "© " + new Date().getFullYear() + " " + S.store_name + ". All rights reserved.";
+
+  // Trust badges
+  const tIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>';
+  const trusts = [S.trust1,S.trust2,S.trust3,S.trust4].filter(t=>t && (""+t).trim());
+  if(trusts.length){
+    $("#trust").innerHTML = trusts.map(t=>`<div class="trust-point">${tIcon}<span>${t}</span></div>`).join("");
+  } else { $("#trust").parentNode.style.display="none"; }
+
+  // Hero banner slider
+  const banners = [S.banner1,S.banner2,S.banner3,S.banner4,S.banner5].filter(b=>b && (""+b).trim());
+  if(banners.length){
+    $("#heroText").style.display="none";
+    const slider = $("#heroSlider"), dots = $("#heroDots");
+    slider.style.display="block";
+    slider.querySelectorAll('.slide').forEach(s=>s.remove());
+    banners.forEach((raw,i)=>{
+      const parts = (""+raw).split('|').map(x=>x.trim());
+      const img=parts[0], title=parts[1]||"", sub=parts[2]||"", btnTxt=parts[3]||"", btnLink=parts[4]||"";
+      const d=document.createElement('div');
+      d.className='slide'+(i===0?' on':'');
+      let ov="";
+      if(title || sub || btnTxt){
+        const tgt = /^https?:/.test(btnLink) ? ' target="_blank"' : '';
+        ov = `<div class="ov">`
+           + (title?`<h2>${title}</h2>`:"")
+           + (sub?`<p>${sub}</p>`:"")
+           + (btnTxt?`<a class="cta" href="${btnLink||'#'}"${tgt}>${btnTxt}</a>`:"")
+           + `</div>`;
+      }
+      d.innerHTML=`<img src="${img}" alt="banner">${ov}`;
+      slider.insertBefore(d, dots);
+    });
+    dots.innerHTML = banners.map((_,i)=>`<button class="${i===0?'on':''}" data-i="${i}"></button>`).join("");
+    let idx=0;
+    const show=i=>{
+      slider.querySelectorAll('.slide').forEach((s,j)=>s.classList.toggle('on',j===i));
+      dots.querySelectorAll('button').forEach((b,j)=>b.classList.toggle('on',j===i));
+      idx=i;
+    };
+    dots.querySelectorAll('button').forEach(b=>b.onclick=()=>show(+b.dataset.i));
+    if(banners.length>1){
+      clearInterval(window.__heroTimer);
+      window.__heroTimer=setInterval(()=>show((idx+1)%banners.length),4000);
+    }
+  }
+}
+
+/* ---- CSV parser (কমা/কোট/নতুন লাইন সামলায়) ---- */
+function parseCSV(text){
+  const rows=[]; let row=[], val="", q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){val+='"';i++;} else q=false; }
+      else val+=c;
+    } else {
+      if(c==='"') q=true;
+      else if(c===','){ row.push(val); val=""; }
+      else if(c==='\n'){ row.push(val); rows.push(row); row=[]; val=""; }
+      else if(c==='\r'){}
+      else val+=c;
+    }
+  }
+  if(val!==""||row.length){ row.push(val); rows.push(row); }
+  return rows;
+}
+function rowsToObjects(rows){
+  if(!rows.length) return [];
+  const head = rows[0].map(h=>h.trim().toLowerCase());
+  return rows.slice(1).filter(r=>r.some(c=>c.trim()!=="")).map(r=>{
+    const o={}; head.forEach((h,i)=>o[h]=(r[i]||"").trim()); return o;
+  });
+}
+
+async function fetchCSV(url){
+  const res = await fetch(url);
+  return rowsToObjects(parseCSV(await res.text()));
+}
+
+async function loadSettings(){
+  if(!CONFIG.settingsCsvUrl) return;
+  try{
+    const rows = await fetchCSV(CONFIG.settingsCsvUrl);   // key,value columns
+    rows.forEach(r=>{ if(r.key) S[r.key.trim()] = (r.value||"").trim(); });
+  }catch(e){}
+}
+
+async function loadCoupons(){
+  if(!CONFIG.couponsCsvUrl) return;
+  try{
+    const rows = await fetchCSV(CONFIG.couponsCsvUrl);    // code,type,value,min
+    const list = rows.filter(r=>r.code).map(r=>({
+      code:r.code.trim(),
+      type:(r.type||"flat").trim().toLowerCase(),
+      value:parseFloat(String(r.value).replace(/[^0-9.]/g,''))||0,
+      min:parseFloat(String(r.min).replace(/[^0-9.]/g,''))||0
+    }));
+    if(list.length) COUPONS = list;
+  }catch(e){}
+}
+
+async function loadProducts(){
+  if(!CONFIG.productsCsvUrl){ PRODUCTS = SAMPLE; return; }
+  try{
+    const data = await fetchCSV(CONFIG.productsCsvUrl);
+    PRODUCTS = data.map(d=>({
+      id:d.id, name:d.name, category:d.category||"",
+      price:parseFloat(String(d.price).replace(/[^0-9.]/g,''))||0,
+      old_price:parseFloat(String(d.old_price).replace(/[^0-9.]/g,''))||0,
+      image_url:d.image_url||"", description:d.description||"",
+      status:(d.status||"active").toLowerCase()
+    })).filter(p=>p.name && p.status!=="hidden");
+    if(!PRODUCTS.length) PRODUCTS = SAMPLE;
+  }catch(e){ PRODUCTS = SAMPLE; }
+}
+
+
+/* ============================================================
+   CART SYSTEM
+   ============================================================ */
+let CART = []; // [{id, name, price, image_url, qty}]
+let cartCoupon = null;
+
+function addToCart(id){
+  const p = PRODUCTS.find(x=>String(x.id)===String(id));
+  if(!p) return;
+  const ex = CART.find(x=>x.id===p.id);
+  if(ex){ ex.qty++; } else { CART.push({...p, qty:1}); }
+  updateCartUI();
+  // bounce animation on cart buttons
+  ["cartBadge","cartFabBadge"].forEach(bid=>{ const el=document.getElementById(bid); if(el){el.style.transform="scale(1.5)"; setTimeout(()=>el.style.transform="",250); } });
+}
+
+function removeFromCart(id){
+  CART = CART.filter(x=>x.id!==id);
+  cartCoupon = null;
+  updateCartUI();
+  renderCartBody();
+  updateCartTotal();
+}
+
+function changeCartQty(id, delta){
+  const item = CART.find(x=>x.id===id);
+  if(!item) return;
+  item.qty = Math.max(1, item.qty + delta);
+  renderCartBody();
+  updateCartTotal();
+}
+
+function updateCartUI(){
+  const total = CART.reduce((s,x)=>s+x.qty,0);
+  const badge = document.getElementById("cartBadge");
+  const fabBadge = document.getElementById("cartFabBadge");
+  const fab = document.getElementById("cartFab");
+  if(badge){ badge.textContent=total; badge.style.display=total?"flex":"none"; }
+  if(fabBadge) fabBadge.textContent=total;
+  if(fab){ if(total>0) fab.classList.add("visible"); else fab.classList.remove("visible"); }
+}
+
+function openCart(){
+  renderCartBody();
+  updateCartTotal();
+  document.getElementById("cartOverlay").classList.add("show");
+  document.getElementById("cartDone").style.display="none";
+  document.getElementById("cartSubmitBtn").style.display="flex";
+}
+function closeCart(){ document.getElementById("cartOverlay").classList.remove("show"); }
+
+function renderCartBody(){
+  const body = document.getElementById("cartBody");
+  const checkout = document.getElementById("cartCheckout");
+  if(!CART.length){
+    body.innerHTML = '<div class="cart-empty">🛒 Cart is empty.<br>Add products to order!</div>';
+    checkout.style.display="none"; return;
+  }
+  checkout.style.display="block";
+  body.innerHTML = CART.map(item=>{
+    const imgHTML = item.image_url
+      ? `<img src="${item.image_url}" alt="${item.name}">`
+      : item.name[0]||'?';
+    return `<div class="ci">
+      <div class="ci-img">${imgHTML}</div>
+      <div class="ci-info">
+        <div class="ci-name">${item.name}</div>
+        <div class="ci-price">${bnNum(item.price * item.qty)}${cur}</div>
+      </div>
+      <div class="ci-qty">
+        <button onclick="changeCartQty('${item.id}',-1)">−</button>
+        <span>${item.qty}</span>
+        <button onclick="changeCartQty('${item.id}',1)">+</button>
+      </div>
+      <button class="ci-del" onclick="removeFromCart('${item.id}')" title="Remove">×</button>
+    </div>`;
+  }).join("") + `<button class="add-btn" onclick="closeCart()">+ আরও পণ্য যোগ করুন</button>`;
+}
+
+function calcCart(){
+  const subtotal = CART.reduce((s,x)=>s+x.price*x.qty,0);
+  let discount=0;
+  if(cartCoupon){
+    discount = cartCoupon.type==='percent'
+      ? Math.round(subtotal*cartCoupon.value/100)
+      : cartCoupon.value;
+    if(discount>subtotal) discount=subtotal;
+  }
+  const loc = document.getElementById("cDelivery").value;
+  const ship = loc==='outside' ? (Number(S.delivery_outside)||0) : (Number(S.delivery_dhaka)||0);
+  return {subtotal, discount, ship, grand:subtotal-discount+ship, loc};
+}
+
+function updateCartTotal(){
+  if(!CART.length) return;
+  const c = calcCart();
+  document.getElementById("cSumSub").textContent = bnNum(c.subtotal)+cur;
+  document.getElementById("cSumShip").textContent = bnNum(c.ship)+cur;
+  const rowDisc = document.getElementById("cRowDisc");
+  if(rowDisc) rowDisc.style.display = c.discount>0?"flex":"none";
+  document.getElementById("cSumDisc").textContent = "−"+bnNum(c.discount)+cur;
+  document.getElementById("cGrand").textContent = bnNum(c.grand)+cur;
+}
+
+function applyCartCoupon(){
+  const code = document.getElementById("cCoupon").value.trim().toUpperCase();
+  const m = document.getElementById("cCouponMsg");
+  if(!code){ cartCoupon=null; m.textContent=""; updateCartTotal(); return; }
+  const found = (COUPONS||[]).find(c=>c.code.toUpperCase()===code);
+  const sub = CART.reduce((s,x)=>s+x.price*x.qty,0);
+  if(!found){ cartCoupon=null; m.style.color="var(--accent-deep)"; m.textContent="❌ Invalid coupon code."; updateCartTotal(); return; }
+  if(found.min && sub<found.min){ cartCoupon=null; m.style.color="var(--accent-deep)"; m.textContent="❌ Min order "+bnNum(found.min)+cur+" required."; updateCartTotal(); return; }
+  cartCoupon=found; m.style.color="var(--green)";
+  const off = found.type==='percent' ? found.value+"% off" : bnNum(found.value)+cur+" off";
+  m.textContent="✅ Applied — "+off+"!";
+  updateCartTotal();
+}
+
+async function submitCartOrder(){
+  const name = document.getElementById("ccName").value.trim();
+  const phone = document.getElementById("ccPhone").value.trim();
+  const addr = document.getElementById("ccAddr").value.trim();
+  if(!name||!phone||!addr){ alert("Please fill in name, mobile, and address."); return; }
+  if(!CART.length){ alert("Cart is empty!"); return; }
+  const c = calcCart();
+  const note = document.getElementById("ccNote").value.trim();
+  const locText = c.loc==='outside' ? 'Outside Dhaka' : 'Inside Dhaka';
+  const couponCode = cartCoupon ? cartCoupon.code : "";
+  // পণ্যের তালিকা একটা string-এ
+  const productList = CART.map(x=>`${x.name} x${x.qty}`).join(" | ");
+  const qtyTotal = CART.reduce((s,x)=>s+x.qty,0);
+  document.getElementById("cartSubmitBtn").disabled=true;
+  if(CONFIG.orderEndpoint){
+    try{
+      const fd=new URLSearchParams({
+        time:new Date().toLocaleString('en-GB'),
+        product:productList, qty:qtyTotal, price:"-",
+        subtotal:c.subtotal, coupon:couponCode, discount:c.discount,
+        delivery_area:locText, delivery_charge:c.ship, total:c.grand,
+        name, phone, address:addr, note
+      });
+      fetch(CONFIG.orderEndpoint,{method:"POST",mode:"no-cors",body:fd});
+    }catch(e){}
+  }
+  // clear cart
+  CART=[]; cartCoupon=null; updateCartUI();
+  document.getElementById("cartSubmitBtn").style.display="none";
+  document.getElementById("cartDone").style.display="block";
+  document.getElementById("cartBody").innerHTML="";
+  document.getElementById("cartCheckout").style.display="none";
+}
+
+document.getElementById("cartOverlay").onclick=e=>{if(e.target===document.getElementById("cartOverlay"))closeCart();};
+
+async function boot(){
+  await Promise.all([loadSettings(), loadCoupons(), loadProducts()]);
+  cur = S.currency || "৳";
+  applyConfig();
+  buildCats();
+  render();
+}
+
+function buildCats(){
+  const cats = [...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
+  const el = $("#cats");
+  el.innerHTML = `<button class="chip on" data-c="all">All Products</button>` +
+    cats.map(c=>`<button class="chip" data-c="${c}">${c}</button>`).join("");
+  el.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    el.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); activeCat=b.dataset.c;
+    $("#secTitle").textContent = activeCat==="all" ? "All Products" : activeCat;
+    render();
+  });
+}
+
+function render(){
+  const q = $("#search").value.trim().toLowerCase();
+  let list = PRODUCTS.filter(p=>activeCat==="all"||p.category===activeCat);
+  if(q) list = list.filter(p=>p.name.toLowerCase().includes(q));
+  $("#status").style.display="none";
+  $("#count").textContent = bnNum(list.length)+" items";
+  if(!list.length){ $("#grid").innerHTML=`<div class="empty" style="grid-column:1/-1">No products found.</div>`; return; }
+  $("#grid").innerHTML = list.map(p=>{
+    const sale = p.old_price && p.old_price>p.price;
+    const off = sale ? Math.round((1-p.price/p.old_price)*100) : 0;
+    const img = p.image_url
+      ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" onerror="this.parentNode.innerHTML='<div class=&quot;ph&quot;>${(p.name[0]||'?')}</div>'">`
+      : `<div class="ph">${p.name[0]||'?'}</div>`;
+    return `<div class="card" data-id="${p.id}" style="cursor:pointer">
+      <div class="thumb">${sale?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${img}</div>
+      <div class="body">
+        ${p.category?`<div class="cat-tag">${p.category}</div>`:""}
+        <div class="title">${p.name}</div>
+        <div class="price">
+          <span class="now">${bnNum(p.price)}${cur}</span>
+          ${sale?`<span class="was">${bnNum(p.old_price)}${cur}</span>`:""}
+        </div>
+        <div style="display:flex;gap:7px;margin-top:12px">
+          <button class="order-btn" style="flex:1" data-id="${p.id}">Order Now</button>
+          <button class="order-btn" style="flex:0 0 auto;padding:11px 14px;background:var(--ink)" data-cart="${p.id}" title="Add to Cart">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#fff" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  $("#grid").querySelectorAll(".order-btn").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); openModal(b.dataset.id); });
+  $("#grid").querySelectorAll("[data-cart]").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); addToCart(b.dataset.cart); });
+  $("#grid").querySelectorAll(".card").forEach(c=>c.onclick=()=>openModal(c.dataset.id));
+}
+
+/* ---- Modal / Order ---- */
+function openModal(id){
+  current = PRODUCTS.find(p=>String(p.id)===String(id));
+  if(!current) return;
+  const img = current.image_url
+    ? `<img src="${current.image_url}" alt="">`
+    : `<div class="ph">${current.name[0]||'?'}</div>`;
+  $("#mHead").innerHTML = `${img}<div><h3>${current.name}</h3><div class="mp">${bnNum(current.price)}${cur}</div></div>`;
+  const desc = (current.description||"").trim();
+  if(desc){ $("#mDesc").textContent = desc; $("#mDesc").style.display="block"; }
+  else { $("#mDesc").textContent=""; $("#mDesc").style.display="none"; }
+  $("#qty").value=1;
+  appliedCoupon=null; $("#coupon").value=""; $("#couponMsg").textContent="";
+  $("#delivery").value="dhaka";
+  updateTotal();
+  $("#cName").value=$("#cPhone").value=$("#cAddr").value=$("#cNote").value="";
+  $("#orderForm").style.display="block"; $("#doneView").style.display="none";
+  $("#submitBtn").disabled=false;
+  $("#overlay").classList.add("show");
+}
+function closeModal(){ $("#overlay").classList.remove("show"); }
+let appliedCoupon=null;
+
+function calc(){
+  const q=Math.max(1,parseInt($("#qty").value)||1);
+  const subtotal=current.price*q;
+  let discount=0;
+  if(appliedCoupon){
+    discount = appliedCoupon.type==='percent'
+      ? Math.round(subtotal*appliedCoupon.value/100)
+      : appliedCoupon.value;
+    if(discount>subtotal) discount=subtotal;
+  }
+  const loc=$("#delivery").value;
+  const ship = loc==='outside' ? (Number(S.delivery_outside)||0) : (Number(S.delivery_dhaka)||0);
+  const grand = subtotal - discount + ship;
+  return {q,subtotal,discount,ship,grand,loc};
+}
+function updateTotal(){
+  const c=calc();
+  $("#sumSub").textContent  = bnNum(c.subtotal)+cur;
+  $("#sumShip").textContent = bnNum(c.ship)+cur;
+  $("#rowDisc").style.display = c.discount>0 ? "flex" : "none";
+  $("#sumDisc").textContent = "−"+bnNum(c.discount)+cur;
+  $("#grand").textContent   = bnNum(c.grand)+cur;
+}
+function applyCoupon(){
+  const code=$("#coupon").value.trim().toUpperCase();
+  const m=$("#couponMsg");
+  if(!code){ appliedCoupon=null; m.textContent=""; updateTotal(); return; }
+  const found=(COUPONS||[]).find(c=>c.code.toUpperCase()===code);
+  const sub=current.price*Math.max(1,parseInt($("#qty").value)||1);
+  if(!found){ appliedCoupon=null; m.style.color="var(--accent-deep)"; m.textContent="❌ Invalid coupon code."; updateTotal(); return; }
+  if(found.min && sub<found.min){ appliedCoupon=null; m.style.color="var(--accent-deep)"; m.textContent="❌ This coupon applies to orders of "+bnNum(found.min)+cur+" or more."; updateTotal(); return; }
+  appliedCoupon=found; m.style.color="var(--green)";
+  const off = found.type==='percent' ? found.value+"% off" : bnNum(found.value)+cur+" off";
+  m.textContent="✅ Coupon applied — "+off+"!";
+  updateTotal();
+}
+$("#plus").onclick=()=>{$("#qty").value=(parseInt($("#qty").value)||1)+1;updateTotal();};
+$("#minus").onclick=()=>{$("#qty").value=Math.max(1,(parseInt($("#qty").value)||1)-1);updateTotal();};
+$("#qty").oninput=()=>{ if(appliedCoupon) applyCoupon(); else updateTotal(); };
+$("#applyCoupon").onclick=applyCoupon;
+$("#delivery").onchange=updateTotal;
+$("#closeX").onclick=closeModal;
+$("#overlay").onclick=e=>{if(e.target===$("#overlay"))closeModal();};
+
+$("#submitBtn").onclick=async ()=>{
+  const name=$("#cName").value.trim(), phone=$("#cPhone").value.trim(), addr=$("#cAddr").value.trim();
+  if(!name||!phone||!addr){ alert("Please fill in name, mobile, and address."); return; }
+  const qty=Math.max(1,parseInt($("#qty").value)||1);
+  const c=calc();
+  const note=$("#cNote").value.trim();
+  const locText = c.loc==='outside' ? 'Outside Dhaka' : 'Inside Dhaka';
+  const couponCode = appliedCoupon ? appliedCoupon.code : "";
+  $("#submitBtn").disabled=true;
+
+  // অর্ডার শিটে জমা (Apps Script)
+  if(CONFIG.orderEndpoint){
+    try{
+      const fd=new URLSearchParams({
+        time:new Date().toLocaleString('en-GB'),
+        product:current.name, qty, price:current.price,
+        subtotal:c.subtotal, coupon:couponCode, discount:c.discount,
+        delivery_area:locText, delivery_charge:c.ship, total:c.grand,
+        name, phone, address:addr, note
+      });
+      fetch(CONFIG.orderEndpoint,{method:"POST",mode:"no-cors",body:fd});
+    }catch(e){}
+  }
+
+  $("#orderForm").style.display="none";
+  $("#doneView").style.display="block";
+};
+
+$("#search").oninput=render;
+boot();
+</script>
+</body>
+</html>
