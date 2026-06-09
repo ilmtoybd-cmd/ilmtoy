@@ -85,8 +85,10 @@ img{max-width:100%;display:block}
 .announce{
   background:linear-gradient(90deg,var(--accent),var(--accent-deep));
   color:#fff;text-align:center;font-weight:600;font-size:.9rem;
-  padding:9px 14px;
+  padding:9px 14px;min-height:38px;display:flex;align-items:center;justify-content:center;
 }
+.ann-cursor{display:inline-block;width:2px;height:1em;margin-left:3px;background:currentColor;vertical-align:-2px;animation:annblink 1s steps(1) infinite}
+@keyframes annblink{50%{opacity:0}}
 
 /* ---------- Header ---------- */
 header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
@@ -101,15 +103,15 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 }
 .search input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,107,74,.12)}
 .search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--ink-soft)}
-.callbtn{display:flex;align-items:center;gap:7px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:50px;font-weight:600;font-size:.9rem;white-space:nowrap}
-.callbtn:hover{background:var(--accent-deep)}
-/* ---------- Cart Header Button ---------- */
-.cart-hbtn{position:relative;display:flex;align-items:center;gap:7px;background:var(--accent);color:#fff;padding:10px 16px;border-radius:50px;font-weight:700;font-size:.9rem;white-space:nowrap;cursor:pointer;border:none;font-family:inherit;transition:.18s}
-.cart-hbtn:hover{background:var(--accent-deep)}
-.lang-btn{background:#fff;border:1.5px solid var(--line);color:var(--ink);font-family:'Baloo Da 2';font-weight:700;font-size:.85rem;padding:9px 14px;border-radius:50px;cursor:pointer;white-space:nowrap;transition:.18s}
-.lang-btn:hover{border-color:var(--accent);color:var(--accent-deep)}
-.cart-hbtn svg{width:18px;height:18px;flex-shrink:0}
-.cart-badge{position:absolute;top:-6px;right:-6px;background:var(--green);color:#fff;font-size:.7rem;font-weight:800;min-width:18px;height:18px;border-radius:50px;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1}
+.hactions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.iconbtn{position:relative;width:42px;height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%;background:#fff;border:1.5px solid var(--line);color:var(--ink);cursor:pointer;font-family:inherit;transition:.18s}
+.iconbtn:hover{border-color:var(--accent);color:var(--accent-deep)}
+.iconbtn svg{width:20px;height:20px}
+.iconbtn.lang-ic{width:auto;border-radius:50px;padding:0 13px;gap:6px;font-family:'Baloo Da 2';font-weight:700;font-size:.85rem}
+.iconbtn.lang-ic svg{width:17px;height:17px}
+.iconbtn.cart-ic{background:var(--accent);border-color:var(--accent);color:#fff}
+.iconbtn.cart-ic:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff}
+.cart-badge{position:absolute;top:-5px;right:-5px;background:var(--green);color:#fff;font-size:.7rem;font-weight:800;min-width:18px;height:18px;border-radius:50px;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;border:2px solid var(--bg)}
 /* ---------- Cart Floating Button ---------- */
 .cart-fab{position:fixed;bottom:86px;right:20px;background:var(--accent);color:#fff;border:none;border-radius:50px;padding:13px 20px;font-family:'Baloo Da 2';font-weight:700;font-size:1rem;cursor:pointer;display:none;align-items:center;gap:9px;box-shadow:0 8px 24px rgba(255,107,74,.45);z-index:50;transition:.2s}
 .cart-fab:hover{background:var(--accent-deep);transform:scale(1.05)}
@@ -197,18 +199,24 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .trust-point svg{width:20px;height:20px;color:var(--accent);flex-shrink:0}
 @media(max-width:640px){.trust .seal{width:90px}.trust-list{grid-template-columns:1fr;gap:10px}.trust-point{font-size:.9rem}}
 
-/* ব্যানারের নিচে: ট্রাস্ট (বামে) + রিভিউ (ডানে) পাশাপাশি */
-.reviews-wrap{margin-top:2px}
-.reviews-head{text-align:center;max-width:640px;margin:6px auto 22px;display:flex;flex-direction:column;align-items:center}
-.reviews-head h2{font-size:1.55rem;color:var(--ink)}
-.reviews-sub{color:var(--ink-soft);font-size:.95rem;margin-top:5px}
-.reviews-head .review-add-btn{margin-top:14px;display:inline-block}
+/* ব্যানারের নিচে: ট্রাস্ট (উপরে) + রিভিউ (নিচে) — উপরে-নিচে স্ট্যাক */
+.top-row{display:block;margin-top:18px}
+.top-row .trust{max-width:1180px;margin:8px auto 0;padding:24px 18px 4px;background:none;border:none;border-radius:0;box-shadow:none;text-align:center}
+.top-row .trust .seal{width:96px;margin:0 auto 14px}
+.top-row .trust-list{display:inline-grid;grid-template-columns:1fr 1fr;gap:14px 46px;text-align:left}
+.top-row .reviews-wrap{margin:30px auto 0;padding:0;max-width:1180px}
+.top-row .review-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+@media(max-width:640px){.top-row .trust-list{grid-template-columns:1fr;gap:10px}}
 
 /* ---------- Grid ---------- */
 .wrap{max-width:1180px;margin:0 auto;padding:18px}
 .section-h{display:flex;align-items:baseline;justify-content:space-between;margin:10px 2px 16px}
 .section-h h2{font-size:1.35rem}
 .section-h span{color:var(--ink-soft);font-size:.9rem;font-weight:600}
+.sec-tools{display:flex;align-items:center;gap:10px}
+.sort-sel{font-family:'Hind Siliguri',sans-serif;font-size:.84rem;font-weight:600;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:50px;padding:7px 30px 7px 14px;cursor:pointer;outline:none;transition:.18s;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B5E50' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.sort-sel:focus,.sort-sel:hover{border-color:var(--accent)}
+@media(max-width:520px){.section-h{flex-wrap:wrap;gap:8px}.sec-tools{width:100%;justify-content:space-between}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
 
 .card{
@@ -242,6 +250,9 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .card-actions .order-btn{margin-top:0;flex:1;width:auto;padding:10px 8px;font-size:.92rem;white-space:nowrap;border-radius:11px}
 .cart-btn{flex:0 0 auto;width:42px;height:42px;display:flex;align-items:center;justify-content:center;padding:0;border:1.5px solid var(--accent);background:#FFEEE4;color:var(--accent-deep);border-radius:11px;cursor:pointer;transition:.18s}
 .cart-btn:hover{background:var(--accent);color:#fff;transform:translateY(-1px)}
+.order-btn.buynow-btn{background:var(--accent-deep)}
+.order-btn.buynow-btn:hover{background:#cf3f22}
+.save-line{font-size:.78rem;font-weight:700;color:var(--green);margin-top:4px}
 .cart-btn:active{transform:scale(.94)}
 .cart-btn svg{width:18px;height:18px}
 
@@ -301,6 +312,13 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .submit{width:100%;border:none;background:var(--green);color:#fff;font-family:'Baloo Da 2';font-weight:700;font-size:1.05rem;padding:14px;border-radius:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:.18s}
 .submit:hover{filter:brightness(1.06);transform:translateY(-1px)}
 .submit:disabled{opacity:.6;cursor:default;transform:none}
+.m-actions{display:flex;flex-direction:column;gap:10px}
+.m-actions .submit{flex:1;width:100%}
+.submit.buynow-btn{background:var(--accent-deep)}
+.submit.buynow-btn:hover{filter:brightness(1.08)}
+.m-title .m-was{font-size:.82rem;color:var(--ink-soft);text-decoration:line-through;font-weight:600;font-family:'Hind Siliguri',sans-serif;margin-left:6px}
+.m-title .m-save{font-size:.8rem;color:var(--green);font-weight:700;font-family:'Hind Siliguri',sans-serif;margin-left:6px}
+.m-title .m-off{display:inline-block;font-size:.74rem;color:#fff;background:var(--green);font-weight:700;font-family:'Hind Siliguri',sans-serif;padding:2px 9px;border-radius:50px;margin-left:6px;vertical-align:middle}
 .x{position:absolute;top:14px;right:16px;width:34px;height:34px;border-radius:50%;border:none;background:#fff;color:var(--ink);font-size:1.3rem;cursor:pointer;box-shadow:var(--shadow);z-index:2}
 .note-line{font-size:.8rem;color:var(--ink-soft);text-align:center;margin-top:10px}
 .done{text-align:center;padding:34px 22px}
@@ -310,20 +328,22 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 
 /* ---------- Customer Reviews ---------- */
 .review-add-btn{border:none;background:var(--accent);color:#fff;font-family:'Baloo Da 2';font-weight:700;font-size:.92rem;padding:9px 16px;border-radius:11px;cursor:pointer;transition:.18s;white-space:nowrap}
+.reviews-head{text-align:center;margin:4px auto 20px}
+.reviews-head h2{font-size:1.55rem}
+.reviews-sub{color:var(--ink-soft);font-weight:600;margin-top:4px}
+.reviews-head .review-add-btn{margin-top:14px}
 .review-add-btn:hover{background:var(--accent-deep);transform:translateY(-1px)}
 .review-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
 .rv-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 16px 18px;box-shadow:0 5px 14px rgba(120,80,40,.06)}
 .rv-top{display:flex;align-items:center;gap:11px;margin-bottom:9px}
 .rv-ava{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-weight:700;font-size:1.15rem;flex-shrink:0;overflow:hidden}
 .rv-ava img{width:100%;height:100%;object-fit:cover}
-.rv-name{font-weight:700;color:var(--ink);font-size:.96rem;line-height:1.2}
-.rv-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
-.rv-prof{font-size:.8rem;color:var(--accent-deep);font-weight:600;line-height:1.35}
-.rv-date{font-size:.78rem;color:#a89684;line-height:1.35}
-.rv-stars{display:block;color:#F5B301;font-size:.98rem;letter-spacing:1px;margin:2px 0}
+.rv-name{font-weight:700;color:var(--ink);font-size:.96rem}
+.rv-stars{color:#F5B301;font-size:.95rem;letter-spacing:1px}
 .rv-stars .off{color:#E0D6C8}
-.rv-prod{display:inline-flex;align-items:center;gap:5px;margin-top:12px;background:var(--accent-soft);color:var(--accent-deep);font-size:.8rem;font-weight:600;padding:5px 11px;border-radius:20px}
 .rv-text{color:var(--ink-soft);font-size:.92rem;line-height:1.6;margin-top:4px}
+.rv-text.rv-pending{min-height:1.4em}
+.rv-cur{background:var(--accent-deep)}
 .rv-media{margin-top:11px;border-radius:12px;overflow:hidden}
 .rv-media iframe{width:100%;aspect-ratio:16/9;border:0;display:block;border-radius:12px}
 .rv-media img{width:100%;border-radius:12px;display:block}
@@ -358,14 +378,16 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
 
 @media(max-width:640px){
   .grid{grid-template-columns:repeat(2,1fr);gap:12px}
-  .logo{font-size:1.25rem}
-  .logo img{height:56px}
-  .callbtn span{display:none}
-  .callbtn{padding:10px}
+  .logo{font-size:1.2rem;min-width:0}
+  .logo img{height:46px}
+  .logo span{font-size:1.3rem}
   .hero h1{font-size:1.3rem}
   .hero-in{padding:22px 18px}
   .search{order:3;flex-basis:100%;max-width:100%}
-  .bar{flex-wrap:wrap}
+  .bar{flex-wrap:wrap;gap:10px}
+  .hactions{gap:7px;margin-left:auto}
+  .iconbtn{width:40px;height:40px}
+  .iconbtn.lang-ic{padding:0 11px}
   .title{font-size:.9rem}
 }
 
@@ -409,13 +431,15 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="search" type="text" placeholder="Search products..." data-i18n-ph="search_ph" />
     </div>
-    <a class="callbtn" id="callBtn" href="#"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span id="callNum">Call Now</span></a>
-    <button class="lang-btn" id="langToggle" type="button" onclick="setLang(LANG==='en'?'bn':'en')" aria-label="Change language">বাংলা</button>
-    <button class="cart-hbtn" id="cartHBtn" onclick="openCart()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-      <span data-i18n="cart">Cart</span>
-      <span class="cart-badge" id="cartBadge" style="display:none">0</span>
-    </button>
+    <div class="hactions">
+      <a class="iconbtn" id="emailBtn" href="#" title="Email" aria-label="Email" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
+      <a class="iconbtn" id="callBtn" href="#" title="Call" aria-label="Call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span id="callNum" hidden></span></a>
+      <button class="iconbtn lang-ic" id="langToggle" type="button" onclick="setLang(LANG==='en'?'bn':'en')" aria-label="Change language"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg><span id="langLabel">বাংলা</span></button>
+      <button class="iconbtn cart-ic" id="cartHBtn" onclick="openCart()" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+      </button>
+    </div>
   </div>
   <div class="cats" id="cats"></div>
 </header>
@@ -433,7 +457,8 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
   </div>
 </div>
 
-<div class="trust">
+<div class="wrap top-row" id="topRow">
+  <div class="trust">
     <svg class="seal" viewBox="0 0 120 124" xmlns="http://www.w3.org/2000/svg">
       <g fill="#FFB89F">
         <circle cx="106" cy="58" r="9"/><circle cx="100" cy="81" r="9"/><circle cx="83" cy="98" r="9"/>
@@ -452,14 +477,14 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
     </svg>
     <div class="trust-list" id="trust"></div>
   </div>
-
-<div class="wrap reviews-wrap" id="reviewsSection" style="display:none">
-  <div class="reviews-head">
-    <h2 data-i18n="reviews_title">⭐ Customer Reviews</h2>
-    <p class="reviews-sub" data-i18n="reviews_sub">What our happy customers say</p>
-    <button class="review-add-btn" id="openReviewBtn" data-i18n="write_review" style="display:none">✍️ Write a Review</button>
+  <div class="reviews-wrap" id="reviewsSection" style="display:none">
+    <div class="reviews-head">
+      <h2 data-i18n="reviews_title">⭐ Customer Reviews</h2>
+      <p class="reviews-sub" data-i18n="reviews_sub">What our happy customers say</p>
+      <button class="review-add-btn" id="openReviewBtn" data-i18n="write_review" style="display:none">✍️ Write a Review</button>
+    </div>
+    <div id="reviewGrid" class="review-grid"></div>
   </div>
-  <div id="reviewGrid" class="review-grid"></div>
 </div>
 
 <div class="wrap shopcat-wrap" id="shopcatWrap" style="display:none">
@@ -470,7 +495,14 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
 <div class="wrap">
   <div class="section-h">
     <h2 id="secTitle" data-i18n="all_products">All Products</h2>
-    <span id="count"></span>
+    <div class="sec-tools">
+      <select id="sortSel" class="sort-sel" onchange="setSort(this.value)">
+        <option value="default" data-i18n="sort_default">Default</option>
+        <option value="low" data-i18n="sort_low">Price: Low to High</option>
+        <option value="high" data-i18n="sort_high">Price: High to Low</option>
+      </select>
+      <span id="count"></span>
+    </div>
   </div>
   <div id="grid" class="grid"></div>
   <div id="status" class="loading" data-i18n="loading">Loading products...</div>
@@ -483,7 +515,6 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
     <div id="reviewForm">
       <h3 class="review-modal-title" data-i18n="write_review">Write a Review</h3>
       <div class="field"><label data-i18n="name_label">Your Name *</label><input id="rvName" placeholder="Enter your name" data-i18n-ph="name_ph" /></div>
-      <div class="field"><label data-i18n="prof_label">Profession (optional)</label><input id="rvProf" placeholder="e.g. Teacher, Student, Businessman" data-i18n-ph="prof_ph" /></div>
       <div class="field">
         <label data-i18n="your_rating">Your Rating *</label>
         <div class="star-pick" id="starPick"><span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div>
@@ -578,11 +609,11 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
       <div class="field"><label data-i18n="note_label">Note (optional)</label><input id="ccNote" placeholder="Anything else to add" data-i18n-ph="note_ph" /></div>
       <button class="submit" id="cartSubmitBtn" onclick="submitCartOrder()" data-i18n="confirm_order">Confirm Order</button>
       <p class="note-line" data-i18n="cod_note">Cash on delivery. We'll contact you shortly.</p>
-      <div id="cartDone" class="done" style="display:none">
-        <div class="check">✓</div>
-        <h3 data-i18n="order_sent">Order Sent!</h3>
-        <p data-i18n="contact_soon">We'll contact you shortly.</p>
-      </div>
+    </div>
+    <div id="cartDone" class="done" style="display:none">
+      <div class="check">✓</div>
+      <h3 data-i18n="order_sent">Order Sent!</h3>
+      <p data-i18n="contact_soon">We'll contact you shortly.</p>
     </div>
   </div>
 </div>
@@ -601,7 +632,10 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
             <button type="button" id="plus">+</button>
           </div>
         </div>
-        <button class="submit" id="modalAddBtn" data-i18n="add_to_cart">Add to Cart</button>
+        <div class="m-actions">
+          <button class="submit" id="modalAddBtn" data-i18n="add_to_cart">Add to Cart</button>
+          <button class="submit buynow-btn" id="modalBuyBtn" data-i18n="buy_now">Buy Now</button>
+        </div>
         <p class="note-line" data-i18n="cod_note_long">Cash on delivery. We'll contact you shortly to confirm your order.</p>
       </div>
     </div>
@@ -635,7 +669,8 @@ const DEFAULTS = {
   banner1:"", banner2:"", banner3:"", banner4:"", banner5:"",
   trust1:"প্যারেন্টিং এক্সপার্টদের রিকমেন্ডেড", trust2:"বাচ্চার জন্য নিরাপদ (Non-Toxic)", trust3:"সারা দেশে হোম ডেলিভারি", trust4:"পণ্য হাতে পেয়ে মূল্য পরিশোধ",
   instagram:"", youtube:"", email:"",
-  corporate_sales:"", retail_sales:"", owner_quote:"", owner_name:"", map_link:""
+  corporate_sales:"", retail_sales:"", owner_quote:"", owner_name:"", map_link:"",
+  discount_display:"both"
 };
 let S = {...DEFAULTS};
 let COUPONS = [
@@ -658,6 +693,7 @@ const SAMPLE = [
    ============================================================ */
 const $ = s => document.querySelector(s);
 let PRODUCTS = [], activeCat = "all", current = null;
+let sortMode = "default";   // পণ্য সাজানোর ধরন
 let REVIEWS = [], rvRating = 0;   // কাস্টমার রিভিউ
 let galImgs = [], galIdx = 0;   // প্রোডাক্ট গ্যালারির ছবি
 let cur = DEFAULTS.currency;
@@ -682,7 +718,7 @@ const T = {
     shop_by_cat:"Shop By Category", all_products:"All Products", loading:"Loading products...",
     no_products:"No products found.", items:"items", contact:"Contact",
     follow_us:"Follow Us", sales_heading:"Sales", corporate_sales:"Corporate Sales", retail_sales:"Retail Sales", about_us:"About Us", view_on_map:"📍 View on Google Maps",
-    reviews_title:"⭐ Customer Reviews", reviews_sub:"What our happy customers say", prof_label:"Profession (optional)", prof_ph:"e.g. Teacher, Student, Businessman", write_review:"✍️ Write a Review", your_rating:"Your Rating *", review_text_label:"Your Review *", review_text_ph:"Write your experience...", submit_review:"Submit Review", review_thanks:"Thanks! Your review will appear after approval.", watch_video:"▶ Watch Video", review_fill:"Please add your name, rating and review.",
+    reviews_title:"⭐ Customer Reviews", reviews_sub:"What our happy customers say", write_review:"✍️ Write a Review", your_rating:"Your Rating *", review_text_label:"Your Review *", review_text_ph:"Write your experience...", submit_review:"Submit Review", review_thanks:"Thanks! Your review will appear after approval.", watch_video:"▶ Watch Video", review_fill:"Please add your name, rating and review.",
     how_to_order:"How to Order",
     how_to_order_desc:"Tap a product → enter your details → confirm the order. Cash on delivery.",
     your_cart:"🛒 Your Cart", subtotal:"Subtotal", discount:"Discount",
@@ -691,21 +727,21 @@ const T = {
     coupon_ph:"Enter code", apply:"Apply", name_label:"Your Name *", name_ph:"Enter your name",
     phone_label:"Mobile Number *", addr_label:"Full Address *", addr_ph:"House/Village, Thana, District",
     note_label:"Note (optional)", note_ph:"Anything else to add", confirm_order:"Confirm Order",
-    quantity:"Quantity", order_now:"Order Now", add_to_cart:"Add to Cart", out_of_stock:"Out of Stock", add_more:"+ Add more products",
+    quantity:"Quantity", order_now:"Order Now", add_to_cart:"Add to Cart", buy_now:"Buy Now", out_of_stock:"Out of Stock", add_more:"+ Add more products",
     cod_note:"Cash on delivery. We'll contact you shortly.",
     cod_note_long:"Cash on delivery. We'll contact you shortly to confirm your order.",
     order_sent:"Order Sent!", contact_soon:"We'll contact you shortly.",
     cart_empty:"🛒 Cart is empty.<br>Add products to order!", added_cart:"Added to cart",
     fill_required:"Please fill in name, mobile, and address.", cart_empty_alert:"Cart is empty!",
     coupon_invalid:"❌ Invalid coupon code.", coupon_min:"❌ Minimum order {x} required.",
-    coupon_applied:"✅ Applied — {x}!", off_percent:"{v}% off", off_flat:"{v} off"
+    coupon_applied:"✅ Applied — {x}!", off_percent:"{v}% off", off_flat:"{v} off", sort_default:"Default", sort_low:"Price: Low to High", sort_high:"Price: High to Low", save_label:"Save {x}"
   },
   bn:{
     search_ph:"পণ্য খুঁজুন...", cart:"কার্ট", hero_badge:"🚚 সারা দেশে ডেলিভারি",
     shop_by_cat:"ক্যাটাগরি অনুযায়ী কিনুন", all_products:"সব পণ্য", loading:"পণ্য লোড হচ্ছে...",
     no_products:"কোনো পণ্য পাওয়া যায়নি।", items:"টি পণ্য", contact:"যোগাযোগ",
     follow_us:"ফলো করুন", sales_heading:"বিক্রয়", corporate_sales:"কর্পোরেট সেলস", retail_sales:"রিটেইল সেলস", about_us:"আমাদের সম্পর্কে জানুন", view_on_map:"📍 গুগল ম্যাপে দেখুন",
-    reviews_title:"⭐ গ্রাহকদের মতামত", reviews_sub:"আমাদের সন্তুষ্ট গ্রাহকরা কী বলছেন", prof_label:"পেশা (ঐচ্ছিক)", prof_ph:"যেমন: শিক্ষক, ছাত্র, ব্যবসায়ী", write_review:"✍️ রিভিউ লিখুন", your_rating:"আপনার রেটিং *", review_text_label:"আপনার মতামত *", review_text_ph:"আপনার অভিজ্ঞতা লিখুন...", submit_review:"রিভিউ জমা দিন", review_thanks:"ধন্যবাদ! অ্যাপ্রুভের পর আপনার রিভিউ দেখা যাবে।", watch_video:"▶ ভিডিও দেখুন", review_fill:"নাম, রেটিং ও মতামত দিন।",
+    reviews_title:"⭐ কাস্টমার রিভিউ", reviews_sub:"আমাদের সন্তুষ্ট ক্রেতারা যা বলেন", write_review:"✍️ রিভিউ লিখুন", your_rating:"আপনার রেটিং *", review_text_label:"আপনার মতামত *", review_text_ph:"আপনার অভিজ্ঞতা লিখুন...", submit_review:"রিভিউ জমা দিন", review_thanks:"ধন্যবাদ! অ্যাপ্রুভের পর আপনার রিভিউ দেখা যাবে।", watch_video:"▶ ভিডিও দেখুন", review_fill:"নাম, রেটিং ও মতামত দিন।",
     how_to_order:"কীভাবে অর্ডার করবেন",
     how_to_order_desc:"পণ্যে ট্যাপ করুন → আপনার তথ্য দিন → অর্ডার নিশ্চিত করুন। ক্যাশ অন ডেলিভারি।",
     your_cart:"🛒 আপনার কার্ট", subtotal:"সাবটোটাল", discount:"ছাড়",
@@ -714,14 +750,14 @@ const T = {
     coupon_ph:"কোড লিখুন", apply:"প্রয়োগ", name_label:"আপনার নাম *", name_ph:"আপনার নাম লিখুন",
     phone_label:"মোবাইল নম্বর *", addr_label:"সম্পূর্ণ ঠিকানা *", addr_ph:"বাসা/গ্রাম, থানা, জেলা",
     note_label:"নোট (ঐচ্ছিক)", note_ph:"আর কিছু যোগ করতে চাইলে", confirm_order:"অর্ডার নিশ্চিত করুন",
-    quantity:"পরিমাণ", order_now:"অর্ডার করুন", add_to_cart:"কার্টে যোগ করুন", out_of_stock:"স্টক শেষ", add_more:"+ আরও পণ্য যোগ করুন",
+    quantity:"পরিমাণ", order_now:"অর্ডার করুন", add_to_cart:"কার্টে যোগ করুন", buy_now:"এখনই কিনুন", out_of_stock:"স্টক শেষ", add_more:"+ আরও পণ্য যোগ করুন",
     cod_note:"ক্যাশ অন ডেলিভারি। আমরা শীঘ্রই যোগাযোগ করব।",
     cod_note_long:"ক্যাশ অন ডেলিভারি। অর্ডার নিশ্চিত করতে আমরা শীঘ্রই যোগাযোগ করব।",
     order_sent:"অর্ডার পাঠানো হয়েছে!", contact_soon:"আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।",
     cart_empty:"🛒 কার্ট খালি।<br>অর্ডার করতে পণ্য যোগ করুন!", added_cart:"কার্টে যোগ হয়েছে",
     fill_required:"অনুগ্রহ করে নাম, মোবাইল ও ঠিকানা পূরণ করুন।", cart_empty_alert:"কার্ট খালি!",
     coupon_invalid:"❌ ভুল কুপন কোড।", coupon_min:"❌ ন্যূনতম অর্ডার {x} প্রয়োজন।",
-    coupon_applied:"✅ প্রয়োগ হয়েছে — {x}!", off_percent:"{v}% ছাড়", off_flat:"{v} ছাড়"
+    coupon_applied:"✅ প্রয়োগ হয়েছে — {x}!", off_percent:"{v}% ছাড়", off_flat:"{v} ছাড়", sort_default:"ডিফল্ট", sort_low:"দাম: কম থেকে বেশি", sort_high:"দাম: বেশি থেকে কম", save_label:"{x} সাশ্রয়"
   }
 };
 let LANG = 'en';
@@ -731,7 +767,7 @@ function applyLang(){
   document.documentElement.lang = LANG;
   document.querySelectorAll('[data-i18n]').forEach(el=>{ el.innerHTML = t(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'))); });
-  const tg = document.getElementById('langToggle');
+  const tg = document.getElementById('langLabel') || document.getElementById('langToggle');
   if(tg) tg.textContent = (LANG==='en') ? 'বাংলা' : 'EN';
 }
 function setLang(l){
@@ -745,8 +781,39 @@ function setLang(l){
   if(document.getElementById("cartOverlay").classList.contains("show")){ renderCartBody(); updateCartTotal(); }
 }
 
+/* উপরের ঘোষণা-বার টাইপিং অ্যানিমেশন। একাধিক বার্তা দিতে চাইলে announce-এ পাইপ | দিয়ে আলাদা করো */
+let __annTimer;
+function esc(s){ return (s||"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function escAttr(s){ return esc(s).replace(/"/g,"&quot;"); }
+function typeAnnounce(text){
+  const el = document.getElementById("announce");
+  if(!el) return;
+  clearTimeout(__annTimer);
+  const msgs = (text||"").toString().split("|").map(s=>s.trim()).filter(Boolean);
+  if(!msgs.length){ el.textContent=""; el.style.display="none"; return; }
+  el.style.display="";
+  const TYPE=55, ERASE=26, HOLD=2200, PAUSE=400;
+  let mi=0, ci=0, phase="type";
+  const curSpan = '<span class="ann-cursor"></span>';
+  function frame(){
+    const msg = msgs[mi];
+    if(phase==="type"){
+      ci++;
+      el.innerHTML = esc(msg.slice(0,ci)) + curSpan;
+      if(ci>=msg.length){ phase="erase"; __annTimer=setTimeout(frame, HOLD); }
+      else __annTimer=setTimeout(frame, TYPE);
+    } else {
+      ci--;
+      el.innerHTML = esc(msg.slice(0,Math.max(0,ci))) + curSpan;
+      if(ci<=0){ mi=(mi+1)%msgs.length; phase="type"; __annTimer=setTimeout(frame, PAUSE); }
+      else __annTimer=setTimeout(frame, ERASE);
+    }
+  }
+  frame();
+}
+
 function applyConfig(){
-  $("#announce").textContent = S.announce;
+  typeAnnounce(S.announce);
   if(S.logo_url){
     $("#logoImg").src = S.logo_url;
     $("#logoImg").style.display = "block";
@@ -754,8 +821,15 @@ function applyConfig(){
   }
   $("#logoName").textContent = S.store_name;
   document.title = S.store_name;
-  $("#callNum").textContent = S.phone;
-  $("#callBtn").href = "tel:" + S.phone;
+  $("#callNum").textContent = S.phone || "";
+  const callValid = S.phone && !/01XXXX/.test(S.phone);
+  $("#callBtn").href = callValid ? ("tel:" + S.phone) : "#";
+  $("#callBtn").style.display = callValid ? "" : "none";
+  const emailBtn = $("#emailBtn");
+  if(emailBtn){
+    if(S.email && (""+S.email).trim()){ emailBtn.href = "mailto:" + (""+S.email).trim(); emailBtn.style.display=""; }
+    else { emailBtn.style.display="none"; }
+  }
   $("#heroTitle").textContent = S.hero_title;
   $("#heroSub").textContent = S.hero_sub;
   $("#fName").textContent = S.store_name;
@@ -930,10 +1004,7 @@ async function loadReviews(){
       rating:Math.max(0,Math.min(5, Math.round(parseFloat(d.rating)||0))),
       review:(d.review||"").trim(),
       photo:(d.photo||"").trim(),
-      video:(d.video||"").trim(),
-      profession:(d.profession||d.profesion||d.designation||"").trim(),
-      date:(d.timestamp||d.time||d.date||"").trim(),
-      product:(d.product||d.item||"").trim()
+      video:(d.video||"").trim()
     }));
   }catch(e){ REVIEWS = []; }
 }
@@ -945,27 +1016,6 @@ function starHTML(n){
   let s="";
   for(let i=1;i<=5;i++){ s += `<span class="${i<=n?'':'off'}">★</span>`; }
   return s;
-}
-function bnDigits(s){
-  if(LANG!=='bn') return String(s);
-  const d="০১২৩৪৫৬৭৮৯";
-  return String(s).replace(/[0-9]/g,c=>d[+c]);
-}
-function fmtReviewDate(raw){
-  if(!raw) return "";
-  const str = String(raw).trim();
-  const first = str.split(",")[0].trim();
-  let dd,mm,yy,m;
-  if((m = first.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/))){          // YYYY-MM-DD
-    yy=m[1]; mm=m[2].padStart(2,'0'); dd=m[3].padStart(2,'0');
-  } else if((m = first.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/))){ // DD-MM-YYYY (en-GB)
-    dd=m[1].padStart(2,'0'); mm=m[2].padStart(2,'0'); yy=m[3].length===2?('20'+m[3]):m[3];
-  } else {
-    const dt=new Date(str);
-    if(isNaN(dt.getTime())) return bnDigits(first);
-    dd=String(dt.getDate()).padStart(2,'0'); mm=String(dt.getMonth()+1).padStart(2,'0'); yy=dt.getFullYear();
-  }
-  return bnDigits(dd+"-"+mm+"-"+yy);
 }
 function renderReviews(){
   const sec = $("#reviewsSection"), grid = $("#reviewGrid");
@@ -985,24 +1035,58 @@ function renderReviews(){
     } else if(r.video){
       media = `<a class="rv-watch" href="${r.video}" target="_blank" rel="noopener">${t('watch_video')}</a>`;
     }
-    const dateHTML = r.date ? `<div class="rv-date">${fmtReviewDate(r.date)}</div>` : "";
-    const profHTML = r.profession ? `<div class="rv-prof">${r.profession}</div>` : "";
-    const prodHTML = r.product ? `<div class="rv-prod">📦 ${r.product}</div>` : "";
     return `<div class="rv-card">
       <div class="rv-top">
         <div class="rv-ava">${ava}</div>
-        <div class="rv-meta">
-          <div class="rv-name">${r.name||"Customer"}</div>
-          ${profHTML}
-          ${dateHTML}
-        </div>
+        <div><div class="rv-name">${r.name||"Customer"}</div><div class="rv-stars">${starHTML(r.rating)}</div></div>
       </div>
-      <div class="rv-stars">${starHTML(r.rating)}</div>
-      ${r.review?`<div class="rv-text">${r.review}</div>`:""}
+      ${r.review?`<div class="rv-text" data-fulltext="${escAttr(r.review)}"></div>`:""}
       ${media}
-      ${prodHTML}
     </div>`;
   }).join("");
+  setupReviewTyping();
+}
+
+/* রিভিউ লেখা — কার্ড স্ক্রিনে এলে একবার টাইপ হয়ে বসবে (announce-এর মতো) */
+let __rvObserver;
+function typeReviewEl(el){
+  const full = el.getAttribute('data-fulltext') || "";
+  el.classList.remove('rv-pending');
+  let i = 0;
+  const speed = full.length > 140 ? 12 : 18;
+  function step(){
+    i++;
+    el.innerHTML = esc(full.slice(0,i)) + '<span class="ann-cursor rv-cur"></span>';
+    if(i < full.length){ setTimeout(step, speed); }
+    else { setTimeout(()=>{ el.textContent = full; }, 700); }
+  }
+  step();
+}
+function setupReviewTyping(){
+  if(__rvObserver){ __rvObserver.disconnect(); }
+  const els = Array.from(document.querySelectorAll('.rv-text[data-fulltext]'));
+  if(!els.length) return;
+  els.forEach(el=>{ el.textContent=""; el.classList.add('rv-pending'); });
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce || !('IntersectionObserver' in window)){
+    els.forEach(el=>{ el.classList.remove('rv-pending'); el.textContent = el.getAttribute('data-fulltext')||""; });
+    return;
+  }
+  let batch = 0, lastTime = 0;
+  __rvObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting) return;
+      const el = entry.target;
+      __rvObserver.unobserve(el);
+      if(el.dataset.typed) return;
+      el.dataset.typed = "1";
+      const now = Date.now();
+      batch = (now - lastTime < 450) ? batch+1 : 0;
+      lastTime = now;
+      setTimeout(()=>typeReviewEl(el), batch*180);
+    });
+  }, {threshold:0.25});
+  els.forEach(el=>__rvObserver.observe(el));
 }
 
 
@@ -1194,7 +1278,7 @@ function initReviewModal(){
   const close = ()=>ov.classList.remove("show");
   openBtn.onclick = ()=>{
     rvRating=0; paint(0);
-    $("#rvName").value=""; $("#rvText").value=""; $("#rvProf").value="";
+    $("#rvName").value=""; $("#rvText").value="";
     $("#reviewForm").style.display="block"; $("#reviewDone").style.display="none";
     $("#rvSubmit").disabled=false;
     ov.classList.add("show");
@@ -1202,12 +1286,12 @@ function initReviewModal(){
   $("#reviewCloseX").onclick = close;
   ov.onclick = e=>{ if(e.target===ov) close(); };
   $("#rvSubmit").onclick = async ()=>{
-    const name=$("#rvName").value.trim(), text=$("#rvText").value.trim(), profession=$("#rvProf").value.trim();
+    const name=$("#rvName").value.trim(), text=$("#rvText").value.trim();
     if(!name || !rvRating || !text){ alert(t('review_fill')); return; }
     $("#rvSubmit").disabled=true;
     if(CONFIG.reviewEndpoint){
       try{
-        const fd=new URLSearchParams({ time:new Date().toLocaleString('en-GB'), name, profession, rating:rvRating, review:text, status:"pending" });
+        const fd=new URLSearchParams({ time:new Date().toLocaleString('en-GB'), name, rating:rvRating, review:text, status:"pending" });
         fetch(CONFIG.reviewEndpoint,{method:"POST",mode:"no-cors",body:fd});
       }catch(e){}
     }
@@ -1272,10 +1356,24 @@ function buildShopCats(){
   box.querySelectorAll(".scat").forEach(b=>b.onclick=()=>selectCategory(b.dataset.c));
 }
 
+function setSort(v){ sortMode = (v==='low'||v==='high') ? v : 'default'; render(); }
+
+/* ছাড় কীভাবে দেখাবে — Settings শিটের discount_display key দিয়ে নিয়ন্ত্রিত
+   মান: both (দুটোই) | percent (শুধু %) | taka (শুধু টাকা) | none (কিছুই না) */
+function discMode(){
+  const v = (S.discount_display||'both').toString().trim().toLowerCase();
+  if(['percent','percentage','%','pct','per','parcent'].includes(v)) return 'percent';
+  if(['taka','amount','bdt','tk','৳','money','flat'].includes(v)) return 'taka';
+  if(['none','no','off','hide','hidden'].includes(v)) return 'none';
+  return 'both';
+}
+
 function render(){
   const q = $("#search").value.trim().toLowerCase();
   let list = PRODUCTS.filter(p=>activeCat==="all"||p.category===activeCat);
   if(q) list = list.filter(p=>p.name.toLowerCase().includes(q));
+  if(sortMode==='low') list = list.slice().sort((a,b)=>a.price-b.price);
+  else if(sortMode==='high') list = list.slice().sort((a,b)=>b.price-a.price);
   $("#status").style.display="none";
   $("#count").textContent = bnNum(list.length)+" "+t('items');
   if(!list.length){ $("#grid").innerHTML=`<div class="empty" style="grid-column:1/-1">${t('no_products')}</div>`; return; }
@@ -1289,11 +1387,15 @@ function render(){
       ? `<span class="multi-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M21 7v12a2 2 0 0 1-2 2H7"/></svg>${p.images.length}</span>`
       : "";
     const soldFlag = p.soldout ? `<span class="sold-flag">${t('out_of_stock')}</span>` : "";
+    const saveAmt = sale ? (p.old_price - p.price) : 0;
+    const dmode = discMode();
+    const showPctFlag = sale && !p.soldout && (dmode==='percent'||dmode==='both');
+    const showTkLine  = sale && !p.soldout && (dmode==='taka'||dmode==='both');
     const actionBtn = p.soldout
       ? `<button class="order-btn soldout-btn" disabled>${t('out_of_stock')}</button>`
       : `<button class="order-btn" data-cart="${p.id}">${t('add_to_cart')}</button>`;
     return `<div class="card${p.soldout?' is-sold':''}" data-id="${p.id}" style="cursor:pointer">
-      <div class="thumb">${(sale && !p.soldout)?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${soldFlag}${multi}${img}</div>
+      <div class="thumb">${showPctFlag?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${soldFlag}${multi}${img}</div>
       <div class="body">
         ${p.category?`<div class="cat-tag">${p.category}</div>`:""}
         <div class="title">${p.name}</div>
@@ -1301,6 +1403,7 @@ function render(){
           <span class="now">${bnNum(p.price)}${cur}</span>
           ${sale?`<span class="was">${bnNum(p.old_price)}${cur}</span>`:""}
         </div>
+        ${showTkLine?`<div class="save-line">${t('save_label').replace('{x}', bnNum(saveAmt)+cur)}</div>`:""}
         <div class="card-actions">
           ${actionBtn}
         </div>
@@ -1333,7 +1436,17 @@ function openModal(id){
   } else {
     galInner = `<div class="gal-main"><div class="ph-big">${current.name[0]||'?'}</div></div>`;
   }
-  $("#mHead").innerHTML = `<div class="gallery">${galInner}</div><div class="m-title"><h3>${current.name}</h3><div class="mp">${bnNum(current.price)}${cur}</div></div>`;
+  const mSale = current.old_price && current.old_price>current.price;
+  const mDmode = discMode();
+  let mExtra = "";
+  if(mSale){
+    if(mDmode==='percent'||mDmode==='both'){ mExtra += `<span class="m-off">${bnNum(Math.round((1-current.price/current.old_price)*100))}% OFF</span>`; }
+    if(mDmode==='taka'||mDmode==='both'){ mExtra += `<span class="m-save">${t('save_label').replace('{x}', bnNum(current.old_price-current.price)+cur)}</span>`; }
+  }
+  const mpInner = mSale
+    ? `${bnNum(current.price)}${cur}<span class="m-was">${bnNum(current.old_price)}${cur}</span>${mExtra}`
+    : `${bnNum(current.price)}${cur}`;
+  $("#mHead").innerHTML = `<div class="gallery">${galInner}</div><div class="m-title"><h3>${current.name}</h3><div class="mp">${mpInner}</div></div>`;
   const desc = (current.description||"").trim();
   if(desc){ $("#mDesc").textContent = desc; $("#mDesc").style.display="block"; }
   else { $("#mDesc").textContent=""; $("#mDesc").style.display="none"; }
@@ -1341,6 +1454,8 @@ function openModal(id){
   const addBtn = $("#modalAddBtn");
   if(current.soldout){ addBtn.disabled=true; addBtn.textContent=t('out_of_stock'); addBtn.classList.add('soldout-btn'); }
   else { addBtn.disabled=false; addBtn.textContent=t('add_to_cart'); addBtn.classList.remove('soldout-btn'); }
+  const buyBtn = $("#modalBuyBtn");
+  if(buyBtn){ if(current.soldout){ buyBtn.disabled=true; buyBtn.style.display="none"; } else { buyBtn.disabled=false; buyBtn.style.display=""; buyBtn.textContent=t('buy_now'); } }
   $("#overlay").classList.add("show");
 }
 function closeModal(){ $("#overlay").classList.remove("show"); }
@@ -1362,6 +1477,13 @@ $("#modalAddBtn").onclick=()=>{
   const qty=Math.max(1,parseInt($("#qty").value)||1);
   addToCart(current.id, qty);
   closeModal();
+};
+$("#modalBuyBtn").onclick=()=>{
+  if(!current || current.soldout) return;
+  const qty=Math.max(1,parseInt($("#qty").value)||1);
+  addToCart(current.id, qty);
+  closeModal();
+  openCart();
 };
 
 $("#search").oninput=render;
