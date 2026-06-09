@@ -88,6 +88,7 @@ img{max-width:100%;display:block}
   padding:9px 14px;min-height:38px;display:flex;align-items:center;justify-content:center;
 }
 .ann-cursor{display:inline-block;width:2px;height:1em;margin-left:3px;background:currentColor;vertical-align:-2px;animation:annblink 1s steps(1) infinite}
+.logo-cur{width:3px;height:1.05em;background:var(--accent-deep);margin-left:2px}
 @keyframes annblink{50%{opacity:0}}
 
 /* ---------- Header ---------- */
@@ -171,8 +172,8 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 
 /* ---------- Hero slider ---------- */
 .hero-slider{position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#FBF2E9;aspect-ratio:8/3}
-.hero-slider .slide{position:absolute;inset:0;opacity:0;transition:opacity .7s ease}
-.hero-slider .slide.on{opacity:1}
+.hero-track{display:flex;height:100%;transition:transform .6s cubic-bezier(.4,0,.2,1);will-change:transform}
+.hero-slider .slide{position:relative;flex:0 0 100%;height:100%}
 .hero-slider .slide img{width:100%;height:100%;object-fit:contain;object-position:center;background:#FBF2E9;display:block}
 .hero-slider .slide .ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center;gap:10px;padding:0 7% 28px;background:linear-gradient(0deg,rgba(40,33,24,.7),rgba(40,33,24,.2) 45%,transparent 75%)}
 .hero-slider .slide .ov h2{font-family:'Baloo Da 2',cursive;color:#fff;font-size:2.05rem;line-height:1.15;max-width:90%;text-shadow:0 2px 14px rgba(0,0,0,.45);margin:0}
@@ -214,6 +215,8 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .section-h h2{font-size:1.35rem}
 .section-h span{color:var(--ink-soft);font-size:.9rem;font-weight:600}
 .sec-tools{display:flex;align-items:center;gap:10px}
+.sort-group{display:flex;align-items:center;gap:8px}
+.sort-label{font-size:.85rem;font-weight:600;color:var(--ink-soft);white-space:nowrap}
 .sort-sel{font-family:'Hind Siliguri',sans-serif;font-size:.84rem;font-weight:600;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:50px;padding:7px 30px 7px 14px;cursor:pointer;outline:none;transition:.18s;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B5E50' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .sort-sel:focus,.sort-sel:hover{border-color:var(--accent)}
 @media(max-width:520px){.section-h{flex-wrap:wrap;gap:8px}.sec-tools{width:100%;justify-content:space-between}}
@@ -325,6 +328,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .done .check{width:66px;height:66px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 16px}
 .done h3{font-size:1.25rem;margin-bottom:6px}
 .done p{color:var(--ink-soft)}
+.order-msg{margin:12px auto 0;color:var(--accent-deep);font-weight:600;font-size:.95rem;max-width:90%;line-height:1.5}
 
 /* ---------- Customer Reviews ---------- */
 .review-add-btn{border:none;background:var(--accent);color:#fff;font-family:'Baloo Da 2';font-weight:700;font-size:.92rem;padding:9px 16px;border-radius:11px;cursor:pointer;transition:.18s;white-space:nowrap}
@@ -453,6 +457,7 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
     </div>
   </div>
   <div class="hero-slider" id="heroSlider" style="display:none">
+    <div class="hero-track" id="heroTrack"></div>
     <div class="hero-dots" id="heroDots"></div>
   </div>
 </div>
@@ -496,11 +501,14 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
   <div class="section-h">
     <h2 id="secTitle" data-i18n="all_products">All Products</h2>
     <div class="sec-tools">
-      <select id="sortSel" class="sort-sel" onchange="setSort(this.value)">
-        <option value="default" data-i18n="sort_default">Default</option>
-        <option value="low" data-i18n="sort_low">Price: Low to High</option>
-        <option value="high" data-i18n="sort_high">Price: High to Low</option>
-      </select>
+      <div class="sort-group">
+        <label class="sort-label" for="sortSel" data-i18n="sort_by">Sort by</label>
+        <select id="sortSel" class="sort-sel" onchange="setSort(this.value)">
+          <option value="default" data-i18n="sort_default">Default</option>
+          <option value="low" data-i18n="sort_low">Price: Low to High</option>
+          <option value="high" data-i18n="sort_high">Price: High to Low</option>
+        </select>
+      </div>
       <span id="count"></span>
     </div>
   </div>
@@ -614,6 +622,7 @@ footer{background:var(--ink);color:#F3E9DD;margin-top:30px;padding:38px 18px 24p
       <div class="check">✓</div>
       <h3 data-i18n="order_sent">Order Sent!</h3>
       <p data-i18n="contact_soon">We'll contact you shortly.</p>
+      <p id="orderMsg" class="order-msg" style="display:none"></p>
     </div>
   </div>
 </div>
@@ -670,7 +679,7 @@ const DEFAULTS = {
   trust1:"প্যারেন্টিং এক্সপার্টদের রিকমেন্ডেড", trust2:"বাচ্চার জন্য নিরাপদ (Non-Toxic)", trust3:"সারা দেশে হোম ডেলিভারি", trust4:"পণ্য হাতে পেয়ে মূল্য পরিশোধ",
   instagram:"", youtube:"", email:"",
   corporate_sales:"", retail_sales:"", owner_quote:"", owner_name:"", map_link:"",
-  discount_display:"both"
+  discount_display:"both", order_message:""
 };
 let S = {...DEFAULTS};
 let COUPONS = [
@@ -734,7 +743,7 @@ const T = {
     cart_empty:"🛒 Cart is empty.<br>Add products to order!", added_cart:"Added to cart",
     fill_required:"Please fill in name, mobile, and address.", cart_empty_alert:"Cart is empty!",
     coupon_invalid:"❌ Invalid coupon code.", coupon_min:"❌ Minimum order {x} required.",
-    coupon_applied:"✅ Applied — {x}!", off_percent:"{v}% off", off_flat:"{v} off", sort_default:"Default", sort_low:"Price: Low to High", sort_high:"Price: High to Low", save_label:"Save {x}"
+    coupon_applied:"✅ Applied — {x}!", off_percent:"{v}% off", off_flat:"{v} off", sort_default:"Default", sort_low:"Price: Low to High", sort_high:"Price: High to Low", save_label:"Save {x}", sort_by:"Sort by"
   },
   bn:{
     search_ph:"পণ্য খুঁজুন...", cart:"কার্ট", hero_badge:"🚚 সারা দেশে ডেলিভারি",
@@ -757,7 +766,7 @@ const T = {
     cart_empty:"🛒 কার্ট খালি।<br>অর্ডার করতে পণ্য যোগ করুন!", added_cart:"কার্টে যোগ হয়েছে",
     fill_required:"অনুগ্রহ করে নাম, মোবাইল ও ঠিকানা পূরণ করুন।", cart_empty_alert:"কার্ট খালি!",
     coupon_invalid:"❌ ভুল কুপন কোড।", coupon_min:"❌ ন্যূনতম অর্ডার {x} প্রয়োজন।",
-    coupon_applied:"✅ প্রয়োগ হয়েছে — {x}!", off_percent:"{v}% ছাড়", off_flat:"{v} ছাড়", sort_default:"ডিফল্ট", sort_low:"দাম: কম থেকে বেশি", sort_high:"দাম: বেশি থেকে কম", save_label:"{x} সাশ্রয়"
+    coupon_applied:"✅ প্রয়োগ হয়েছে — {x}!", off_percent:"{v}% ছাড়", off_flat:"{v} ছাড়", sort_default:"ডিফল্ট", sort_low:"দাম: কম থেকে বেশি", sort_high:"দাম: বেশি থেকে কম", save_label:"{x} সাশ্রয়", sort_by:"সাজান"
   }
 };
 let LANG = 'en';
@@ -812,6 +821,33 @@ function typeAnnounce(text){
   frame();
 }
 
+/* লোগোর পাশের নাম — সবসময় টাইপিং (লুপ) */
+let __logoTimer;
+function typeLogo(text){
+  const el = document.getElementById('logoName');
+  if(!el) return;
+  clearTimeout(__logoTimer);
+  const full = (text||"").toString().trim();
+  if(!full){ el.textContent=""; return; }
+  const TYPE=120, ERASE=70, HOLD=1800, PAUSE=500;
+  let i=0, phase="type";
+  const cur = '<span class="ann-cursor logo-cur"></span>';
+  function frame(){
+    if(phase==="type"){
+      i++;
+      el.innerHTML = esc(full.slice(0,i)) + cur;
+      if(i>=full.length){ phase="erase"; __logoTimer=setTimeout(frame, HOLD); }
+      else __logoTimer=setTimeout(frame, TYPE);
+    } else {
+      i--;
+      el.innerHTML = esc(full.slice(0,Math.max(0,i))) + cur;
+      if(i<=0){ phase="type"; __logoTimer=setTimeout(frame, PAUSE); }
+      else __logoTimer=setTimeout(frame, ERASE);
+    }
+  }
+  frame();
+}
+
 function applyConfig(){
   typeAnnounce(S.announce);
   if(S.logo_url){
@@ -819,7 +855,7 @@ function applyConfig(){
     $("#logoImg").style.display = "block";
     $("#logoEmoji").style.display = "none";
   }
-  $("#logoName").textContent = S.store_name;
+  typeLogo(S.store_name);
   document.title = S.store_name;
   $("#callNum").textContent = S.phone || "";
   const callValid = S.phone && !/01XXXX/.test(S.phone);
@@ -829,6 +865,11 @@ function applyConfig(){
   if(emailBtn){
     if(S.email && (""+S.email).trim()){ emailBtn.href = "mailto:" + (""+S.email).trim(); emailBtn.style.display=""; }
     else { emailBtn.style.display="none"; }
+  }
+  const om = $("#orderMsg");
+  if(om){
+    if(S.order_message && (""+S.order_message).trim()){ om.textContent = (""+S.order_message).trim(); om.style.display=""; }
+    else { om.style.display="none"; }
   }
   $("#heroTitle").textContent = S.hero_title;
   $("#heroSub").textContent = S.hero_sub;
@@ -884,14 +925,14 @@ function applyConfig(){
   const banners = [S.banner1,S.banner2,S.banner3,S.banner4,S.banner5].filter(b=>b && (""+b).trim());
   if(banners.length){
     $("#heroText").style.display="none";
-    const slider = $("#heroSlider"), dots = $("#heroDots");
+    const slider = $("#heroSlider"), dots = $("#heroDots"), track = $("#heroTrack");
     slider.style.display="block";
-    slider.querySelectorAll('.slide').forEach(s=>s.remove());
+    track.innerHTML="";
     banners.forEach((raw,i)=>{
       const parts = (""+raw).split('|').map(x=>x.trim());
       const img=parts[0], title=parts[1]||"", sub=parts[2]||"", btnTxt=parts[3]||"", btnLink=parts[4]||"";
       const d=document.createElement('div');
-      d.className='slide'+(i===0?' on':'');
+      d.className='slide';
       let ov="";
       if(title || sub || btnTxt){
         const tgt = /^https?:/.test(btnLink) ? ' target="_blank"' : '';
@@ -902,20 +943,21 @@ function applyConfig(){
            + `</div>`;
       }
       d.innerHTML=`<img src="${img}" alt="banner">${ov}`;
-      slider.insertBefore(d, dots);
+      track.appendChild(d);
     });
     dots.innerHTML = banners.map((_,i)=>`<button class="${i===0?'on':''}" data-i="${i}"></button>`).join("");
     let idx=0;
     const show=i=>{
-      slider.querySelectorAll('.slide').forEach((s,j)=>s.classList.toggle('on',j===i));
-      dots.querySelectorAll('button').forEach((b,j)=>b.classList.toggle('on',j===i));
-      idx=i;
+      idx=(i%banners.length+banners.length)%banners.length;
+      track.style.transform = `translateX(-${idx*100}%)`;
+      dots.querySelectorAll('button').forEach((b,j)=>b.classList.toggle('on',j===idx));
     };
-    dots.querySelectorAll('button').forEach(b=>b.onclick=()=>show(+b.dataset.i));
-    if(banners.length>1){
+    dots.querySelectorAll('button').forEach(b=>b.onclick=()=>{ show(+b.dataset.i); restartHeroTimer(); });
+    function restartHeroTimer(){
       clearInterval(window.__heroTimer);
-      window.__heroTimer=setInterval(()=>show((idx+1)%banners.length),4000);
+      if(banners.length>1) window.__heroTimer=setInterval(()=>show(idx+1),4500);
     }
+    restartHeroTimer();
   }
 }
 
@@ -1048,25 +1090,40 @@ function renderReviews(){
 }
 
 /* রিভিউ লেখা — কার্ড স্ক্রিনে এলে একবার টাইপ হয়ে বসবে (announce-এর মতো) */
-let __rvObserver;
+let __rvObserver, __rvActive = new Set();
+function stopReviewTyping(){
+  __rvActive.forEach(el=>{ if(el.__rvT) clearTimeout(el.__rvT); });
+  __rvActive = new Set();
+}
 function typeReviewEl(el){
   const full = el.getAttribute('data-fulltext') || "";
   el.classList.remove('rv-pending');
-  let i = 0;
-  const speed = full.length > 140 ? 12 : 18;
-  function step(){
-    i++;
-    el.innerHTML = esc(full.slice(0,i)) + '<span class="ann-cursor rv-cur"></span>';
-    if(i < full.length){ setTimeout(step, speed); }
-    else { setTimeout(()=>{ el.textContent = full; }, 700); }
+  if(!full) return;
+  __rvActive.add(el);
+  const TYPE = full.length > 140 ? 12 : 18, ERASE = 9, HOLD = 2600, PAUSE = 650;
+  let i = 0, phase = "type";
+  const cur = '<span class="ann-cursor rv-cur"></span>';
+  function frame(){
+    if(phase==="type"){
+      i++;
+      el.innerHTML = esc(full.slice(0,i)) + cur;
+      if(i>=full.length){ phase="erase"; el.__rvT=setTimeout(frame, HOLD); }
+      else el.__rvT=setTimeout(frame, TYPE);
+    } else {
+      i--;
+      el.innerHTML = esc(full.slice(0,Math.max(0,i))) + cur;
+      if(i<=0){ phase="type"; el.__rvT=setTimeout(frame, PAUSE); }
+      else el.__rvT=setTimeout(frame, ERASE);
+    }
   }
-  step();
+  frame();
 }
 function setupReviewTyping(){
   if(__rvObserver){ __rvObserver.disconnect(); }
+  stopReviewTyping();
   const els = Array.from(document.querySelectorAll('.rv-text[data-fulltext]'));
   if(!els.length) return;
-  els.forEach(el=>{ el.textContent=""; el.classList.add('rv-pending'); });
+  els.forEach(el=>{ el.textContent=""; el.classList.add('rv-pending'); el.dataset.typed=""; });
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(reduce || !('IntersectionObserver' in window)){
     els.forEach(el=>{ el.classList.remove('rv-pending'); el.textContent = el.getAttribute('data-fulltext')||""; });
@@ -1138,11 +1195,13 @@ function updateCartUI(){
 }
 
 function openCart(){
+  clearTimeout(window.__orderDoneTimer);
   renderCartBody();
   updateCartTotal();
   document.getElementById("cartOverlay").classList.add("show");
   document.getElementById("cartDone").style.display="none";
-  document.getElementById("cartSubmitBtn").style.display="flex";
+  const sb = document.getElementById("cartSubmitBtn");
+  sb.style.display="flex"; sb.disabled=false;
 }
 function closeCart(){ document.getElementById("cartOverlay").classList.remove("show"); }
 
@@ -1248,6 +1307,9 @@ async function submitCartOrder(){
   document.getElementById("cartDone").style.display="block";
   document.getElementById("cartBody").innerHTML="";
   document.getElementById("cartCheckout").style.display="none";
+  // কয়েক সেকেন্ড পর নিজে থেকে বন্ধ হয়ে সাইটে ফিরে যাবে
+  clearTimeout(window.__orderDoneTimer);
+  window.__orderDoneTimer = setTimeout(closeCart, 4500);
 }
 
 document.getElementById("cartOverlay").onclick=e=>{if(e.target===document.getElementById("cartOverlay"))closeCart();};
