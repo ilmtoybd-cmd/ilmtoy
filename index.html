@@ -1338,6 +1338,19 @@ function openCart(){
   clearTimeout(window.__orderDoneTimer);
   renderCartBody();
   updateCartTotal();
+  // Analytics: InitiateCheckout ইভেন্ট (Meta Pixel + GA4) — কার্টে পণ্য থাকলে
+  if(CART.length){
+    try{
+      const ic = calcCart();
+      if(window.fbq) fbq('track','InitiateCheckout',{
+        value:ic.grand, currency:'BDT',
+        num_items:CART.reduce((s,x)=>s+x.qty,0),
+        contents:CART.map(x=>({id:String(x.id), quantity:x.qty})),
+        content_type:'product'
+      });
+    }catch(e){}
+    try{ if(window.gtag) gtag('event','begin_checkout',{ value:calcCart().grand, currency:'BDT' }); }catch(e){}
+  }
   document.getElementById("cartOverlay").classList.add("show");
   document.getElementById("cartDone").style.display="none";
   const sb = document.getElementById("cartSubmitBtn");
@@ -1440,7 +1453,14 @@ async function submitCartOrder(){
   }
   // Analytics: অর্ডার ইভেন্ট (GA4 + Meta Pixel)
   try{ if(window.gtag) gtag('event','purchase',{ value:c.grand, currency:'BDT', items_count:qtyTotal }); }catch(e){}
-  try{ if(window.fbq) fbq('track','Purchase',{ value:c.grand, currency:'BDT', num_items:qtyTotal }); }catch(e){}
+  try{
+    const purchaseEventId = 'ord_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    if(window.fbq) fbq('track','Purchase',{
+      value:c.grand, currency:'BDT', num_items:qtyTotal,
+      contents:CART.map(x=>({id:String(x.id), quantity:x.qty})),
+      content_type:'product'
+    }, { eventID: purchaseEventId });
+  }catch(e){}
   // clear cart
   CART=[]; cartCoupon=null; updateCartUI();
   document.getElementById("cartSubmitBtn").style.display="none";
@@ -1700,6 +1720,9 @@ function render(){
 function openModal(id){
   current = PRODUCTS.find(p=>String(p.id)===String(id));
   if(!current) return;
+  // Analytics: ViewContent ইভেন্ট (Meta Pixel + GA4) — প্রোডাক্ট ডিটেইল দেখলে
+  try{ if(window.fbq) fbq('track','ViewContent',{ content_name:current.name, content_ids:[String(current.id)], content_type:'product', value:current.price, currency:'BDT' }); }catch(e){}
+  try{ if(window.gtag) gtag('event','view_item',{ value:current.price, currency:'BDT', items:[{item_id:String(current.id), item_name:current.name}] }); }catch(e){}
   // মিডিয়া গ্যালারি তৈরি (একাধিক ছবি + ভিডিও)
   galItems = [];
   (current.images||[]).forEach(u=>galItems.push({type:'image',url:u}));
