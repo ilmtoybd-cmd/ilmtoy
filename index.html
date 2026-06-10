@@ -791,7 +791,7 @@ const T = {
     fill_required:"Please fill in name, mobile, and address.", cart_empty_alert:"Cart is empty!",
     coupon_invalid:"❌ Invalid coupon code.", coupon_min:"❌ Minimum order {x} required.",
     coupon_applied:"✅ Applied — {x}!", off_percent:"{v}% off", off_flat:"{v} off", sort_default:"Default", sort_low:"Price: Low to High", sort_high:"Price: High to Low", save_label:"Save {x}", sort_by:"Sort by",
-    shop_by_age:"Shop By Age", details:"Details", related_title:"You may also like", battery_hint:"This toy runs on batteries — add some too", add_battery:"+ Add", years:"yrs"
+    shop_by_age:"Shop By Age", details:"Details", related_title:"You may also like", battery_hint:"This toy runs on batteries — add some too", battery_need:"Needs", add_battery:"+ Add", years:"yrs"
   },
   bn:{
     search_ph:"পণ্য খুঁজুন...", cart:"কার্ট", hero_badge:"🚚 সারা দেশে ডেলিভারি",
@@ -815,7 +815,7 @@ const T = {
     fill_required:"অনুগ্রহ করে নাম, মোবাইল ও ঠিকানা পূরণ করুন।", cart_empty_alert:"কার্ট খালি!",
     coupon_invalid:"❌ ভুল কুপন কোড।", coupon_min:"❌ ন্যূনতম অর্ডার {x} প্রয়োজন।",
     coupon_applied:"✅ প্রয়োগ হয়েছে — {x}!", off_percent:"{v}% ছাড়", off_flat:"{v} ছাড়", sort_default:"ডিফল্ট", sort_low:"দাম: কম থেকে বেশি", sort_high:"দাম: বেশি থেকে কম", save_label:"{x} সাশ্রয়", sort_by:"সাজান",
-    shop_by_age:"বয়স অনুযায়ী কিনুন", details:"বিস্তারিত", related_title:"এগুলোও পছন্দ হতে পারে", battery_hint:"এই খেলনাটি ব্যাটারিতে চলে — সাথে ব্যাটারিও নিন", add_battery:"+ যোগ করুন", years:"বছর"
+    shop_by_age:"বয়স অনুযায়ী কিনুন", details:"বিস্তারিত", related_title:"এগুলোও পছন্দ হতে পারে", battery_hint:"এই খেলনাটি ব্যাটারিতে চলে — সাথে ব্যাটারিও নিন", battery_need:"লাগবে", add_battery:"+ যোগ করুন", years:"বছর"
   }
 };
 let LANG = 'en';
@@ -1125,6 +1125,7 @@ async function loadProducts(){
         images:imgs, image_url:imgs[0]||"", videos:vids, description:d.description||"",
         age:(d.age||d.age_group||"").toString().trim(),
         battery:(d.battery||d.needs_battery||"").toString().toLowerCase().trim(),
+        battery_size:(d.battery_size||d.battery_type||"").toString().trim(),
         status:st,
         soldout:['soldout','sold out','stockout','stock out','out','out of stock','no stock','nostock'].includes(st)
       };
@@ -1704,16 +1705,20 @@ function needsBattery(p){
   if(bp && String(bp.id)===String(p.id)) return false;          // ব্যাটারি পণ্যের জন্য নিজে নয়
   if(['no','false','0','n','none'].includes(p.battery)) return false;
   if(['yes','true','1','y'].includes(p.battery)) return true;
+  if(p.battery_size) return true;
   return ['yes','true','1','y','on','all'].includes((S.battery_default||"").toString().toLowerCase().trim());
 }
 function renderBatterySuggest(){
   const bs = $("#batterySuggest"); if(!bs) return;
   const bp = batteryProduct();
   if(current && needsBattery(current) && bp && !bp.soldout){
+    const battSub = current.battery_size
+      ? `${t('battery_need')}: ${esc(current.battery_size)}`
+      : t('battery_hint');
     bs.innerHTML = `<span class="batt-ic">🔋</span>
       <div class="batt-info">
         <div class="batt-title">${esc(bp.name)}</div>
-        <div class="batt-sub">${t('battery_hint')}</div>
+        <div class="batt-sub">${battSub}</div>
         <div class="batt-price">${bnNum(bp.price)}${cur}</div>
       </div>
       <button class="batt-add" type="button" onclick="addBattery('${bp.id}')">${t('add_battery')}</button>`;
