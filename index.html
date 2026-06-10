@@ -180,6 +180,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .hero-track{display:flex;height:100%;transition:transform .6s cubic-bezier(.4,0,.2,1);will-change:transform}
 .hero-slider .slide{position:relative;flex:0 0 100%;height:100%}
 .hero-slider .slide img{width:100%;height:100%;object-fit:contain;object-position:center;background:#FBF2E9;display:block}
+.hero-slider .slide .slide-video{width:100%;height:100%;border:0;display:block;background:#FBF2E9;object-fit:cover}
 .hero-slider .slide .ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center;gap:10px;padding:0 7% 28px;background:linear-gradient(0deg,rgba(40,33,24,.7),rgba(40,33,24,.2) 45%,transparent 75%)}
 .hero-slider .slide .ov h2{font-family:'Baloo Da 2',cursive;color:#fff;font-size:2.05rem;line-height:1.15;max-width:90%;text-shadow:0 2px 14px rgba(0,0,0,.45);margin:0}
 .hero-slider .slide .ov p{color:#fff;font-size:1.02rem;font-weight:600;max-width:80%;text-shadow:0 1px 10px rgba(0,0,0,.45);margin:0}
@@ -418,6 +419,10 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
 .gal-thumb{flex:0 0 auto;width:54px;height:54px;border-radius:10px;border:2px solid transparent;background:#FBF2E9;overflow:hidden;cursor:pointer;padding:0;transition:.18s}
 .gal-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .gal-thumb.on{border-color:var(--accent)}
+.modal-head .gal-main .gal-video{width:100%;height:100%;border:0;border-radius:14px;display:block;background:#000;object-fit:cover}
+.gal-thumb.vid{position:relative}
+.gal-thumb.vid .gal-thumb-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;background:rgba(0,0,0,.34);text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.gal-thumb .gal-thumb-vph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:#2A2118;color:#fff}
 .m-title h3{font-size:1.1rem;line-height:1.3}
 .m-title .mp{color:var(--accent-deep);font-family:'Baloo Da 2';font-weight:700;margin-top:3px;font-size:1.15rem}
 /* multiple-image badge on product cards */
@@ -746,7 +751,7 @@ const $ = s => document.querySelector(s);
 let PRODUCTS = [], activeCat = "all", activeAge = "all", current = null;
 let sortMode = "default";   // পণ্য সাজানোর ধরন
 let REVIEWS = [], rvRating = 0;   // কাস্টমার রিভিউ
-let galImgs = [], galIdx = 0;   // প্রোডাক্ট গ্যালারির ছবি
+let galItems = [], galIdx = 0;   // প্রোডাক্ট গ্যালারির মিডিয়া (ছবি+ভিডিও)
 let cur = DEFAULTS.currency;
 const bnNum = n => Number(n).toLocaleString('en-US');
 
@@ -992,7 +997,7 @@ function applyConfig(){
     const TRANS = "transform .6s cubic-bezier(.4,0,.2,1)";
     const makeSlide = raw=>{
       const parts = (""+raw).split('|').map(x=>x.trim());
-      const img=parts[0], title=parts[1]||"", sub=parts[2]||"", btnTxt=parts[3]||"", btnLink=parts[4]||"";
+      const media=parts[0], title=parts[1]||"", sub=parts[2]||"", btnTxt=parts[3]||"", btnLink=parts[4]||"";
       const d=document.createElement('div');
       d.className='slide';
       let ov="";
@@ -1004,7 +1009,7 @@ function applyConfig(){
            + (btnTxt?`<a class="cta" href="${btnLink||'#'}"${tgt}>${btnTxt}</a>`:"")
            + `</div>`;
       }
-      d.innerHTML=`<img src="${img}" alt="banner">${ov}`;
+      d.innerHTML=`${bannerMediaHTML(media)}${ov}`;
       return d;
     };
     banners.forEach(raw=>track.appendChild(makeSlide(raw)));
@@ -1092,18 +1097,32 @@ async function loadCoupons(){
   }catch(e){}
 }
 
+/* একই বেস-নামের একাধিক কলাম (যেমন image_url, image_url1, image_url2…) থেকে মান একত্র করে অ্যারে বানায় */
+function gatherMedia(d, bases, sep){
+  const out=[];
+  bases.forEach(base=>{
+    const add = v => String(v||"").split(sep).map(s=>s.trim()).filter(Boolean).forEach(x=>out.push(x));
+    if(base in d) add(d[base]);
+    Object.keys(d).filter(k=>new RegExp('^'+base+'_?\\d+$').test(k))
+      .sort((a,b)=>(parseInt(a.replace(/\D/g,''))||0)-(parseInt(b.replace(/\D/g,''))||0))
+      .forEach(k=>add(d[k]));
+  });
+  return [...new Set(out)];
+}
+
 async function loadProducts(){
   if(!CONFIG.productsCsvUrl){ PRODUCTS = SAMPLE; return; }
   try{
     const data = await fetchCSV(CONFIG.productsCsvUrl);
     PRODUCTS = data.map(d=>{
-      const imgs = String(d.image_url||"").split(/[|\n,]+/).map(s=>s.trim()).filter(Boolean);
+      const imgs = gatherMedia(d, ['image_url','image'], /[|\n,]+/);
+      const vids = gatherMedia(d, ['video','product_video'], /[|\n]+/);
       const st = (d.status||"active").toLowerCase().trim();
       return {
         id:d.id, name:d.name, category:d.category||"",
         price:parseFloat(String(d.price).replace(/[^0-9.]/g,''))||0,
         old_price:parseFloat(String(d.old_price).replace(/[^0-9.]/g,''))||0,
-        images:imgs, image_url:imgs[0]||"", description:d.description||"",
+        images:imgs, image_url:imgs[0]||"", videos:vids, description:d.description||"",
         age:(d.age||d.age_group||"").toString().trim(),
         battery:(d.battery||d.needs_battery||"").toString().toLowerCase().trim(),
         status:st,
@@ -1132,6 +1151,27 @@ async function loadReviews(){
 function ytId(url){
   const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
   return m ? m[1] : "";
+}
+/* ব্যানারের মিডিয়া: YouTube → অটোপ্লে মিউট লুপ iframe; .mp4/.webm → ভিডিও; বাকি সব → ছবি */
+function bannerMediaHTML(url){
+  const yt = ytId(url);
+  if(yt) return `<iframe class="slide-video" src="https://www.youtube.com/embed/${yt}?rel=0&autoplay=1&mute=1&loop=1&playlist=${yt}&controls=0&modestbranding=1&playsinline=1&disablekb=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)) return `<video class="slide-video" src="${url}" autoplay muted loop playsinline></video>`;
+  return `<img src="${url}" alt="banner">`;
+}
+/* প্রোডাক্ট গ্যালারির ভিডিও থাম্বনেইল (YouTube হলে YT-এর প্রিভিউ ছবি) */
+function ytThumb(url){
+  const id = ytId(url);
+  return id ? `<img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">` : `<div class="gal-thumb-vph">🎬</div>`;
+}
+/* প্রোডাক্ট গ্যালারির মূল মিডিয়া (ক্লিকে চলবে — অটোপ্লে নয়) */
+function galMediaHTML(it){
+  if(it.type==='video'){
+    const yt = ytId(it.url);
+    if(yt) return `<iframe class="gal-video" src="https://www.youtube.com/embed/${yt}?rel=0&modestbranding=1&playsinline=1" allow="encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+    return `<video class="gal-video" src="${it.url}" controls playsinline preload="metadata"></video>`;
+  }
+  return `<img id="galImg" src="${it.url}" alt="${escAttr(current?current.name:'')}">`;
 }
 function starHTML(n){
   let s="";
@@ -1603,23 +1643,25 @@ function render(){
 function openModal(id){
   current = PRODUCTS.find(p=>String(p.id)===String(id));
   if(!current) return;
-  // ছবির গ্যালারি তৈরি (একাধিক ছবি)
-  galImgs = (current.images && current.images.length) ? current.images.slice() : (current.image_url ? [current.image_url] : []);
+  // মিডিয়া গ্যালারি তৈরি (একাধিক ছবি + ভিডিও)
+  galItems = [];
+  (current.images||[]).forEach(u=>galItems.push({type:'image',url:u}));
+  (current.videos||[]).forEach(u=>galItems.push({type:'video',url:u}));
+  if(!galItems.length && current.image_url) galItems.push({type:'image',url:current.image_url});
   galIdx = 0;
   let galInner;
-  if(galImgs.length){
-    const nav = galImgs.length>1
-      ? `<button type="button" class="gal-nav prev" onclick="showGalImg(galIdx-1)">‹</button><button type="button" class="gal-nav next" onclick="showGalImg(galIdx+1)">›</button>`
+  if(galItems.length){
+    const thumbs = galItems.length>1
+      ? `<div class="gal-thumbs">${galItems.map((it,i)=>{
+          const inner = it.type==='video'
+            ? `${ytThumb(it.url)}<span class="gal-thumb-play">▶</span>`
+            : `<img src="${it.url}" alt="" loading="lazy">`;
+          return `<button type="button" class="gal-thumb${it.type==='video'?' vid':''}${i===0?' on':''}" onclick="showGalImg(${i})">${inner}</button>`;
+        }).join("")}</div>`
       : "";
-    const dots = galImgs.length>1
-      ? `<div class="gal-dots">${galImgs.map((_,i)=>`<button type="button" class="${i===0?'on':''}" onclick="showGalImg(${i})"></button>`).join("")}</div>`
-      : "";
-    const thumbs = galImgs.length>1
-      ? `<div class="gal-thumbs">${galImgs.map((u,i)=>`<button type="button" class="gal-thumb${i===0?' on':''}" onclick="showGalImg(${i})"><img src="${u}" alt="" loading="lazy"></button>`).join("")}</div>`
-      : "";
-    galInner = `<div class="gal-main"><img id="galImg" src="${galImgs[0]}" alt="${current.name}">${nav}${dots}</div>${thumbs}`;
+    galInner = `<div class="gal-main" id="galMain"></div>${thumbs}`;
   } else {
-    galInner = `<div class="gal-main"><div class="ph-big">${current.name[0]||'?'}</div></div>`;
+    galInner = `<div class="gal-main"><div class="ph-big">${esc(current.name[0]||'?')}</div></div>`;
   }
   const mSale = current.old_price && current.old_price>current.price;
   const mDmode = discMode();
@@ -1632,6 +1674,7 @@ function openModal(id){
     ? `${bnNum(current.price)}${cur}<span class="m-was">${bnNum(current.old_price)}${cur}</span>${mExtra}`
     : `${bnNum(current.price)}${cur}`;
   $("#mHead").innerHTML = `<div class="gallery">${galInner}</div><div class="m-title"><h3>${current.name}</h3><div class="mp">${mpInner}</div></div>`;
+  renderGalMain();
   const ovModal = document.querySelector('#overlay .modal'); if(ovModal) ovModal.scrollTop = 0;
   const desc = (current.description||"").trim();
   const dt = $("#mDescTitle");
@@ -1703,14 +1746,24 @@ function renderRelated(){
     }).join("") + `</div>`;
   wrap.querySelectorAll('[data-rel]').forEach(b=>b.onclick=()=>openModal(b.dataset.rel));
 }
-function closeModal(){ $("#overlay").classList.remove("show"); }
+function closeModal(){ $("#overlay").classList.remove("show"); const gm=document.getElementById('galMain'); if(gm) gm.innerHTML=""; }
+function renderGalMain(){
+  const main = document.getElementById('galMain');
+  if(!main || !galItems.length) return;
+  const multi = galItems.length>1;
+  const nav = multi
+    ? `<button type="button" class="gal-nav prev" onclick="showGalImg(galIdx-1)">‹</button><button type="button" class="gal-nav next" onclick="showGalImg(galIdx+1)">›</button>`
+    : "";
+  const dots = multi
+    ? `<div class="gal-dots">${galItems.map((_,i)=>`<button type="button" class="${i===galIdx?'on':''}" onclick="showGalImg(${i})"></button>`).join("")}</div>`
+    : "";
+  main.innerHTML = galMediaHTML(galItems[galIdx]) + nav + dots;
+}
 function showGalImg(i){
-  if(!galImgs.length) return;
-  galIdx = ((i % galImgs.length) + galImgs.length) % galImgs.length;
-  const main = document.getElementById('galImg');
-  if(main) main.src = galImgs[galIdx];
+  if(!galItems.length) return;
+  galIdx = ((i % galItems.length) + galItems.length) % galItems.length;
+  renderGalMain();
   document.querySelectorAll('.gal-thumb').forEach((t,j)=>t.classList.toggle('on', j===galIdx));
-  document.querySelectorAll('.gal-dots button').forEach((d,j)=>d.classList.toggle('on', j===galIdx));
 }
 
 $("#plus").onclick=()=>{$("#qty").value=(parseInt($("#qty").value)||1)+1;};
