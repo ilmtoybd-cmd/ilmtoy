@@ -162,6 +162,11 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 }
 .chip:hover{border-color:var(--accent)}
 .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(255,107,74,.3)}
+/* যে ক্যাটেগরিতে প্রোডাক্ট নেই/হিডেন — দেখা যাবে কিন্তু ক্লিক হবে না */
+.chip.disabled{opacity:.42;cursor:not-allowed;background:#fff;color:var(--ink-soft);border-style:dashed}
+.chip.disabled:hover{border-color:var(--line)}
+/* "Shop By" থেকে এলে প্রোডাক্ট সেকশন যেন sticky হেডারের নিচে ঢাকা না পড়ে */
+#productsSection{scroll-margin-top:84px}
 
 /* ---------- Hero ---------- */
 .hero{max-width:1180px;margin:18px auto 6px;padding:0 18px}
@@ -538,7 +543,7 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
   <div class="shopcat" id="shopage"></div>
 </div>
 
-<div class="wrap">
+<div class="wrap" id="productsSection">
   <div class="section-h">
     <h2 id="secTitle" data-i18n="all_products">All Products</h2>
     <div class="sec-tools">
@@ -726,6 +731,7 @@ const DEFAULTS = {
   instagram:"", youtube:"", email:"",
   corporate_sales:"", retail_sales:"", owner_quote:"", owner_name:"", map_link:"",
   discount_display:"both", order_message:"",
+  categories:"",   // উপরের ক্যাটেগরি বারের পুরো তালিকা+ক্রম (কমা দিয়ে) — Settings শিটে key=categories
   footer_tagline:"", footer_color:"", battery_default:"", battery_product_id:""
 };
 let S = {...DEFAULTS};
@@ -1120,8 +1126,12 @@ async function loadProducts(){
       const imgs = gatherMedia(d, ['image_url','image'], /[|\n,]+/);
       const vids = gatherMedia(d, ['video','product_video'], /[|\n]+/);
       const st = (d.status||"active").toLowerCase().trim();
+      // category ঘরে কমা (বা | / ) দিয়ে একাধিক — যেমন "Book, Best Seller"
+      const catArr = String(d.category||"").split(/\s*[,|/]\s*/).map(s=>s.trim()).filter(Boolean);
       return {
-        id:d.id, name:d.name, category:d.category||"",
+        id:d.id, name:d.name,
+        category:catArr[0]||"",     // মূল ক্যাটেগরি (কার্ডে দেখানোর জন্য — কমার প্রথমটা)
+        categories:catArr,          // সব ক্যাটেগরি — Book, Best Seller সব এখানে
         price:parseFloat(String(d.price).replace(/[^0-9.]/g,''))||0,
         old_price:parseFloat(String(d.old_price).replace(/[^0-9.]/g,''))||0,
         images:imgs, image_url:imgs[0]||"", videos:vids, description:d.description||"",
@@ -1429,9 +1439,9 @@ async function submitCartOrder(){
   document.getElementById("cartDone").style.display="block";
   document.getElementById("cartBody").innerHTML="";
   document.getElementById("cartCheckout").style.display="none";
-  // কয়েক সেকেন্ড পর নিজে থেকে বন্ধ হয়ে সাইটে ফিরে যাবে
+  // অর্ডার সফল মেসেজ পড়ার সময় দিতে — ৯ সেকেন্ড পর নিজে থেকে বন্ধ হবে
   clearTimeout(window.__orderDoneTimer);
-  window.__orderDoneTimer = setTimeout(closeCart, 4500);
+  window.__orderDoneTimer = setTimeout(closeCart, 9000);
 }
 
 document.getElementById("cartOverlay").onclick=e=>{if(e.target===document.getElementById("cartOverlay"))closeCart();};
@@ -1485,12 +1495,45 @@ function initReviewModal(){
   };
 }
 
+/* একটা প্রোডাক্টের সব ক্যাটেগরি (পুরোনো single-category ডেটার জন্যও কাজ করে) */
+const prodCats = p => (p.categories && p.categories.length) ? p.categories : (p.category ? [p.category] : []);
+
+/* Settings শিটের key=categories লাইন থেকে পুরো তালিকা ও ক্রম (কমা/নতুন লাইন দিয়ে আলাদা) */
+function catMasterList(){
+  const raw = (S.categories || S.category_order || S.category_list || "").toString();
+  return raw.split(/\s*[,|\n]\s*/).map(s=>s.trim()).filter(Boolean);
+}
+/* একটা ক্যাটেগরিতে কয়টা দেখানোর মতো (non-hidden) প্রোডাক্ট আছে — ০ হলে চিপ ক্লিক হবে না */
+function catCount(c){ return PRODUCTS.filter(p=>prodCats(p).includes(c)).length; }
+
+/* উপরের ক্যাটেগরি চিপ — Settings এর তালিকা+ক্রম অনুযায়ী সব ক্যাটেগরি;
+   যেগুলোতে প্রোডাক্ট নেই/হিডেন সেগুলো দেখাবে কিন্তু ক্লিক হবে না */
 function buildCats(){
-  const cats = [...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
+  // শিটে আসলে যেসব ক্যাটেগরি প্রোডাক্টে আছে
+  const inProducts = new Set();
+  PRODUCTS.forEach(p=>prodCats(p).forEach(c=>inProducts.add(c)));
+  // চূড়ান্ত ক্রম: আগে Settings এর তালিকা, তারপর তালিকায় নেই কিন্তু প্রোডাক্টে আছে এমনগুলো
+  const seen = new Set(), finalCats = [];
+  catMasterList().forEach(c=>{ if(c && !seen.has(c)){ seen.add(c); finalCats.push(c); } });
+  [...inProducts].forEach(c=>{ if(!seen.has(c)){ seen.add(c); finalCats.push(c); } });
+
   const el = $("#cats");
   el.innerHTML = `<button class="chip on" data-c="all">${t('all_products')}</button>` +
-    cats.map(c=>`<button class="chip" data-c="${c}">${c}</button>`).join("");
-  el.querySelectorAll(".chip").forEach(b=>b.onclick=()=>selectCategory(b.dataset.c));
+    finalCats.map(c=>{
+      const has = catCount(c) > 0;   // অ্যাক্টিভ প্রোডাক্ট আছে?
+      return `<button class="chip${has?'':' disabled'}" data-c="${c}"${has?'':' aria-disabled="true" title="এই ক্যাটেগরিতে এখন কোনো প্রোডাক্ট নেই"'}>${c}</button>`;
+    }).join("");
+  el.querySelectorAll(".chip").forEach(b=>{
+    if(b.classList.contains("disabled")) return;   // খালি/হিডেন — ক্লিক হবে না
+    b.onclick=()=>selectCategory(b.dataset.c);
+  });
+}
+
+/* প্রোডাক্ট গ্রিড সেকশনে স্ক্রল (আগে ভুল করে পেজের একদম উপরে চলে যেত) */
+function scrollToProducts(){
+  const sec = document.getElementById("productsSection")
+           || (document.getElementById("grid") && document.getElementById("grid").closest(".wrap"));
+  if(sec) sec.scrollIntoView({behavior:"smooth", block:"start"});
 }
 
 /* একটা ক্যাটাগরি বাছাই (chip আর Shop-By-Category টাইল — দুটোই এটা ব্যবহার করে) */
@@ -1500,8 +1543,7 @@ function selectCategory(cat){
   $("#cats").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on", x.dataset.c===cat));
   $("#secTitle").textContent = cat==="all" ? t('all_products') : cat;
   render();
-  const prod = document.querySelector(".wrap:not(.shopcat-wrap)");
-  if(prod) prod.scrollIntoView({behavior:"smooth", block:"start"});
+  scrollToProducts();
 }
 
 /* একটা বয়স-গ্রুপ বাছাই (Shop By Age টাইল) */
@@ -1511,8 +1553,7 @@ function selectAge(age){
   $("#cats").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on", x.dataset.c==="all"));
   $("#secTitle").textContent = age==="all" ? t('all_products') : (age + " " + t('years'));
   render();
-  const prod = document.querySelector(".wrap:not(.shopcat-wrap)");
-  if(prod) prod.scrollIntoView({behavior:"smooth", block:"start"});
+  scrollToProducts();
 }
 
 /* Shop By Category — শিটের ক্যাটাগরি থেকে অটো টাইল */
@@ -1520,7 +1561,12 @@ function buildShopCats(){
   const wrap = document.getElementById("shopcatWrap");
   const box = document.getElementById("shopcat");
   if(!wrap || !box) return;
-  const cats = [...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
+  // প্রোডাক্টে আছে এমন সব ক্যাটেগরি, Settings এর ক্রম অনুযায়ী সাজানো
+  const inProducts = new Set();
+  PRODUCTS.forEach(p=>prodCats(p).forEach(c=>inProducts.add(c)));
+  const seen = new Set(), cats = [];
+  catMasterList().forEach(c=>{ if(inProducts.has(c) && !seen.has(c)){ seen.add(c); cats.push(c); } });
+  [...inProducts].forEach(c=>{ if(!seen.has(c)){ seen.add(c); cats.push(c); } });
   if(cats.length < 2){ wrap.style.display="none"; return; }
   wrap.style.display="";
   const palette = ['#FF6B4A','#16A34A','#F59E0B','#6366F1','#EC4899','#0EA5E9','#8B5CF6','#EF4444'];
@@ -1543,7 +1589,7 @@ function buildShopCats(){
     const col = palette[i % palette.length];
     const e = pickEmoji(c);
     const icon = e || (("" + c)[0] || '?');
-    const n = PRODUCTS.filter(p=>p.category===c).length;
+    const n = catCount(c);
     return `<button class="scat" data-c="${c}">
       <span class="ic" style="background:${col}">${icon}</span>
       <span class="nm">${c}</span>
@@ -1598,7 +1644,7 @@ function discMode(){
 
 function render(){
   const q = $("#search").value.trim().toLowerCase();
-  let list = PRODUCTS.filter(p=>(activeCat==="all"||p.category===activeCat) && (activeAge==="all"||p.age===activeAge));
+  let list = PRODUCTS.filter(p=>(activeCat==="all"||prodCats(p).includes(activeCat)) && (activeAge==="all"||p.age===activeAge));
   if(q) list = list.filter(p=>p.name.toLowerCase().includes(q));
   if(sortMode==='low') list = list.slice().sort((a,b)=>a.price-b.price);
   else if(sortMode==='high') list = list.slice().sort((a,b)=>b.price-a.price);
@@ -1732,7 +1778,7 @@ function addBattery(id){ addToCart(id, 1); }
 /* রিলেটেড পণ্য — একই ক্যাটাগরির অন্য পণ্য (কম হলে বাকিগুলো) */
 function renderRelated(){
   const wrap = $("#mRelated"); if(!wrap || !current){ if(wrap){wrap.style.display="none";} return; }
-  let rel = PRODUCTS.filter(p=>String(p.id)!==String(current.id) && !p.soldout && p.category && p.category===current.category);
+  let rel = PRODUCTS.filter(p=>String(p.id)!==String(current.id) && !p.soldout && prodCats(p).some(c=>prodCats(current).includes(c)));
   if(rel.length < 2){
     const more = PRODUCTS.filter(p=>String(p.id)!==String(current.id) && !p.soldout && !rel.some(r=>String(r.id)===String(p.id)));
     rel = rel.concat(more);
