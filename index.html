@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="ilm Toy — শিক্ষামূলক খেলনার অনলাইন দোকান" />
 <meta name="twitter:description" content="শিশুদের জন্য শিক্ষামূলক ও মজার খেলনা। সারা দেশে হোম ডেলিভারি।" />
 <meta name="twitter:image" content="https://i.ibb.co/m56yG9FV/Gemini-Generated-Image-obctykobctykobct.png" />
-<link rel="icon" type="image/png" href="https://i.ibb.co/m56yG9FV/Gemini-Generated-Image-obctykobctykobct.png" />
+<link id="faviconLink" rel="icon" type="image/png" href="https://i.ibb.co/m56yG9FV/Gemini-Generated-Image-obctykobctykobct.png" />
 
 <!-- Meta Pixel (Facebook) — নিচের "" এর ভিতরে তোমার Pixel ID বসাও, যেমন "123456789012345" -->
 <script>
@@ -903,6 +903,8 @@ function applyConfig(){
     $("#logoImg").src = S.logo_url;
     $("#logoImg").style.display = "block";
     $("#logoEmoji").style.display = "none";
+    const __fav = $("#faviconLink");
+    if(__fav) __fav.href = S.logo_url + (S.logo_url.indexOf("?")>-1 ? "&" : "?") + "v=" + Date.now();
   }
   typeLogo(S.store_name);
   const __ls = $("#logoSizer"); if(__ls) __ls.textContent = S.store_name || "";
