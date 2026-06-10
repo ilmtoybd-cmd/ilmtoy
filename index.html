@@ -153,8 +153,16 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 
 
 /* ---------- Categories ---------- */
-.cats{max-width:1180px;margin:0 auto;padding:14px 18px 4px;display:flex;gap:9px;overflow-x:auto;scrollbar-width:none}
+.cats-wrap{position:relative;max-width:1180px;margin:0 auto}
+.cats{padding:14px 18px 4px;display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .cats::-webkit-scrollbar{display:none}
+/* মোবাইলে ডান পাশে হালকা ফেইড — বোঝাতে যে ডানে আরও ক্যাটেগরি আছে */
+.cats-wrap::after{content:"";position:absolute;top:0;right:0;bottom:4px;width:34px;pointer-events:none;background:linear-gradient(90deg,rgba(255,248,240,0),var(--bg))}
+/* ডেস্কটপ/ট্যাবে — সব ক্যাটেগরি কয়েক লাইনে ভাগ হয়ে একসাথে দেখা যাবে */
+@media(min-width:768px){
+  .cats{flex-wrap:wrap;overflow-x:visible}
+  .cats-wrap::after{display:none}
+}
 .chip{
   border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);
   padding:8px 16px;border-radius:50px;font-family:inherit;font-weight:600;font-size:.88rem;
@@ -486,7 +494,7 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
       </button>
     </div>
   </div>
-  <div class="cats" id="cats"></div>
+  <div class="cats-wrap"><div class="cats" id="cats"></div></div>
 </header>
 
 <div class="hero">
