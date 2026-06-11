@@ -471,6 +471,59 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
 .rel-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-weight:800;font-size:1.6rem;color:var(--accent);opacity:.55}
 .rel-name{font-size:.8rem;font-weight:600;color:var(--ink);padding:7px 8px 2px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
 .rel-price{font-family:'Baloo Da 2';font-weight:700;color:var(--accent-deep);font-size:.9rem;padding:0 8px 9px}
+
+/* ---------- Online Payment (checkout) ---------- */
+.pay-methods{display:flex;gap:8px}
+.pay-chip{flex:1;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);font-family:inherit;font-weight:700;font-size:.88rem;padding:10px 8px;border-radius:12px;cursor:pointer;transition:.18s;display:flex;align-items:center;justify-content:center;gap:6px}
+.pay-chip.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(255,107,74,.3)}
+.pay-box{margin-top:10px;background:#FFF7E6;border:1.5px solid #FAE0A4;border-radius:13px;padding:13px}
+.pay-amount{font-weight:700;font-size:.95rem;color:var(--ink)}
+.pay-amount b{font-family:'Baloo Da 2';color:var(--accent-deep);font-size:1.1rem}
+.pay-inst{font-size:.85rem;color:var(--ink-soft);margin-top:5px;line-height:1.5}
+.pay-prov{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0 2px}
+.prov-chip{border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);font-family:inherit;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:50px;cursor:pointer;transition:.18s}
+.prov-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.pay-num-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1.5px dashed var(--accent);border-radius:11px;padding:9px 12px;margin:9px 0}
+.pay-num{font-size:.88rem;color:var(--ink)}
+.pay-num b{font-family:'Baloo Da 2';font-size:1.02rem;color:var(--accent-deep);letter-spacing:.5px}
+.copy-btn{flex-shrink:0;border:none;background:var(--accent);color:#fff;font-family:'Baloo Da 2';font-weight:700;font-size:.78rem;padding:7px 13px;border-radius:9px;cursor:pointer;transition:.18s}
+.copy-btn:hover{background:var(--accent-deep)}
+.pay-box .field{margin-top:8px}
+.pay-box .field label{font-size:.82rem}
+.pay-box .field input{background:#fff}
+.pay-note{font-size:.8rem;color:#92702A;margin-top:7px;line-height:1.45}
+
+/* ---------- Parenting Blog ---------- */
+.blog-row{display:grid;grid-auto-flow:column;grid-auto-columns:235px;gap:13px;overflow-x:auto;padding:4px 2px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.blog-card{border:1px solid var(--line);background:var(--card);border-radius:16px;overflow:hidden;cursor:pointer;text-align:left;padding:0;font-family:inherit;transition:.18s;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.blog-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--accent)}
+.blog-thumb{aspect-ratio:16/9;background:#FBF2E9;overflow:hidden}
+.blog-thumb img{width:100%;height:100%;object-fit:cover}
+.blog-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:.55}
+.blog-meta{padding:11px 13px 13px;display:flex;flex-direction:column;gap:5px;flex:1}
+.blog-date{font-size:.74rem;color:var(--ink-soft);font-weight:600}
+.blog-title{font-family:'Baloo Da 2';font-weight:700;font-size:.97rem;color:var(--ink);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.blog-read{margin-top:auto;font-weight:700;font-size:.82rem;color:var(--accent-deep)}
+
+/* ---------- Page / Blog post modal ---------- */
+.page-modal{max-width:560px}
+.pg-title{padding:20px 22px 0;font-family:'Baloo Da 2';font-weight:700;font-size:1.25rem;color:var(--ink);line-height:1.3}
+.pg-img{padding:14px 22px 0}
+.pg-img img{border-radius:13px;width:100%}
+.pg-body{padding:10px 22px 24px;color:var(--ink-soft);font-size:.95rem;line-height:1.75}
+.pg-body p{margin-bottom:11px}
+
+/* ---------- Order Tracking ---------- */
+.trk-wrap{padding:20px 20px 24px}
+.trk-wrap h3{font-family:'Baloo Da 2';font-weight:700;font-size:1.2rem;color:var(--ink);margin-bottom:13px}
+.trk-msg{margin-top:13px;font-size:.9rem;color:var(--ink-soft);text-align:center}
+.trk-card{margin-top:12px;border:1px solid var(--line);border-radius:13px;padding:12px 14px;background:#FFFDF9}
+.trk-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.trk-row b{font-family:'Baloo Da 2';color:var(--ink)}
+.trk-badge{font-size:.74rem;font-weight:800;padding:4px 11px;border-radius:50px;color:#fff;white-space:nowrap}
+.trk-badge.pend{background:#F59E0B}.trk-badge.conf{background:#0EA5E9}.trk-badge.ship{background:#8B5CF6}.trk-badge.ok{background:var(--green)}.trk-badge.bad{background:#EF4444}
+.trk-prod{font-size:.84rem;color:var(--ink);margin-top:6px;line-height:1.4}
+.trk-sub{font-size:.8rem;color:var(--ink-soft);margin-top:5px}
 </style>
 </head>
 <body>
@@ -509,6 +562,11 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
     <div class="hero-track" id="heroTrack"></div>
     <div class="hero-dots" id="heroDots"></div>
   </div>
+</div>
+
+<div class="wrap blog-wrap" id="blogWrap" style="display:none">
+  <div class="section-h"><h2 data-i18n="blog_title">👨‍👩‍👧 Parenting Blog</h2></div>
+  <div class="blog-row" id="blogRow"></div>
 </div>
 
 <div class="wrap top-row" id="topRow">
@@ -614,6 +672,10 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
         <a id="fMsg" class="soc msg" href="#" target="_blank" rel="noopener" aria-label="Messenger" title="Messenger"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 4.97 0 11.1c0 3.49 1.74 6.6 4.47 8.64V24l4.08-2.24c1.09.3 2.24.46 3.45.46 6.63 0 12-4.97 12-11.1S18.63 0 12 0zm1.19 14.96l-3.05-3.26-5.96 3.26 6.56-6.96 3.13 3.26 5.88-3.26-6.56 6.96z"/></svg></a>
       </div>
     </div>
+    <div class="foot-col" id="linksCol" style="display:none">
+      <h4 data-i18n="quick_links">Quick Links</h4>
+      <div id="footLinks"></div>
+    </div>
     <div class="foot-col" id="salesCol">
       <h4 data-i18n="sales_heading">Sales</h4>
       <a id="fCorp" href="#"><span data-i18n="corporate_sales">Corporate Sales</span>: <span id="fCorpNum"></span></a>
@@ -635,6 +697,27 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
 <a class="fab" id="fab" href="#" target="_blank" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.51 5.26l-.999 3.648 3.978-.985-.001-.022zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
 </a>
+
+<div class="overlay" id="pageOverlay">
+  <div class="modal page-modal" style="position:relative">
+    <button class="x" onclick="closePage()">×</button>
+    <h3 id="pgTitle" class="pg-title"></h3>
+    <div id="pgImgWrap" class="pg-img"></div>
+    <div id="pgBody" class="pg-body"></div>
+  </div>
+</div>
+
+<div class="overlay" id="trackOverlay">
+  <div class="modal" style="position:relative">
+    <button class="x" onclick="closeTrack()">×</button>
+    <div class="trk-wrap">
+      <h3 data-i18n="track_title">📦 Track Your Order</h3>
+      <div class="field"><input id="trackQ" placeholder="Order ID or mobile number" data-i18n-ph="track_ph" /></div>
+      <button class="submit" onclick="doTrack()" data-i18n="track_btn">Track</button>
+      <div id="trackResult"></div>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -667,6 +750,14 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
         </div>
         <div id="cCouponMsg" class="coupon-msg"></div>
       </div>
+      <div class="field" id="payMethodField" style="display:none">
+        <label data-i18n="payment_method">Payment Method</label>
+        <div class="pay-methods">
+          <button type="button" class="pay-chip on" id="payCod" onclick="setPayMethod('cod')">💵 <span data-i18n="pay_cod">Cash on Delivery</span></button>
+          <button type="button" class="pay-chip" id="payOnline" onclick="setPayMethod('online')">📱 <span data-i18n="pay_online">Online Payment</span></button>
+        </div>
+        <div class="pay-box" id="payBox" style="display:none"></div>
+      </div>
       <div class="field"><label data-i18n="name_label">Your Name *</label><input id="ccName" placeholder="Enter your name" data-i18n-ph="name_ph" /></div>
       <div class="field"><label data-i18n="phone_label">Mobile Number *</label><input id="ccPhone" type="tel" placeholder="01XXXXXXXXX" /></div>
       <div class="field"><label data-i18n="addr_label">Full Address *</label><textarea id="ccAddr" rows="2" placeholder="House/Village, Thana, District" data-i18n-ph="addr_ph"></textarea></div>
@@ -678,6 +769,8 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
       <div class="check">✓</div>
       <h3 data-i18n="order_sent">Order Sent!</h3>
       <p data-i18n="contact_soon">We'll contact you shortly.</p>
+      <p id="orderIdLine" class="order-msg" style="display:none"></p>
+      <p id="payPendingLine" class="order-msg" style="display:none"></p>
       <p id="orderMsg" class="order-msg" style="display:none"></p>
     </div>
   </div>
@@ -719,12 +812,16 @@ const CONFIG = {
   productsCsvUrl : "https://docs.google.com/spreadsheets/d/1T7XIGcZdwBqzvf1k-D010o0Jv9OK7sB5ErG9wJ3Pz2E/gviz/tq?tqx=out:csv&sheet=Products",   // Products ট্যাব
   settingsCsvUrl : "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyFHZIchS7qw8EHxHAk53SiQfbqF0g6OKF2j2QQV8ejqnifPChisg6Q6W_cxxzO3aHZwKFzSH7FUw9/pub?gid=2009011128&single=true&output=csv",   // Settings ট্যাব (দোকানের তথ্য + ডেলিভারি চার্জ)
   couponsCsvUrl  : "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyFHZIchS7qw8EHxHAk53SiQfbqF0g6OKF2j2QQV8ejqnifPChisg6Q6W_cxxzO3aHZwKFzSH7FUw9/pub?gid=216761155&single=true&output=csv",   // Coupons ট্যাব
+  // Policy পেজ (Privacy/Terms/Refund/Shipping) — শিটে "Pages" ট্যাব বানাও (কলাম: page, title, content)
+  pagesCsvUrl    : "https://docs.google.com/spreadsheets/d/1T7XIGcZdwBqzvf1k-D010o0Jv9OK7sB5ErG9wJ3Pz2E/gviz/tq?tqx=out:csv&sheet=Pages",
+  // প্যারেন্টিং ব্লগ — শিটে "Blog" ট্যাব বানাও (কলাম: title, date, image, content, status)
+  blogCsvUrl     : "https://docs.google.com/spreadsheets/d/1T7XIGcZdwBqzvf1k-D010o0Jv9OK7sB5ErG9wJ3Pz2E/gviz/tq?tqx=out:csv&sheet=Blog",
   // অর্ডার শিটে জমা করার Apps Script ওয়েব-অ্যাপ লিঙ্ক — খালি থাকলে শুধু WhatsApp যাবে
-  orderEndpoint  : "https://script.google.com/macros/s/AKfycbyyTWi4aD1gDAIh5R1OeDOPDGc7eHiwS2a2zWvEcp4DNCcWL0mbLdogDiPcx7_WSN2g/exec",
+  orderEndpoint  : "https://script.google.com/macros/s/AKfycbzgA5IdX3EE09ZJQUl-TvxwsgLB2KNvhcMKhdN56sioL-YrKoi1tJ9spUq55Y8GZq2FBQ/exec",
   // রিভিউ পড়ার জন্য Reviews ট্যাবের CSV (গুগল শিটে "Reviews" নামে একটা ট্যাব বানাও)
   reviewsCsvUrl  : "https://docs.google.com/spreadsheets/d/1T7XIGcZdwBqzvf1k-D010o0Jv9OK7sB5ErG9wJ3Pz2E/gviz/tq?tqx=out:csv&sheet=Reviews",
   // কাস্টমার রিভিউ জমা নেওয়ার Apps Script লিঙ্ক — খালি থাকলে "রিভিউ লিখুন" বাটন লুকানো থাকবে
-  reviewEndpoint : "https://script.google.com/macros/s/AKfycbxDk1nd0d0wse_l_aivNPZVOmgoNraT6R9-kuZReR43m43P8xQCuCrlAdGE9TRTAW8bMQ/exec",
+  reviewEndpoint : "https://script.google.com/macros/s/AKfycbzgA5IdX3EE09ZJQUl-TvxwsgLB2KNvhcMKhdN56sioL-YrKoi1tJ9spUq55Y8GZq2FBQ/exec",
 };
 
 /* শিট লিঙ্ক না দেওয়া পর্যন্ত এই ডিফল্ট মান দিয়ে সাইট দেখাবে */
@@ -740,7 +837,12 @@ const DEFAULTS = {
   corporate_sales:"", retail_sales:"", owner_quote:"", owner_name:"", map_link:"",
   discount_display:"both", order_message:"",
   categories:"",   // উপরের ক্যাটেগরি বারের পুরো তালিকা+ক্রম (কমা দিয়ে) — Settings শিটে key=categories
-  footer_tagline:"", footer_color:"", battery_default:"", battery_product_id:""
+  footer_tagline:"", footer_color:"", battery_default:"", battery_product_id:"",
+  online_payment:"off",      // on দিলে চেকআউটে "অনলাইন পেমেন্ট" অপশন আসবে
+  payment_type:"send_money", // send_money বা payment — নির্দেশনা সেভাবে বদলাবে
+  bkash_number:"", nagad_number:"", rocket_number:"",   // যেটার নম্বর দেবে সেটাই দেখাবে
+  payment_note:"",           // পেমেন্ট বক্সে বাড়তি নির্দেশনা (ঐচ্ছিক)
+  order_tracking:"on"        // off দিলে ফুটারের ট্র্যাকিং লিংক লুকাবে
 };
 let S = {...DEFAULTS};
 let COUPONS = [
@@ -805,7 +907,18 @@ const T = {
     fill_required:"Please fill in name, mobile, and address.", cart_empty_alert:"Cart is empty!",
     coupon_invalid:"❌ Invalid coupon code.", coupon_min:"❌ Minimum order {x} required.",
     coupon_applied:"✅ Applied — {x}!", off_percent:"{v}% off", off_flat:"{v} off", sort_default:"Default", sort_low:"Price: Low to High", sort_high:"Price: High to Low", save_label:"Save {x}", sort_by:"Sort by",
-    shop_by_age:"Shop By Age", details:"Details", related_title:"You may also like", battery_hint:"This toy runs on batteries — add some too", battery_need:"Needs", add_battery:"+ Add", years:"yrs"
+    shop_by_age:"Shop By Age", details:"Details", related_title:"You may also like", battery_hint:"This toy runs on batteries — add some too", battery_need:"Needs", add_battery:"+ Add", years:"yrs",
+    payment_method:"Payment Method", pay_cod:"Cash on Delivery", pay_online:"Online Payment",
+    pay_amount:"Amount to Pay", pay_send_money_inst:"Send the exact amount via Send Money to the number below, then enter the TrxID.", pay_payment_inst:"Pay the exact amount using the Payment option to the number below, then enter the TrxID.",
+    trx_label:"Transaction ID (TrxID) *", trx_ph:"e.g. 9HX7A2B1C3", sender_label:"Number you paid from *",
+    copy:"Copy", copied:"Copied!", pay_fill:"Please enter the TrxID and the number you paid from.",
+    pay_verify_note:"Your order will be confirmed after we verify the payment — then the due amount becomes 0.",
+    order_id_label:"Order ID", keep_order_id:"Save this ID to track your order.",
+    track_order:"Track Order", track_title:"📦 Track Your Order", track_ph:"Order ID or mobile number", track_btn:"Track",
+    track_searching:"Searching...", track_none:"No order found. Please check the Order ID / number.", track_fail:"Could not check right now. Please try again later.",
+    payment_label:"Payment", due_label:"Due",
+    blog_title:"👨‍👩‍👧 Parenting Blog", blog_link:"Parenting Blog", read_more:"Read",
+    quick_links:"Quick Links", pg_privacy:"Privacy Policy", pg_terms:"Terms & Conditions", pg_refund:"Refund & Return Policy", pg_shipping:"Shipping Policy"
   },
   bn:{
     search_ph:"পণ্য খুঁজুন...", cart:"কার্ট", hero_badge:"🚚 সারা দেশে ডেলিভারি",
@@ -829,7 +942,18 @@ const T = {
     fill_required:"অনুগ্রহ করে নাম, মোবাইল ও ঠিকানা পূরণ করুন।", cart_empty_alert:"কার্ট খালি!",
     coupon_invalid:"❌ ভুল কুপন কোড।", coupon_min:"❌ ন্যূনতম অর্ডার {x} প্রয়োজন।",
     coupon_applied:"✅ প্রয়োগ হয়েছে — {x}!", off_percent:"{v}% ছাড়", off_flat:"{v} ছাড়", sort_default:"ডিফল্ট", sort_low:"দাম: কম থেকে বেশি", sort_high:"দাম: বেশি থেকে কম", save_label:"{x} সাশ্রয়", sort_by:"সাজান",
-    shop_by_age:"বয়স অনুযায়ী কিনুন", details:"বিস্তারিত", related_title:"এগুলোও পছন্দ হতে পারে", battery_hint:"এই খেলনাটি ব্যাটারিতে চলে — সাথে ব্যাটারিও নিন", battery_need:"লাগবে", add_battery:"+ যোগ করুন", years:"বছর"
+    shop_by_age:"বয়স অনুযায়ী কিনুন", details:"বিস্তারিত", related_title:"এগুলোও পছন্দ হতে পারে", battery_hint:"এই খেলনাটি ব্যাটারিতে চলে — সাথে ব্যাটারিও নিন", battery_need:"লাগবে", add_battery:"+ যোগ করুন", years:"বছর",
+    payment_method:"পেমেন্ট মাধ্যম", pay_cod:"ক্যাশ অন ডেলিভারি", pay_online:"অনলাইন পেমেন্ট",
+    pay_amount:"যত টাকা পাঠাবেন", pay_send_money_inst:"নিচের নম্বরে সঠিক টাকা Send Money করে TrxID লিখুন।", pay_payment_inst:"নিচের নম্বরে Payment অপশনে সঠিক টাকা পাঠিয়ে TrxID লিখুন।",
+    trx_label:"ট্রানজেকশন আইডি (TrxID) *", trx_ph:"যেমন 9HX7A2B1C3", sender_label:"যে নম্বর থেকে পাঠিয়েছেন *",
+    copy:"কপি", copied:"কপি হয়েছে!", pay_fill:"TrxID ও যে নম্বর থেকে টাকা পাঠিয়েছেন তা লিখুন।",
+    pay_verify_note:"পেমেন্ট যাচাইয়ের পর আপনার অর্ডার কনফার্ম হবে — তখন বাকি ০ দেখাবে।",
+    order_id_label:"অর্ডার নম্বর", keep_order_id:"অর্ডার ট্র্যাক করতে এই নম্বরটি রেখে দিন।",
+    track_order:"অর্ডার ট্র্যাক করুন", track_title:"📦 অর্ডার ট্র্যাক করুন", track_ph:"অর্ডার নম্বর বা মোবাইল নম্বর", track_btn:"খুঁজুন",
+    track_searching:"খোঁজা হচ্ছে...", track_none:"কোনো অর্ডার পাওয়া যায়নি। অর্ডার নম্বর/মোবাইল মিলিয়ে দেখুন।", track_fail:"এখন চেক করা যাচ্ছে না। একটু পরে চেষ্টা করুন।",
+    payment_label:"পেমেন্ট", due_label:"বাকি",
+    blog_title:"👨‍👩‍👧 প্যারেন্টিং ব্লগ", blog_link:"প্যারেন্টিং ব্লগ", read_more:"পড়ুন",
+    quick_links:"দরকারি লিংক", pg_privacy:"প্রাইভেসি পলিসি", pg_terms:"শর্তাবলি", pg_refund:"রিফান্ড ও রিটার্ন নীতি", pg_shipping:"শিপিং নীতি"
   }
 };
 let LANG = 'en';
@@ -1169,6 +1293,44 @@ async function loadReviews(){
     }));
   }catch(e){ REVIEWS = []; }
 }
+
+/* ---- Policy পেজ (Pages ট্যাব: page, title, content) ---- */
+let PAGES = {};
+function pageKeyOf(raw){
+  const s = (raw||"").toString().toLowerCase();
+  if(/privacy|প্রাইভ/.test(s)) return 'privacy';
+  if(/term|condition|শর্ত/.test(s)) return 'terms';
+  if(/refund|return|রিফান্ড|রিটার্ন/.test(s)) return 'refund';
+  if(/ship|delivery policy|শিপিং|ডেলিভারি নীতি/.test(s)) return 'shipping';
+  return '';
+}
+async function loadPages(){
+  if(!CONFIG.pagesCsvUrl) return;
+  try{
+    const rows = await fetchCSV(CONFIG.pagesCsvUrl);
+    rows.forEach(r=>{
+      const key = pageKeyOf(r.page || r.key || r.slug || r.title);
+      const content = (r.content||"").trim();
+      if(key && content) PAGES[key] = { title:(r.title||"").trim(), content };
+    });
+  }catch(e){ PAGES = {}; }
+}
+
+/* ---- প্যারেন্টিং ব্লগ (Blog ট্যাব: title, date, image, content, status) ---- */
+let BLOG = [];
+async function loadBlog(){
+  if(!CONFIG.blogCsvUrl) return;
+  try{
+    const rows = await fetchCSV(CONFIG.blogCsvUrl);
+    BLOG = rows.filter(r=>{
+      const st = (r.status||"active").toLowerCase().trim();
+      return (r.title||"").trim() && (r.content||"").trim() && !['hidden','off','no','draft'].includes(st);
+    }).map(r=>({
+      title:(r.title||"").trim(), date:(r.date||"").trim(),
+      image:(r.image||r.image_url||"").trim(), content:(r.content||"").trim()
+    }));
+  }catch(e){ BLOG = []; }
+}
 function ytId(url){
   const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
   return m ? m[1] : "";
@@ -1384,6 +1546,7 @@ function renderCartBody(){
       <button class="ci-del" onclick="removeFromCart('${item.id}')" title="Remove">×</button>
     </div>`;
   }).join("") + `<button class="add-btn" onclick="closeCart()">${t('add_more')}</button>`;
+  refreshPayUI();
 }
 
 function calcCart(){
@@ -1409,6 +1572,8 @@ function updateCartTotal(){
   if(rowDisc) rowDisc.style.display = c.discount>0?"flex":"none";
   document.getElementById("cSumDisc").textContent = "−"+bnNum(c.discount)+cur;
   document.getElementById("cGrand").textContent = bnNum(c.grand)+cur;
+  const payAmt = document.getElementById("payAmt");
+  if(payAmt) payAmt.textContent = bnNum(c.grand)+cur;
 }
 
 function applyCartCoupon(){
@@ -1431,6 +1596,16 @@ async function submitCartOrder(){
   const addr = document.getElementById("ccAddr").value.trim();
   if(!name||!phone||!addr){ alert(t('fill_required')); return; }
   if(!CART.length){ alert(t('cart_empty_alert')); return; }
+  // অনলাইন পেমেন্ট হলে TrxID + প্রেরক নম্বর বাধ্যতামূলক
+  let payTrxV='', paySenderV='', payMethodText='Cash on Delivery', payStatus='';
+  if(payEnabled() && __payMethod==='online'){
+    payTrxV = (document.getElementById('payTrx')||{value:''}).value.trim();
+    paySenderV = (document.getElementById('paySender')||{value:''}).value.trim();
+    if(!payTrxV || !paySenderV){ alert(t('pay_fill')); return; }
+    payMethodText = 'Online - ' + (__payProvider||'') + ' (' + payTypeLabel() + ')';
+    payStatus = 'Pending';
+  }
+  const orderId = 'IT-' + Date.now().toString(36).toUpperCase() + Math.floor(10 + Math.random()*89);
   const c = calcCart();
   const note = document.getElementById("ccNote").value.trim();
   const locText = c.loc==='outside' ? 'Outside Dhaka' : 'Inside Dhaka';
@@ -1442,11 +1617,14 @@ async function submitCartOrder(){
   if(CONFIG.orderEndpoint){
     try{
       const fd=new URLSearchParams({
+        form:"order",
         time:new Date().toLocaleString('en-GB'),
         product:productList, qty:qtyTotal, price:"-",
         subtotal:c.subtotal, coupon:couponCode, discount:c.discount,
         delivery_area:locText, delivery_charge:c.ship, total:c.grand,
-        name, phone, address:addr, note
+        name, phone, address:addr, note,
+        order_id:orderId, payment_method:payMethodText,
+        trx_id:payTrxV, sender_number:paySenderV, payment_status:payStatus
       });
       fetch(CONFIG.orderEndpoint,{method:"POST",mode:"no-cors",body:fd});
     }catch(e){}
@@ -1462,9 +1640,13 @@ async function submitCartOrder(){
     }, { eventID: purchaseEventId });
   }catch(e){}
   // clear cart
-  CART=[]; cartCoupon=null; updateCartUI();
+  CART=[]; cartCoupon=null; __payMethod='cod'; updateCartUI();
   document.getElementById("cartSubmitBtn").style.display="none";
   document.getElementById("cartDone").style.display="block";
+  const oidEl = document.getElementById("orderIdLine");
+  if(oidEl){ oidEl.innerHTML = t('order_id_label') + ': <b>' + orderId + '</b><br>' + t('keep_order_id'); oidEl.style.display="block"; }
+  const ppEl = document.getElementById("payPendingLine");
+  if(ppEl){ if(payStatus){ ppEl.textContent = t('pay_verify_note'); ppEl.style.display="block"; } else { ppEl.style.display="none"; } }
   document.getElementById("cartBody").innerHTML="";
   document.getElementById("cartCheckout").style.display="none";
   // অর্ডার সফল মেসেজ পড়ার সময় দিতে — ৯ সেকেন্ড পর নিজে থেকে বন্ধ হবে
@@ -1475,7 +1657,7 @@ async function submitCartOrder(){
 document.getElementById("cartOverlay").onclick=e=>{if(e.target===document.getElementById("cartOverlay"))closeCart();};
 
 async function boot(){
-  await Promise.all([loadSettings(), loadCoupons(), loadProducts(), loadReviews()]);
+  await Promise.all([loadSettings(), loadCoupons(), loadProducts(), loadReviews(), loadPages(), loadBlog()]);
   cur = S.currency || "৳";
   applyConfig();
   buildCats();
@@ -1484,6 +1666,8 @@ async function boot(){
   render();
   renderReviews();
   initReviewModal();
+  renderBlog();
+  buildFooterLinks();
   applyLang();
 }
 
@@ -1514,7 +1698,7 @@ function initReviewModal(){
     $("#rvSubmit").disabled=true;
     if(CONFIG.reviewEndpoint){
       try{
-        const fd=new URLSearchParams({ time:new Date().toLocaleString('en-GB'), name, rating:rvRating, review:text, status:"pending" });
+        const fd=new URLSearchParams({ form:"review", time:new Date().toLocaleString('en-GB'), name, rating:rvRating, review:text, status:"pending" });
         fetch(CONFIG.reviewEndpoint,{method:"POST",mode:"no-cors",body:fd});
       }catch(e){}
     }
@@ -1522,6 +1706,176 @@ function initReviewModal(){
     $("#reviewDone").style.display="block";
   };
 }
+
+/* ============================================================
+   ONLINE PAYMENT  (Settings: online_payment, payment_type,
+   bkash_number / nagad_number / rocket_number, payment_note)
+   ============================================================ */
+let __payMethod = 'cod', __payProvider = '';
+function payEnabled(){
+  const on = ['on','yes','true','1'].includes((S.online_payment||'').toString().toLowerCase().trim());
+  return on && payNumbers().length > 0;
+}
+function payNumbers(){
+  const list = [];
+  const add = (label,key)=>{ const v=(S[key]||'').toString().trim(); if(v) list.push({label, num:v}); };
+  add('bKash','bkash_number'); add('Nagad','nagad_number'); add('Rocket','rocket_number');
+  return list;
+}
+function payTypeLabel(){
+  return ((S.payment_type||'send_money').toString().toLowerCase().indexOf('pay')===0) ? 'Payment' : 'Send Money';
+}
+function setPayMethod(m){ __payMethod = (m==='online') ? 'online' : 'cod'; refreshPayUI(); }
+function setPayProvider(p){ __payProvider = p; refreshPayUI(); }
+function refreshPayUI(){
+  const f = document.getElementById('payMethodField'); if(!f) return;
+  if(!CART.length || !payEnabled()){ f.style.display='none'; __payMethod='cod'; return; }
+  f.style.display='';
+  document.getElementById('payCod').classList.toggle('on', __payMethod==='cod');
+  document.getElementById('payOnline').classList.toggle('on', __payMethod==='online');
+  const box = document.getElementById('payBox');
+  // অনলাইন হলে নিচের COD নোট লুকাও
+  const codNote = document.querySelector('#cartCheckout .note-line');
+  if(codNote) codNote.style.display = (__payMethod==='online') ? 'none' : '';
+  if(__payMethod!=='online'){ box.style.display='none'; return; }
+  const oldTrx = (document.getElementById('payTrx')||{}).value || '';
+  const oldSender = (document.getElementById('paySender')||{}).value || '';
+  const nums = payNumbers();
+  if(!__payProvider || !nums.some(n=>n.label===__payProvider)) __payProvider = nums[0].label;
+  const inst = payTypeLabel()==='Payment' ? t('pay_payment_inst') : t('pay_send_money_inst');
+  const c = calcCart();
+  box.innerHTML = `
+    <div class="pay-amount">${t('pay_amount')}: <b id="payAmt">${bnNum(c.grand)}${cur}</b></div>
+    <div class="pay-inst">${inst}</div>
+    ${nums.length>1 ? `<div class="pay-prov">${nums.map(n=>`<button type="button" class="prov-chip${n.label===__payProvider?' on':''}" onclick="setPayProvider('${n.label}')">${n.label}</button>`).join('')}</div>` : ''}
+    ${nums.filter(n=>n.label===__payProvider).map(n=>`
+      <div class="pay-num-row"><span class="pay-num">${n.label} (${payTypeLabel()}): <b>${esc(n.num)}</b></span>
+      <button type="button" class="copy-btn" onclick="copyPayNum('${escAttr(n.num)}', this)">${t('copy')}</button></div>`).join('')}
+    <div class="field"><label>${t('trx_label')}</label><input id="payTrx" placeholder="${escAttr(t('trx_ph'))}" value="${escAttr(oldTrx)}"></div>
+    <div class="field"><label>${t('sender_label')}</label><input id="paySender" type="tel" placeholder="01XXXXXXXXX" value="${escAttr(oldSender)}"></div>
+    ${S.payment_note && (''+S.payment_note).trim() ? `<div class="pay-note">${esc(S.payment_note)}</div>` : ''}
+    <div class="pay-note">${t('pay_verify_note')}</div>`;
+  box.style.display = 'block';
+}
+function copyPayNum(num, btn){
+  const done = ()=>{ btn.textContent = t('copied'); setTimeout(()=>btn.textContent=t('copy'), 1400); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(num).then(done).catch(()=>fallbackCopy(num, done));
+  } else fallbackCopy(num, done);
+}
+function fallbackCopy(text, cb){
+  try{
+    const ta = document.createElement('textarea'); ta.value = text;
+    ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); cb();
+  }catch(e){}
+}
+
+/* ============================================================
+   POLICY পেজ + ব্লগ মডাল
+   ============================================================ */
+function fmtContent(s){
+  return esc(s).split(/\n{2,}/).map(p=>'<p>'+p.replace(/\n/g,'<br>')+'</p>').join('');
+}
+function showPageModal(title, image, content){
+  $("#pgTitle").textContent = title || '';
+  $("#pgImgWrap").innerHTML = image ? `<img src="${escAttr(image)}" alt="">` : '';
+  $("#pgBody").innerHTML = fmtContent(content || '');
+  const m = document.querySelector('#pageOverlay .modal'); if(m) m.scrollTop = 0;
+  $("#pageOverlay").classList.add('show');
+}
+function openPage(key){ const pg = PAGES[key]; if(!pg) return; showPageModal(pg.title || t('pg_'+key), '', pg.content); }
+function openBlogPost(i){ const b = BLOG[i]; if(!b) return; showPageModal(b.title, b.image, (b.date ? b.date + '\n\n' : '') + b.content); }
+function closePage(){ $("#pageOverlay").classList.remove('show'); }
+
+function renderBlog(){
+  const wrap = document.getElementById('blogWrap'), row = document.getElementById('blogRow');
+  if(!wrap || !row) return;
+  if(!BLOG.length){ wrap.style.display='none'; return; }
+  wrap.style.display='';
+  row.innerHTML = BLOG.map((b,i)=>{
+    const img = b.image ? `<img src="${escAttr(b.image)}" alt="" loading="lazy">` : `<div class="blog-ph">\uD83D\uDCD6</div>`;
+    return `<button class="blog-card" type="button" onclick="openBlogPost(${i})">
+      <div class="blog-thumb">${img}</div>
+      <div class="blog-meta">
+        ${b.date ? `<span class="blog-date">\uD83D\uDCC5 ${esc(b.date)}</span>` : ''}
+        <div class="blog-title">${esc(b.title)}</div>
+        <span class="blog-read">${t('read_more')} \u2192</span>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+/* ============================================================
+   ফুটারের Quick Links (ট্র্যাক + পলিসি + ব্লগ)
+   ============================================================ */
+function buildFooterLinks(){
+  const col = document.getElementById('linksCol'), box = document.getElementById('footLinks');
+  if(!col || !box) return;
+  let h = '';
+  if(CONFIG.orderEndpoint && !['off','no','false','0'].includes((S.order_tracking||'on').toString().toLowerCase().trim())){
+    h += `<a href="#" onclick="openTrack();return false;">\uD83D\uDCE6 ${t('track_order')}</a>`;
+  }
+  ['privacy','terms','refund','shipping'].forEach(k=>{
+    if(PAGES[k]) h += `<a href="#" onclick="openPage('${k}');return false;">\uD83D\uDCC4 ${esc(PAGES[k].title || t('pg_'+k))}</a>`;
+  });
+  if(BLOG.length){
+    h += `<a href="#blogWrap" onclick="document.getElementById('blogWrap').scrollIntoView({behavior:'smooth'});return false;">\uD83D\uDCD6 ${t('blog_link')}</a>`;
+  }
+  if(!h){ col.style.display='none'; return; }
+  box.innerHTML = h; col.style.display='';
+}
+
+/* ============================================================
+   অর্ডার ট্র্যাকিং (Apps Script doGet: action=track)
+   ============================================================ */
+function openTrack(){
+  $("#trackResult").innerHTML=''; $("#trackQ").value='';
+  $("#trackOverlay").classList.add('show');
+  setTimeout(()=>{ try{ $("#trackQ").focus(); }catch(e){} }, 80);
+}
+function closeTrack(){ $("#trackOverlay").classList.remove('show'); }
+function trkCls(s){
+  s = (s||'').toLowerCase();
+  if(/deliver/.test(s)) return 'ok';
+  if(/ship|courier|way|পাঠানো/.test(s)) return 'ship';
+  if(/confirm|process|কনফার্ম/.test(s)) return 'conf';
+  if(/cancel|return|fail|বাতিল/.test(s)) return 'bad';
+  return 'pend';
+}
+async function doTrack(){
+  const q = $("#trackQ").value.trim(); const box = $("#trackResult");
+  if(q.length < 4){ box.innerHTML = `<div class="trk-msg">${t('track_none')}</div>`; return; }
+  box.innerHTML = `<div class="trk-msg">${t('track_searching')}</div>`;
+  try{
+    const sep = CONFIG.orderEndpoint.indexOf('?')>-1 ? '&' : '?';
+    const res = await fetch(CONFIG.orderEndpoint + sep + 'action=track&q=' + encodeURIComponent(q));
+    const data = await res.json();
+    if(!data.found || !data.orders || !data.orders.length){ box.innerHTML = `<div class="trk-msg">${t('track_none')}</div>`; return; }
+    box.innerHTML = data.orders.map(o=>{
+      const st = o.status || 'Pending';
+      const paid = /confirm|paid|done|received|verified|yes|পরিশোধ/i.test(o.payment_status||'') || /deliver/i.test(st);
+      const totalNum = parseFloat(String(o.total).replace(/[^0-9.]/g,'')) || 0;
+      const dueTxt = paid ? '0'+cur : (totalNum ? bnNum(totalNum)+cur : '-');
+      return `<div class="trk-card">
+        <div class="trk-row"><b>${esc(o.order_id||'-')}</b><span class="trk-badge ${trkCls(st)}">${esc(st)}</span></div>
+        ${o.product ? `<div class="trk-prod">${esc(o.product)}</div>` : ''}
+        <div class="trk-row trk-sub"><span>${t('total')}: ${totalNum ? bnNum(totalNum)+cur : '-'}</span><span>${t('due_label')}: <b>${dueTxt}</b></span></div>
+        ${o.payment_method ? `<div class="trk-sub">${t('payment_label')}: ${esc(o.payment_method)}${o.payment_status ? ' \u2014 ' + esc(o.payment_status) : ''}</div>` : ''}
+        ${o.time ? `<div class="trk-sub">\uD83D\uDD52 ${esc(o.time)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }catch(e){ box.innerHTML = `<div class="trk-msg">${t('track_fail')}</div>`; }
+}
+(function(){
+  const ov = document.getElementById('trackOverlay');
+  if(ov) ov.onclick = e=>{ if(e.target===ov) closeTrack(); };
+  const pv = document.getElementById('pageOverlay');
+  if(pv) pv.onclick = e=>{ if(e.target===pv) closePage(); };
+  const tq = document.getElementById('trackQ');
+  if(tq) tq.addEventListener('keydown', e=>{ if(e.key==='Enter') doTrack(); });
+})();
 
 /* একটা প্রোডাক্টের সব ক্যাটেগরি (পুরোনো single-category ডেটার জন্যও কাজ করে) */
 const prodCats = p => (p.categories && p.categories.length) ? p.categories : (p.category ? [p.category] : []);
