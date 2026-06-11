@@ -339,6 +339,20 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .submit:hover{filter:brightness(1.06);transform:translateY(-1px)}
 .submit:disabled{opacity:.6;cursor:default;transform:none}
 .m-actions{display:flex;flex-direction:column;gap:10px}
+/* 🛒 প্রোডাক্ট লিংক (অ্যাড) থেকে এলে অর্ডার বাটন উপরে প্রাইসের নিচে দেখাবে */
+#orderBody.on-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-top:4px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+#orderBody.on-top .batt-suggest{flex-basis:100%}
+#orderBody.on-top .field{margin:0}
+#orderBody.on-top .field>label{display:none}
+#orderBody.on-top .m-actions{flex:1;flex-direction:row;gap:8px;min-width:230px}
+#orderBody.on-top .m-actions .submit{margin-top:0;padding:11px 10px;font-size:.92rem;white-space:nowrap}
+#orderBody.on-top .note-line{flex-basis:100%;margin-top:2px}
+@media(max-width:480px){
+  #orderBody.on-top .field{width:100%}
+  #orderBody.on-top .qty{width:100%;justify-content:center}
+  #orderBody.on-top .qty input{flex:1}
+  #orderBody.on-top .m-actions{min-width:0}
+}
 .m-actions .submit{flex:1;width:100%}
 .submit.buynow-btn{background:var(--accent-deep)}
 .submit.buynow-btn:hover{filter:brightness(1.08)}
@@ -797,7 +811,7 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
       <div class="modal-head" id="mHead"></div>
       <div class="modal-desc-title" id="mDescTitle" style="display:none" data-i18n="details">Details</div>
       <div class="modal-desc" id="mDesc"></div>
-      <div class="modal-body">
+      <div class="modal-body" id="orderBody">
         <div class="batt-suggest" id="batterySuggest" style="display:none"></div>
         <div class="field">
           <label data-i18n="quantity">Quantity</label>
@@ -2119,9 +2133,23 @@ function render(){
 }
 
 /* ---- Modal / Order ---- */
-function openModal(id){
+// fromLink=true হলে (প্রোডাক্ট লিংক/অ্যাড থেকে এলে) অর্ডার বাটন উপরে দেখাবে
+function placeOrderBody(top){
+  const body = document.getElementById('orderBody');
+  const form = document.getElementById('orderForm');
+  if(!body || !form) return;
+  if(top){
+    form.insertBefore(body, document.getElementById('mDescTitle'));
+    body.classList.add('on-top');
+  } else {
+    form.insertBefore(body, document.getElementById('mRelated'));
+    body.classList.remove('on-top');
+  }
+}
+function openModal(id, fromLink){
   current = PRODUCTS.find(p=>String(p.id)===String(id));
   if(!current) return;
+  placeOrderBody(!!fromLink);
   // Analytics: ViewContent ইভেন্ট (Meta Pixel + GA4) — প্রোডাক্ট ডিটেইল দেখলে
   try{ if(window.fbq) fbq('track','ViewContent',{ content_name:current.name, content_ids:[String(current.id)], content_type:'product', value:current.price, currency:'BDT' }); }catch(e){}
   try{ if(window.gtag) gtag('event','view_item',{ value:current.price, currency:'BDT', items:[{item_id:String(current.id), item_name:current.name}] }); }catch(e){}
@@ -2265,7 +2293,7 @@ function openFromHash(){
   if(m){
     const id = decodeURIComponent(m[1]);
     const p = PRODUCTS.find(x=>String(x.id)===String(id));
-    if(p) openModal(id);
+    if(p) openModal(id, true);   // লিংক থেকে এসেছে → অর্ডার বাটন উপরে
   } else {
     // hash মুছে গেলে (ব্যাক বাটন ইত্যাদি) — খোলা মডাল বন্ধ করো
     const ov = document.getElementById('overlay');
