@@ -19,13 +19,13 @@
 <meta property="og:site_name" content="ilm Toy" />
 <meta property="og:title" content="ilm Toy — শিক্ষামূলক খেলনার অনলাইন দোকান" />
 <meta property="og:description" content="শিশুদের জন্য শিক্ষামূলক ও মজার খেলনা। সারা দেশে হোম ডেলিভারি, ক্যাশ অন ডেলিভারি।" />
-<meta property="og:image" content="https://i.ibb.co/m56yG9FV/Gemini-Generated-Image-obctykobctykobct.png" />
+<meta property="og:image" content="https://i.ibb.co.com/qM0DNnHr/Chat-GPT-Image-Jun-10-2026-02-24-44-PM.png" />
 <meta property="og:url" content="https://ilmtoy.com" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="ilm Toy — শিক্ষামূলক খেলনার অনলাইন দোকান" />
 <meta name="twitter:description" content="শিশুদের জন্য শিক্ষামূলক ও মজার খেলনা। সারা দেশে হোম ডেলিভারি।" />
-<meta name="twitter:image" content="https://i.ibb.co/m56yG9FV/Gemini-Generated-Image-obctykobctykobct.png" />
-<link id="faviconLink" rel="icon" type="image/png" href="https://i.ibb.co/m56yG9FV/Gemini-Generated-Image-obctykobctykobct.png" />
+<meta name="twitter:image" content="https://i.ibb.co.com/qM0DNnHr/Chat-GPT-Image-Jun-10-2026-02-24-44-PM.png" />
+<link id="faviconLink" rel="icon" type="image/png" href="https://i.ibb.co.com/qM0DNnHr/Chat-GPT-Image-Jun-10-2026-02-24-44-PM.png" />
 
 <!-- Meta Pixel (Facebook) — নিচের "" এর ভিতরে তোমার Pixel ID বসাও, যেমন "123456789012345" -->
 <script>
@@ -674,6 +674,7 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
     <div id="reviewDone" class="done" style="display:none">
       <div class="check">✓</div>
       <h3 data-i18n="review_thanks">Thanks! Your review will appear after approval.</h3>
+      <p id="reviewDoneMsg" style="display:none;margin-top:10px;color:var(--ink-soft);font-weight:600;line-height:1.55"></p>
     </div>
   </div>
 </div>
@@ -864,7 +865,7 @@ const DEFAULTS = {
   trust1:"প্যারেন্টিং এক্সপার্টদের রিকমেন্ডেড", trust2:"বাচ্চার জন্য নিরাপদ (Non-Toxic)", trust3:"সারা দেশে হোম ডেলিভারি", trust4:"পণ্য হাতে পেয়ে মূল্য পরিশোধ",
   instagram:"", youtube:"", email:"",
   corporate_sales:"", retail_sales:"", owner_quote:"", owner_name:"", map_link:"",
-  discount_display:"both", order_message:"",
+  discount_display:"both", order_message:"", review_message:"",
   categories:"",   // উপরের ক্যাটেগরি বারের পুরো তালিকা+ক্রম (কমা দিয়ে) — Settings শিটে key=categories
   footer_tagline:"", footer_color:"", battery_default:"", battery_product_id:"",
   online_payment:"off",      // on দিলে চেকআউটে "অনলাইন পেমেন্ট" অপশন আসবে
@@ -1734,10 +1735,11 @@ function initReviewModal(){
     s.onclick = ()=>{ rvRating = parseInt(s.dataset.v); paint(rvRating); };
   });
   $("#starPick").onmouseleave = ()=>paint(rvRating);
-  const close = ()=>ov.classList.remove("show");
+  const close = ()=>{ clearTimeout(window.__reviewDoneTimer); ov.classList.remove("show"); };
   openBtn.onclick = ()=>{
     rvRating=0; paint(0);
     $("#rvName").value=""; $("#rvText").value="";
+    clearTimeout(window.__reviewDoneTimer);
     const rvProf=$("#rvProfession"), rvProd=$("#rvProduct");
     if(rvProf) rvProf.value=""; if(rvProd) rvProd.value="";
     // প্রোডাক্ট সাজেশন লিস্ট (ঐচ্ছিক ফিল্ড — টাইপ করলে সাজেস্ট করবে)
@@ -1763,6 +1765,16 @@ function initReviewModal(){
     }
     $("#reviewForm").style.display="none";
     $("#reviewDone").style.display="block";
+    // Settings শিটে review_message লিখলে সেটাও ধন্যবাদের নিচে দেখাবে
+    const rdMsg=$("#reviewDoneMsg");
+    if(rdMsg){
+      const m=(S.review_message||"").trim();
+      if(m){ rdMsg.textContent=m; rdMsg.style.display="block"; }
+      else rdMsg.style.display="none";
+    }
+    // সফল মেসেজটা ১০ সেকেন্ড পর নিজে থেকে বন্ধ হবে
+    clearTimeout(window.__reviewDoneTimer);
+    window.__reviewDoneTimer = setTimeout(close, 10000);
   };
 }
 
