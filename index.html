@@ -61,7 +61,7 @@
   --shadow:0 6px 24px rgba(120,80,40,.10);
   --shadow-lg:0 18px 50px rgba(120,80,40,.18);
   --radius:18px;
-  --footer:#FF6B4A;       /* ফুটারের রঙ (কমলা) — শিটের footer_color দিয়ে বদলানো যায় */
+  --footer:#4F2A37;       /* ফুটারের রঙ — শিটের footer_color দিয়ে বদলানো যায় */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -867,7 +867,7 @@ const DEFAULTS = {
   corporate_sales:"", retail_sales:"", owner_quote:"", owner_name:"", map_link:"",
   discount_display:"both", order_message:"", review_message:"",
   categories:"",   // উপরের ক্যাটেগরি বারের পুরো তালিকা+ক্রম (কমা দিয়ে) — Settings শিটে key=categories
-  footer_tagline:"", footer_color:"", battery_default:"", battery_product_id:"",
+  footer_tagline:"", footer_color:"", battery_default:"", battery_product_id:"", battery_product_id_aa:"", battery_product_id_aaa:"",
   online_payment:"off",      // on দিলে চেকআউটে "অনলাইন পেমেন্ট" অপশন আসবে
   payment_type:"send_money", // send_money বা payment — নির্দেশনা সেভাবে বদলাবে
   bkash_number:"", nagad_number:"", rocket_number:"",   // যেটার নম্বর দেবে সেটাই দেখাবে
@@ -2236,16 +2236,33 @@ function openModal(id, fromLink){
 }
 
 /* ব্যাটারি সাজেশন — শিটের battery_product_id / Battery ক্যাটাগরির পণ্য সাথে যোগের সাজেশন */
-function batteryProduct(){
-  const bid = (S.battery_product_id||"").toString().trim();
-  let bp = bid ? PRODUCTS.find(p=>String(p.id)===bid) : null;
-  if(!bp) bp = PRODUCTS.find(p=>/battery|ব্যাটারি/i.test(p.category||"") || /battery|ব্যাটারি/i.test(p.name||""));
+function isBatteryItem(p){
+  if(!p) return false;
+  const ids = [S.battery_product_id, S.battery_product_id_aa, S.battery_product_id_aaa]
+    .map(v=>(v||"").toString().trim()).filter(Boolean);
+  if(ids.includes(String(p.id))) return true;
+  return /battery|ব্যাটার/i.test((p.categories||[p.category]).join(" ")) || /battery|ব্যাটার/i.test(p.name||"");
+}
+function batteryProduct(forP){
+  // পণ্যের battery_size (যেমন "2x AA" বা "3x AAA") দেখে সঠিক ব্যাটারি প্রোডাক্ট বেছে নেয়
+  const size = ((forP && forP.battery_size)||"").toString().toUpperCase();
+  const byId = key => { const id=(S[key]||"").toString().trim(); return id ? PRODUCTS.find(p=>String(p.id)===id) : null; };
+  let bp = null;
+  if(/AAA/.test(size)) bp = byId('battery_product_id_aaa');
+  else if(/AA/.test(size)) bp = byId('battery_product_id_aa');
+  if(!bp) bp = byId('battery_product_id');
+  if(!bp){
+    // আইডি না দেওয়া থাকলে নাম/ক্যাটেগরি থেকে খোঁজে — সাইজ মিলিয়ে, স্টকে আছে এমনটা আগে
+    const sizeRe = /AAA/.test(size) ? /AAA/i : (/AA/.test(size) ? /AA(?!A)/i : null);
+    if(sizeRe) bp = PRODUCTS.find(p=>isBatteryItem(p) && sizeRe.test(p.name||"") && !p.soldout)
+                 || PRODUCTS.find(p=>isBatteryItem(p) && sizeRe.test(p.name||""));
+    if(!bp) bp = PRODUCTS.find(p=>isBatteryItem(p) && !p.soldout) || PRODUCTS.find(isBatteryItem);
+  }
   return bp || null;
 }
 function needsBattery(p){
   if(!p) return false;
-  const bp = batteryProduct();
-  if(bp && String(bp.id)===String(p.id)) return false;          // ব্যাটারি পণ্যের জন্য নিজে নয়
+  if(isBatteryItem(p)) return false;          // ব্যাটারি পণ্যের জন্য নিজে নয়
   if(['no','false','0','n','none'].includes(p.battery)) return false;
   if(['yes','true','1','y'].includes(p.battery)) return true;
   if(p.battery_size) return true;
@@ -2253,7 +2270,7 @@ function needsBattery(p){
 }
 function renderBatterySuggest(){
   const bs = $("#batterySuggest"); if(!bs) return;
-  const bp = batteryProduct();
+  const bp = batteryProduct(current);
   if(current && needsBattery(current) && bp && !bp.soldout){
     const battSub = current.battery_size
       ? `${t('battery_need')}: ${esc(current.battery_size)}`
