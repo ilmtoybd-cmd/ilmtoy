@@ -61,7 +61,7 @@
   --shadow:0 6px 24px rgba(120,80,40,.10);
   --shadow-lg:0 18px 50px rgba(120,80,40,.18);
   --radius:18px;
-  --footer:#4F2A37;       /* ফুটারের রঙ (কালো নয়) — শিটের footer_color দিয়ে বদলানো যায় */
+  --footer:#FF6B4A;       /* ফুটারের রঙ (কমলা) — শিটের footer_color দিয়ে বদলানো যায় */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -703,7 +703,7 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
       </div>
     </div>
     <div class="foot-col" id="linksCol" style="display:none">
-      <h4 data-i18n="quick_links">Helpful Information</h4>
+      <h4 data-i18n="quick_links">ILM TOY Policy</h4>
       <div id="footLinks"></div>
     </div>
     <div class="foot-col" id="salesCol">
@@ -872,7 +872,8 @@ const DEFAULTS = {
   payment_type:"send_money", // send_money বা payment — নির্দেশনা সেভাবে বদলাবে
   bkash_number:"", nagad_number:"", rocket_number:"",   // যেটার নম্বর দেবে সেটাই দেখাবে
   payment_note:"",           // পেমেন্ট বক্সে বাড়তি নির্দেশনা (ঐচ্ছিক)
-  order_tracking:"on"        // off দিলে ফুটারের ট্র্যাকিং লিংক লুকাবে
+  order_tracking:"on",       // off দিলে ফুটারের ট্র্যাকিং লিংক লুকাবে
+  order_whatsapp:"on"        // on থাকলে অর্ডার শিটের পাশাপাশি WhatsApp-এও যাবে, off দিলে শুধু শিটে
 };
 let S = {...DEFAULTS};
 let COUPONS = [
@@ -949,7 +950,7 @@ const T = {
     track_searching:"Searching...", track_none:"No order found. Please check the Order ID / number.", track_fail:"Could not check right now. Please try again later.",
     payment_label:"Payment", due_label:"Due",
     blog_title:"👨‍👩‍👧 Parenting Blog", blog_link:"Parenting Blog", read_more:"Read",
-    quick_links:"Helpful Information", pg_privacy:"Privacy Policy", pg_terms:"Terms & Conditions", pg_refund:"Refund & Return Policy", pg_shipping:"Shipping Policy"
+    quick_links:"ILM TOY Policy", pg_privacy:"Privacy Policy", pg_terms:"Terms & Conditions", pg_refund:"Refund & Return Policy", pg_shipping:"Shipping Policy"
   },
   bn:{
     search_ph:"পণ্য খুঁজুন...", cart:"কার্ট", hero_badge:"🚚 সারা দেশে ডেলিভারি",
@@ -985,7 +986,7 @@ const T = {
     track_searching:"খোঁজা হচ্ছে...", track_none:"কোনো অর্ডার পাওয়া যায়নি। অর্ডার নম্বর/মোবাইল মিলিয়ে দেখুন।", track_fail:"এখন চেক করা যাচ্ছে না। একটু পরে চেষ্টা করুন।",
     payment_label:"পেমেন্ট", due_label:"বাকি",
     blog_title:"👨‍👩‍👧 প্যারেন্টিং ব্লগ", blog_link:"প্যারেন্টিং ব্লগ", read_more:"পড়ুন",
-    quick_links:"প্রয়োজনীয় তথ্য", pg_privacy:"প্রাইভেসি পলিসি", pg_terms:"শর্তাবলি", pg_refund:"রিফান্ড ও রিটার্ন নীতি", pg_shipping:"শিপিং নীতি"
+    quick_links:"ILM TOY Policy", pg_privacy:"প্রাইভেসি পলিসি", pg_terms:"শর্তাবলি", pg_refund:"রিফান্ড ও রিটার্ন নীতি", pg_shipping:"শিপিং নীতি"
   }
 };
 let LANG = 'en';
@@ -1681,6 +1682,25 @@ async function submitCartOrder(){
       fetch(CONFIG.orderEndpoint,{method:"POST",mode:"no-cors",body:fd});
     }catch(e){}
   }
+  // 📲 Settings শিটে order_whatsapp = on থাকলে অর্ডারটা WhatsApp-এও পাঠাবে
+  try{
+    const waOn = ['on','yes','true','1'].includes((S.order_whatsapp||'').toString().toLowerCase().trim());
+    if(waOn && S.whatsapp && !/8801XXXX/.test(S.whatsapp)){
+      const waMsg =
+        "🧸 নতুন অর্ডার — " + (S.store_name||"Ilm Toy") + "\n" +
+        "Order ID: " + orderId + "\n" +
+        "পণ্য: " + productList + "\n" +
+        "মোট: " + c.grand + (cur||"৳") + " (" + locText + ")\n" +
+        (couponCode ? "কুপন: " + couponCode + "\n" : "") +
+        "পেমেন্ট: " + payMethodText + "\n" +
+        (payTrxV ? "TrxID: " + payTrxV + " (প্রেরক: " + paySenderV + ")\n" : "") +
+        "নাম: " + name + "\n" +
+        "মোবাইল: " + phone + "\n" +
+        "ঠিকানা: " + addr +
+        (note ? "\nনোট: " + note : "");
+      window.open("https://wa.me/" + S.whatsapp + "?text=" + encodeURIComponent(waMsg), "_blank");
+    }
+  }catch(e){}
   // Analytics: অর্ডার ইভেন্ট (GA4 + Meta Pixel)
   try{ if(window.gtag) gtag('event','purchase',{ value:c.grand, currency:'BDT', items_count:qtyTotal }); }catch(e){}
   try{
