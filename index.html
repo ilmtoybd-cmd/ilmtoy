@@ -260,7 +260,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .sort-sel{font-family:'Hind Siliguri',sans-serif;font-size:.84rem;font-weight:600;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:50px;padding:7px 30px 7px 14px;cursor:pointer;outline:none;transition:.18s;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B5E50' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .sort-sel:focus,.sort-sel:hover{border-color:var(--accent)}
 @media(max-width:520px){.section-h{flex-wrap:wrap;gap:8px}.sec-tools{width:100%;justify-content:space-between}}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
 
 .card{
   background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
@@ -268,7 +268,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 }
 .card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
 .thumb{position:relative;aspect-ratio:1/1;background:#FBF2E9;overflow:hidden}
-.thumb img{width:100%;height:100%;object-fit:contain;transition:.4s}
+.thumb img{width:100%;height:100%;object-fit:cover;object-position:center;transition:.4s}
 .card:hover .thumb img{transform:scale(1.06)}
 .thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-size:2.6rem;font-weight:800;color:var(--accent);opacity:.55}
 .saleflag{position:absolute;top:10px;left:10px;background:var(--green);color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12)}
