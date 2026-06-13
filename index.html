@@ -1663,7 +1663,7 @@ function syncWishHearts(){
     if(lbl) lbl.textContent = on ? t('wish_saved') : t('wish_save');
   });
 }
-function openWish(){ renderWishBody(); document.getElementById('wishOverlay').classList.add('show'); }
+function openWish(){ renderWishBody(); ovPush(); document.getElementById('wishOverlay').classList.add('show'); }
 function closeWish(){ document.getElementById('wishOverlay').classList.remove('show'); }
 function openFromWish(id){ closeWish(); openModal(id); }
 function wishAddToCart(id){ addToCart(id, 1); }
@@ -1751,6 +1751,7 @@ function openCart(){
     }catch(e){}
     try{ if(window.gtag) gtag('event','begin_checkout',{ value:calcCart().grand, currency:'BDT' }); }catch(e){}
   }
+  ovPush();
   document.getElementById("cartOverlay").classList.add("show");
   document.getElementById("cartDone").style.display="none";
   const sb = document.getElementById("cartSubmitBtn");
@@ -1955,6 +1956,7 @@ function initReviewModal(){
     if(dl) dl.innerHTML = PRODUCTS.map(p=>`<option value="${escAttr(p.name)}"></option>`).join("");
     $("#reviewForm").style.display="block"; $("#reviewDone").style.display="none";
     $("#rvSubmit").disabled=false;
+    ovPush();
     ov.classList.add("show");
   };
   $("#reviewCloseX").onclick = close;
@@ -2062,6 +2064,7 @@ function showPageModal(title, image, content){
   $("#pgImgWrap").innerHTML = image ? `<img src="${escAttr(image)}" alt="">` : '';
   $("#pgBody").innerHTML = fmtContent(content || '');
   const m = document.querySelector('#pageOverlay .modal'); if(m) m.scrollTop = 0;
+  ovPush();
   $("#pageOverlay").classList.add('show');
 }
 function openPage(key){ const pg = PAGES[key]; if(!pg) return; if(key==='faq'){ showFaqModal(pg.title || t('pg_faq'), pg.content); return; } showPageModal(pg.title || t('pg_'+key), '', pg.content); }
@@ -2103,6 +2106,7 @@ function showFaqModal(title, content){
       </div>`).join('') + '</div>'
     : fmtContent(content||'');
   const m = document.querySelector('#pageOverlay .modal'); if(m) m.scrollTop = 0;
+  ovPush();
   $("#pageOverlay").classList.add('show');
 }
 function toggleFaq(btn){ const it=btn.closest('.faq-item'); if(it) it.classList.toggle('open'); }
@@ -2158,6 +2162,7 @@ function buildFooterLinks(){
    ============================================================ */
 function openTrack(){
   $("#trackResult").innerHTML=''; $("#trackQ").value='';
+  ovPush();
   $("#trackOverlay").classList.add('show');
   setTimeout(()=>{ try{ $("#trackQ").focus(); }catch(e){} }, 80);
 }
@@ -2450,7 +2455,13 @@ function openModal(id, fromLink){
     : `${bnNum(current.price)}${cur}`;
   $("#mHead").innerHTML = `<div class="gallery">${galInner}</div><div class="m-title"><h3>${current.name}</h3><div class="mp">${mpInner}</div><button type="button" class="copy-link-btn" onclick="copyProductLink(this)">🔗 <span>${t('copy_link')}</span></button><button type="button" class="m-heart${isWished(current.id)?' on':''}" data-wish="${current.id}" onclick="toggleWish('${current.id}')"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> <span data-wishlabel>${isWished(current.id)?t('wish_saved'):t('wish_save')}</span></button></div>`;
   // 🔗 প্রোডাক্ট ডিপ-লিংক: URL-এ #p=slug বসাও — কপি লিংকের সাথে মিল রেখে
-  try{ history.replaceState(null, '', '#p=' + encodeURIComponent(productSlug(current))); }catch(e){ location.hash = 'p=' + encodeURIComponent(productSlug(current)); }
+  // fromLink হলে হ্যাশ আগে থেকেই আছে (deep-link/ব্যাক) → replace; নইলে নতুন এন্ট্রি push,
+  // যাতে মোবাইলের ব্যাক বাটন সাইট থেকে বের না হয়ে মডাল বন্ধ করে।
+  const __pHash = '#p=' + encodeURIComponent(productSlug(current));
+  try{
+    if(fromLink) history.replaceState(null, '', __pHash);
+    else history.pushState({p:1}, '', __pHash);
+  }catch(e){ location.hash = 'p=' + encodeURIComponent(productSlug(current)); }
   renderGalMain();
   const ovModal = document.querySelector('#overlay .modal'); if(ovModal) ovModal.scrollTop = 0;
   const desc = (current.description||"").trim();
@@ -2631,6 +2642,30 @@ function openFromHash(){
   }
 }
 window.addEventListener('hashchange', openFromHash);
+
+/* ============================================================
+   📱 মোবাইল ব্যাক বাটন — খোলা overlay বন্ধ করবে, সাইট থেকে বের হবে না।
+   প্রতিটা overlay খোলার সময় ovPush() একটা history এন্ট্রি যোগ করে;
+   ব্যাক চাপলে popstate-এ সেই overlay বন্ধ হয়। (প্রোডাক্ট মডাল hashchange-এ হ্যান্ডল হয়)
+   ============================================================ */
+function ovPush(){ try{ history.pushState({ov:1}, '', location.href); }catch(e){} }
+function closeOpenOverlays(){
+  const list=[
+    ['cartOverlay', closeCart],
+    ['wishOverlay', closeWish],
+    ['pageOverlay', closePage],
+    ['trackOverlay', closeTrack],
+    ['reviewOverlay', ()=>{ const o=document.getElementById('reviewOverlay'); if(o) o.classList.remove('show'); }],
+    ['promoOverlay', closePromo]
+  ];
+  let closed=false;
+  list.forEach(pair=>{
+    const el=document.getElementById(pair[0]);
+    if(el && el.classList.contains('show')){ try{ pair[1](); }catch(e){} closed=true; }
+  });
+  return closed;
+}
+window.addEventListener('popstate', function(){ closeOpenOverlays(); });
 function renderGalMain(){
   const main = document.getElementById('galMain');
   if(!main || !galItems.length) return;
@@ -2713,6 +2748,7 @@ function showPromo(){
   if(ttl){ titleEl.textContent=ttl; titleEl.style.display='block'; }
   else { titleEl.style.display='none'; }
   cta.textContent=(S.popup_button||'').toString().trim() || t('popup_shop');
+  ovPush();
   ov.classList.add('show');
   markPromoSeen();
 }
