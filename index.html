@@ -128,6 +128,23 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .cart-fab.visible{display:flex}
 .cart-fab svg{width:22px;height:22px}
 .cart-fab-badge{background:#fff;color:var(--accent-deep);border-radius:50px;font-size:.78rem;font-weight:800;padding:1px 7px;margin-left:2px}
+/* ---------- Back to Top Button (ডান দিকে, কার্ট/WhatsApp বাটনের উপরে) ---------- */
+.totop{position:fixed;bottom:152px;right:20px;width:48px;height:48px;border-radius:50%;background:#fff;color:var(--accent-deep);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);z-index:49;opacity:0;visibility:hidden;transform:translateY(12px) scale(.9);transition:.25s}
+.totop.show{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.totop:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.totop svg{width:22px;height:22px}
+/* ---------- First-visit Offer Popup (ব্যানারের মতো) ---------- */
+.promo-overlay{position:fixed;inset:0;background:rgba(40,33,24,.6);backdrop-filter:blur(3px);z-index:95;display:none;align-items:center;justify-content:center;padding:18px}
+.promo-overlay.show{display:flex;animation:promofade .25s ease}
+@keyframes promofade{from{opacity:0}to{opacity:1}}
+.promo-box{position:relative;width:100%;max-width:420px;background:var(--card);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-lg);animation:promopop .3s cubic-bezier(.4,0,.2,1)}
+@keyframes promopop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.promo-box img{width:100%;display:block;background:#FBF2E9}
+.promo-x{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(0,0,0,.45);color:#fff;font-size:1.45rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;transition:.18s}
+.promo-x:hover{background:rgba(0,0,0,.72);transform:scale(1.08)}
+.promo-title{text-align:center;font-family:'Baloo Da 2';font-size:1.2rem;color:var(--ink);padding:14px 16px 0}
+.promo-cta{display:block;width:calc(100% - 32px);margin:14px 16px 16px;text-align:center;background:var(--accent);color:#fff;font-family:'Baloo Da 2';font-weight:700;font-size:1.05rem;padding:13px;border:none;border-radius:50px;cursor:pointer;box-shadow:0 6px 18px rgba(255,107,74,.4);transition:.18s}
+.promo-cta:hover{background:var(--accent-deep);transform:translateY(-1px)}
 /* ---------- Cart Modal ---------- */
 .cart-overlay{position:fixed;inset:0;background:rgba(40,33,24,.55);backdrop-filter:blur(3px);z-index:91;display:none;align-items:flex-end;justify-content:center;padding:0}
 .cart-overlay.show{display:flex}
@@ -464,6 +481,31 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
 /* multiple-image badge on product cards */
 .multi-badge{position:absolute;top:10px;right:10px;background:rgba(40,33,24,.72);color:#fff;font-weight:700;font-size:.72rem;padding:3px 8px;border-radius:50px;display:flex;align-items:center;gap:4px;z-index:2;backdrop-filter:blur(2px)}
 .multi-badge svg{width:12px;height:12px}
+/* ---------- Wishlist ---------- */
+.heart-btn{position:absolute;bottom:10px;right:10px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.92);box-shadow:0 3px 10px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;padding:0;transition:.18s}
+.heart-btn:hover{transform:scale(1.12)}
+.heart-btn svg{width:19px;height:19px;fill:none;stroke:var(--ink-soft);stroke-width:2;transition:.18s}
+.heart-btn.on svg{fill:var(--accent);stroke:var(--accent)}
+.heart-pop{animation:heartpop .3s ease}
+@keyframes heartpop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+.m-heart{display:inline-flex;align-items:center;gap:6px;margin-top:8px;margin-left:8px;padding:6px 13px;border-radius:50px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-family:'Baloo Da 2';font-weight:700;font-size:.8rem;cursor:pointer;transition:.18s}
+.m-heart svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.m-heart.on{border-color:var(--accent);color:var(--accent)}
+.m-heart.on svg{fill:var(--accent);stroke:var(--accent)}
+.wish-add{background:var(--accent);color:#fff;border:none;border-radius:50px;padding:8px 14px;font-family:'Baloo Da 2';font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:.18s}
+.wish-add:hover{background:var(--accent-deep)}
+.wish-add:disabled{background:#cabfb2;cursor:not-allowed}
+.wish-badge{background:var(--accent)!important}
+/* ---------- FAQ accordion ---------- */
+.faq{display:flex;flex-direction:column;gap:10px}
+.faq-item{border:1.5px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:none;border:none;cursor:pointer;font-family:'Baloo Da 2';font-weight:700;font-size:.98rem;color:var(--ink);text-align:left;line-height:1.35}
+.faq-q:hover{background:var(--accent-soft)}
+.faq-q svg{width:20px;height:20px;flex-shrink:0;color:var(--accent-deep);transition:transform .25s}
+.faq-item.open .faq-q svg{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;padding:0 16px;color:var(--ink-soft);line-height:1.6}
+.faq-item.open .faq-a{max-height:1000px;padding:0 16px 14px}
+.faq-a p{margin:0 0 8px}
 /* ---------- Add-to-cart toast ---------- */
 .toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-weight:700;font-size:.9rem;padding:11px 20px;border-radius:50px;box-shadow:var(--shadow-lg);z-index:120;opacity:0;pointer-events:none;transition:.28s;display:flex;align-items:center;gap:8px;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -555,7 +597,7 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
 
 <header>
   <div class="bar">
-    <a href="#" class="logo"><img id="logoImg" alt="logo" style="display:none" /><span id="logoEmoji">🧸</span><span class="logo-name-wrap"><span class="logo-sizer" id="logoSizer">Ilm Toy</span><span id="logoName">Ilm Toy</span></span></a>
+    <a href="./" class="logo" onclick="reloadSite(event)"><img id="logoImg" alt="logo" style="display:none" /><span id="logoEmoji">🧸</span><span class="logo-name-wrap"><span class="logo-sizer" id="logoSizer">Ilm Toy</span><span id="logoName">Ilm Toy</span></span></a>
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="search" type="text" placeholder="Search products..." data-i18n-ph="search_ph" />
@@ -567,6 +609,10 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
       <button class="iconbtn track-ic" id="trackHBtn" type="button" onclick="openTrack()" aria-label="Track Order" title="Track Order" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
         <span data-i18n="track_order">Track Order</span>
+      </button>
+      <button class="iconbtn" id="wishHBtn" type="button" onclick="openWish()" aria-label="Wishlist" title="Wishlist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span class="cart-badge wish-badge" id="wishBadge" style="display:none">0</span>
       </button>
       <button class="iconbtn cart-ic" id="cartHBtn" onclick="openCart()" aria-label="Cart">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -727,6 +773,19 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
 <a class="fab" id="fab" href="#" target="_blank" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.51 5.26l-.999 3.648 3.978-.985-.001-.022zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
 </a>
+<button class="totop" id="toTop" onclick="scrollTopSmooth()" aria-label="Back to top" title="উপরে যান">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+</button>
+
+<!-- প্রথম-ভিজিট অফার পপআপ (Settings → popup_image) -->
+<div class="promo-overlay" id="promoOverlay">
+  <div class="promo-box">
+    <button class="promo-x" id="promoX" aria-label="Close" onclick="closePromo()">×</button>
+    <div id="promoImgWrap"></div>
+    <div id="promoTitle" class="promo-title" style="display:none"></div>
+    <button class="promo-cta" id="promoCta" onclick="promoShopNow()">Shop Now</button>
+  </div>
+</div>
 
 <div class="overlay" id="pageOverlay">
   <div class="modal page-modal" style="position:relative">
@@ -750,6 +809,16 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="cart-overlay" id="wishOverlay">
+  <div class="cart-modal">
+    <div class="cart-modal-head">
+      <h3>❤️ <span data-i18n="wishlist">Wishlist</span></h3>
+      <button class="x" style="position:static;box-shadow:none;background:#FBF2E9" onclick="closeWish()">×</button>
+    </div>
+    <div class="cart-body" id="wishBody"></div>
+  </div>
+</div>
 
 <div class="cart-overlay" id="cartOverlay">
   <div class="cart-modal">
@@ -862,6 +931,11 @@ const DEFAULTS = {
   hero_title:"Best Products, Best Prices", hero_sub:"Tap a product to order easily.",
   currency:"৳", delivery_dhaka:60, delivery_outside:120,
   banner1:"", banner2:"", banner3:"", banner4:"", banner5:"",
+  // ── প্রথম-ভিজিট অফার পপআপ ──
+  popup_image:"",            // অফার পপআপের ছবি (Drive/ibb লিংক) — খালি দিলে পপআপ দেখাবে না
+  popup_title:"",            // ঐচ্ছিক টাইটেল (ছবির নিচে)
+  popup_button:"",           // Shop Now বাটনের লেখা — খালি দিলে ভাষা অনুযায়ী ডিফল্ট
+  popup_link:"",             // ঐচ্ছিক: বাটনে গেলে এই লিংকে যাবে; খালি দিলে প্রোডাক্ট সেকশনে স্ক্রল
   trust1:"প্যারেন্টিং এক্সপার্টদের রিকমেন্ডেড", trust2:"বাচ্চার জন্য নিরাপদ (Non-Toxic)", trust3:"সারা দেশে হোম ডেলিভারি", trust4:"পণ্য হাতে পেয়ে মূল্য পরিশোধ",
   instagram:"", youtube:"", email:"",
   corporate_sales:"", retail_sales:"", owner_quote:"", owner_name:"", map_link:"",
@@ -936,6 +1010,7 @@ const T = {
     cod_note_long:"Cash on delivery. We'll contact you shortly to confirm your order.",
     order_sent:"Order Sent!", contact_soon:"We'll contact you shortly.",
     cart_empty:"🛒 Cart is empty.<br>Add products to order!", added_cart:"Added to cart",
+    wishlist:"Wishlist", wish_added:"❤️ Saved to wishlist", wish_removed:"Removed from wishlist", wish_empty:"❤️ Your wishlist is empty.<br>Tap the heart on a product to save it!", wish_save:"Save", wish_saved:"Saved",
     fill_required:"Please fill in name, mobile, and address.", cart_empty_alert:"Cart is empty!",
     coupon_invalid:"❌ Invalid coupon code.", coupon_min:"❌ Minimum order {x} required.",
     coupon_applied:"✅ Applied — {x}!", off_percent:"{v}% off", off_flat:"{v} off", sort_default:"Default", sort_low:"Price: Low to High", sort_high:"Price: High to Low", save_label:"Save {x}", sort_by:"Sort by",
@@ -943,14 +1018,14 @@ const T = {
     payment_method:"Payment Method", pay_cod:"Cash on Delivery", pay_online:"Online Payment",
     pay_amount:"Amount to Pay", pay_send_money_inst:"Send the exact amount via Send Money to the number below, then enter the TrxID.", pay_payment_inst:"Pay the exact amount using the Payment option to the number below, then enter the TrxID.",
     trx_label:"Transaction ID (TrxID) *", trx_ph:"e.g. 9HX7A2B1C3", sender_label:"Number you paid from *",
-    copy:"Copy", copied:"Copied!", copy_link:"Copy Link", pay_fill:"Please enter the TrxID and the number you paid from.",
+    copy:"Copy", copied:"Copied!", copy_link:"Copy Link", popup_shop:"Shop Now", pay_fill:"Please enter the TrxID and the number you paid from.",
     pay_verify_note:"Your order will be confirmed after we verify the payment — then the due amount becomes 0.",
     order_id_label:"Order ID", keep_order_id:"Save this ID to track your order.",
     track_order:"Track Order", track_title:"📦 Track Your Order", track_ph:"Order ID or mobile number", track_btn:"Track",
     track_searching:"Searching...", track_none:"No order found. Please check the Order ID / number.", track_fail:"Could not check right now. Please try again later.",
     payment_label:"Payment", due_label:"Due",
     blog_title:"👨‍👩‍👧 Parenting Blog", blog_link:"Parenting Blog", read_more:"Read",
-    quick_links:"ILM TOY Policy", pg_privacy:"Privacy Policy", pg_terms:"Terms & Conditions", pg_refund:"Refund & Return Policy", pg_shipping:"Shipping Policy"
+    quick_links:"ILM TOY Policy", pg_privacy:"Privacy Policy", pg_terms:"Terms & Conditions", pg_refund:"Refund & Return Policy", pg_shipping:"Shipping Policy", pg_faq:"FAQ"
   },
   bn:{
     search_ph:"পণ্য খুঁজুন...", cart:"কার্ট", hero_badge:"🚚 সারা দেশে ডেলিভারি",
@@ -972,6 +1047,7 @@ const T = {
     cod_note_long:"ক্যাশ অন ডেলিভারি। অর্ডার নিশ্চিত করতে আমরা শীঘ্রই যোগাযোগ করব।",
     order_sent:"অর্ডার পাঠানো হয়েছে!", contact_soon:"আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।",
     cart_empty:"🛒 কার্ট খালি।<br>অর্ডার করতে পণ্য যোগ করুন!", added_cart:"কার্টে যোগ হয়েছে",
+    wishlist:"উইশলিস্ট", wish_added:"❤️ উইশলিস্টে যোগ হয়েছে", wish_removed:"উইশলিস্ট থেকে সরানো হয়েছে", wish_empty:"❤️ আপনার উইশলিস্ট খালি।<br>সেভ করতে প্রোডাক্টের হার্টে ট্যাপ করুন!", wish_save:"সেভ", wish_saved:"সেভ করা",
     fill_required:"অনুগ্রহ করে নাম, মোবাইল ও ঠিকানা পূরণ করুন।", cart_empty_alert:"কার্ট খালি!",
     coupon_invalid:"❌ ভুল কুপন কোড।", coupon_min:"❌ ন্যূনতম অর্ডার {x} প্রয়োজন।",
     coupon_applied:"✅ প্রয়োগ হয়েছে — {x}!", off_percent:"{v}% ছাড়", off_flat:"{v} ছাড়", sort_default:"ডিফল্ট", sort_low:"দাম: কম থেকে বেশি", sort_high:"দাম: বেশি থেকে কম", save_label:"{x} সাশ্রয়", sort_by:"সাজান",
@@ -979,14 +1055,14 @@ const T = {
     payment_method:"পেমেন্ট মাধ্যম", pay_cod:"ক্যাশ অন ডেলিভারি", pay_online:"অনলাইন পেমেন্ট",
     pay_amount:"যত টাকা পাঠাবেন", pay_send_money_inst:"নিচের নম্বরে সঠিক টাকা Send Money করে TrxID লিখুন।", pay_payment_inst:"নিচের নম্বরে Payment অপশনে সঠিক টাকা পাঠিয়ে TrxID লিখুন।",
     trx_label:"ট্রানজেকশন আইডি (TrxID) *", trx_ph:"যেমন 9HX7A2B1C3", sender_label:"যে নম্বর থেকে পাঠিয়েছেন *",
-    copy:"কপি", copied:"কপি হয়েছে!", copy_link:"লিংক কপি", pay_fill:"TrxID ও যে নম্বর থেকে টাকা পাঠিয়েছেন তা লিখুন।",
+    copy:"কপি", copied:"কপি হয়েছে!", copy_link:"লিংক কপি", popup_shop:"এখনই কিনুন", pay_fill:"TrxID ও যে নম্বর থেকে টাকা পাঠিয়েছেন তা লিখুন।",
     pay_verify_note:"পেমেন্ট যাচাইয়ের পর আপনার অর্ডার কনফার্ম হবে — তখন বাকি ০ দেখাবে।",
     order_id_label:"অর্ডার নম্বর", keep_order_id:"অর্ডার ট্র্যাক করতে এই নম্বরটি রেখে দিন।",
     track_order:"অর্ডার ট্র্যাক করুন", track_title:"📦 অর্ডার ট্র্যাক করুন", track_ph:"অর্ডার নম্বর বা মোবাইল নম্বর", track_btn:"খুঁজুন",
     track_searching:"খোঁজা হচ্ছে...", track_none:"কোনো অর্ডার পাওয়া যায়নি। অর্ডার নম্বর/মোবাইল মিলিয়ে দেখুন।", track_fail:"এখন চেক করা যাচ্ছে না। একটু পরে চেষ্টা করুন।",
     payment_label:"পেমেন্ট", due_label:"বাকি",
     blog_title:"👨‍👩‍👧 প্যারেন্টিং ব্লগ", blog_link:"প্যারেন্টিং ব্লগ", read_more:"পড়ুন",
-    quick_links:"ILM TOY Policy", pg_privacy:"প্রাইভেসি পলিসি", pg_terms:"শর্তাবলি", pg_refund:"রিফান্ড ও রিটার্ন নীতি", pg_shipping:"শিপিং নীতি"
+    quick_links:"ILM TOY Policy", pg_privacy:"প্রাইভেসি পলিসি", pg_terms:"শর্তাবলি", pg_refund:"রিফান্ড ও রিটার্ন নীতি", pg_shipping:"শিপিং নীতি", pg_faq:"সচরাচর জিজ্ঞাসা"
   }
 };
 let LANG = 'en';
@@ -1288,7 +1364,7 @@ async function loadProducts(){
   try{
     const data = await fetchCSV(CONFIG.productsCsvUrl);
     PRODUCTS = data.map(d=>{
-      const imgs = gatherMedia(d, ['image_url','image'], /[|\n,]+/);
+      const imgs = gatherMedia(d, ['image_url','image'], /[|\n,]+/).map(imgURL);
       const vids = gatherMedia(d, ['video','product_video'], /[|\n]+/);
       const st = (d.status||"active").toLowerCase().trim();
       // category ঘরে কমা (বা | / ) দিয়ে একাধিক — যেমন "Book, Best Seller"
@@ -1324,7 +1400,7 @@ async function loadReviews(){
       date:(d.timestamp||d.time||d.date||"").toString().trim(),
       rating:Math.max(0,Math.min(5, Math.round(parseFloat(d.rating)||0))),
       review:(d.review||"").trim(),
-      photo:(d.photo||"").trim(),
+      photo:imgURL((d.photo||"").trim()),
       video:(d.video||"").trim()
     }));
   }catch(e){ REVIEWS = []; }
@@ -1338,6 +1414,7 @@ function pageKeyOf(raw){
   if(/term|condition|শর্ত/.test(s)) return 'terms';
   if(/refund|return|রিফান্ড|রিটার্ন/.test(s)) return 'refund';
   if(/ship|delivery policy|শিপিং|ডেলিভারি নীতি/.test(s)) return 'shipping';
+  if(/faq|frequently asked|প্রশ্ন|জিজ্ঞাস|সচরাচর/.test(s)) return 'faq';
   return '';
 }
 async function loadPages(){
@@ -1363,7 +1440,7 @@ async function loadBlog(){
       return (r.title||"").trim() && (r.content||"").trim() && !['hidden','off','no','draft'].includes(st);
     }).map(r=>({
       title:(r.title||"").trim(), date:(r.date||"").trim(),
-      image:(r.image||r.image_url||"").trim(), content:(r.content||"").trim()
+      image:imgURL((r.image||r.image_url||"").trim()), content:(r.content||"").trim()
     }));
   }catch(e){ BLOG = []; }
 }
@@ -1371,12 +1448,46 @@ function ytId(url){
   const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
   return m ? m[1] : "";
 }
+/* Google Drive শেয়ার লিংক থেকে ফাইল-আইডি বের করে — সব ফরম্যাট সামলায় */
+function driveId(url){
+  const s = String(url||"");
+  const m = s.match(/\/file\/d\/([\w-]{20,})/)              // .../file/d/ID/view
+        || s.match(/[?&]id=([\w-]{20,})/)                   // ...uc?export=view&id=ID
+        || s.match(/googleusercontent\.com\/d\/([\w-]{20,})/)
+        || s.match(/\/d\/([\w-]{20,})/);                    // .../d/ID
+  return m ? m[1] : "";
+}
+/* যেকোনো ইমেজ লিংককে স্থিতিশীল hotlink-এ আনে (Drive হলে lh3 endpoint) */
+function imgURL(url){
+  const id = driveId(url);
+  return id ? `https://lh3.googleusercontent.com/d/${id}=w1600` : String(url||"");
+}
+/* ব্যানার ছবি লোড না হলে ধাপে ধাপে বিকল্প URL চেষ্টা করে — আর "সাদা" দেখায় না */
+function bannerImgFallback(img){
+  const step = +(img.dataset.step||0);
+  if(step===0 && img.dataset.fb1){ img.dataset.step=1; img.src=img.dataset.fb1; return; }
+  if(step<=1 && img.dataset.fb2){ img.dataset.step=2; img.src=img.dataset.fb2; return; }
+  if(step<=2 && img.dataset.fb3==="1"){            // শেষ চেষ্টা: একই URL cache-buster দিয়ে আরেকবার (ক্ষণস্থায়ী ব্যর্থতা)
+    img.dataset.step=3;
+    const base=img.dataset.orig||img.src;
+    img.src = base + (base.indexOf('?')>-1?'&':'?') + 'r=' + Date.now();
+    return;
+  }
+  img.onerror=null;   // আর চেষ্টা নয়
+}
 /* ব্যানারের মিডিয়া: YouTube → অটোপ্লে মিউট লুপ iframe; .mp4/.webm → ভিডিও; বাকি সব → ছবি */
 function bannerMediaHTML(url){
   const yt = ytId(url);
   if(yt) return `<iframe class="slide-video" src="https://www.youtube.com/embed/${yt}?rel=0&autoplay=1&mute=1&loop=1&playlist=${yt}&controls=0&modestbranding=1&playsinline=1&disablekb=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
   if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)) return `<video class="slide-video" src="${url}" autoplay muted loop playsinline></video>`;
-  return `<img src="${url}" alt="banner">`;
+  const id  = driveId(url);
+  const src = imgURL(url);
+  const fb1 = id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600` : "";   // Drive বিকল্প endpoint
+  const fb2 = id ? `https://lh3.googleusercontent.com/d/${id}` : "";              // আকার ছাড়া lh3
+  const fb3 = id ? "" : "1";                                                      // Drive না হলে: একই URL আবার চেষ্টা
+  return `<img src="${src}" alt="banner" loading="eager"
+    data-orig="${escAttr(String(url||""))}" data-fb1="${escAttr(fb1)}" data-fb2="${escAttr(fb2)}" data-fb3="${fb3}"
+    onerror="bannerImgFallback(this)">`;
 }
 /* প্রোডাক্ট গ্যালারির ভিডিও থাম্বনেইল (YouTube হলে YT-এর প্রিভিউ ছবি) */
 function ytThumb(url){
@@ -1507,6 +1618,80 @@ function setupReviewTyping(){
    ============================================================ */
 let CART = []; // [{id, name, price, image_url, qty}]
 let cartCoupon = null;
+
+/* ============================================================
+   ❤️ Wishlist — localStorage (সম্ভব হলে), নইলে sessionStorage, নইলে মেমরি
+   ============================================================ */
+let WISHLIST = [];   // প্রোডাক্ট আইডির অ্যারে (string)
+const WISH_KEY = 'ilm_wishlist';
+function loadWish(){
+  let raw=null;
+  try{ raw=localStorage.getItem(WISH_KEY); }catch(e){}
+  if(raw===null){ try{ raw=sessionStorage.getItem(WISH_KEY); }catch(e){} }
+  if(raw===null && window.__wish) { WISHLIST=window.__wish.slice(); return; }
+  try{ WISHLIST = raw ? (JSON.parse(raw)||[]).map(String) : []; }catch(e){ WISHLIST=[]; }
+}
+function saveWish(){
+  const s=JSON.stringify(WISHLIST);
+  let ok=false;
+  try{ localStorage.setItem(WISH_KEY, s); ok=true; }catch(e){}
+  if(!ok){ try{ sessionStorage.setItem(WISH_KEY, s); ok=true; }catch(e){} }
+  window.__wish = WISHLIST.slice();   // স্টোরেজ ব্লকড হলেও অন্তত এই সেশনে টিকবে
+}
+function isWished(id){ return WISHLIST.indexOf(String(id))>-1; }
+function toggleWish(id){
+  id=String(id);
+  if(isWished(id)){ WISHLIST=WISHLIST.filter(x=>x!==id); showToast(t('wish_removed')); }
+  else { WISHLIST.push(id); showToast(t('wish_added')); }
+  saveWish();
+  updateWishUI();
+  syncWishHearts();
+  const ov=document.getElementById('wishOverlay');
+  if(ov && ov.classList.contains('show')) renderWishBody();
+}
+function updateWishUI(){
+  const n=WISHLIST.length;
+  const badge=document.getElementById('wishBadge');
+  if(badge){ badge.textContent=bnNum(n); badge.style.display=n?'flex':'none'; }
+}
+function syncWishHearts(){
+  document.querySelectorAll('[data-wish]').forEach(b=>{
+    const on=isWished(b.dataset.wish);
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on?'true':'false');
+    const lbl=b.querySelector('[data-wishlabel]');
+    if(lbl) lbl.textContent = on ? t('wish_saved') : t('wish_save');
+  });
+}
+function openWish(){ renderWishBody(); document.getElementById('wishOverlay').classList.add('show'); }
+function closeWish(){ document.getElementById('wishOverlay').classList.remove('show'); }
+function openFromWish(id){ closeWish(); openModal(id); }
+function wishAddToCart(id){ addToCart(id, 1); }
+function renderWishBody(){
+  const body=document.getElementById('wishBody');
+  if(!body) return;
+  // অস্তিত্বহীন/হাইড হওয়া প্রোডাক্ট বাদ দিয়ে শুধু বর্তমানগুলো
+  const items=WISHLIST.map(id=>PRODUCTS.find(p=>String(p.id)===String(id))).filter(Boolean);
+  if(!items.length){ body.innerHTML='<div class="cart-empty">'+t('wish_empty')+'</div>'; return; }
+  body.innerHTML = items.map(p=>{
+    const imgHTML = p.image_url ? `<img src="${p.image_url}" alt="${escAttr(p.name)}">` : (p.name[0]||'?');
+    const act = p.soldout
+      ? `<button class="wish-add" disabled>${t('out_of_stock')}</button>`
+      : `<button class="wish-add" onclick="wishAddToCart('${p.id}')">${t('add_to_cart')}</button>`;
+    return `<div class="ci">
+      <div class="ci-img" style="cursor:pointer" onclick="openFromWish('${p.id}')">${imgHTML}</div>
+      <div class="ci-info" style="cursor:pointer;min-width:0" onclick="openFromWish('${p.id}')">
+        <div class="ci-name">${esc(p.name)}</div>
+        <div class="ci-price">${bnNum(p.price)}${cur}</div>
+      </div>
+      ${act}
+      <button class="ci-del" onclick="toggleWish('${p.id}')" title="Remove">×</button>
+    </div>`;
+  }).join("");
+}
+// কালো ব্যাকগ্রাউন্ডে ক্লিক করলে wishlist বন্ধ হবে
+document.addEventListener('click', e=>{ if(e.target && e.target.id==='wishOverlay') closeWish(); });
+
 
 function addToCart(id, qty){
   const p = PRODUCTS.find(x=>String(x.id)===String(id));
@@ -1731,17 +1916,20 @@ document.getElementById("cartOverlay").onclick=e=>{if(e.target===document.getEle
 async function boot(){
   await Promise.all([loadSettings(), loadCoupons(), loadProducts(), loadReviews(), loadPages(), loadBlog()]);
   cur = S.currency || "৳";
+  loadWish();
   applyConfig();
   buildCats();
   buildShopCats();
   buildShopAges();
   render();
+  updateWishUI();
   renderReviews();
   initReviewModal();
   renderBlog();
   buildFooterLinks();
   applyLang();
   openFromHash();   // 🔗 লিংকে #p=ID থাকলে সেই প্রোডাক্ট সরাসরি খুলবে
+  showPromo();      // 🎁 প্রথম-ভিজিট অফার পপআপ (সেশনে একবার)
 }
 
 /* ---- রিভিউ লিখুন মডাল ---- */
@@ -1876,7 +2064,48 @@ function showPageModal(title, image, content){
   const m = document.querySelector('#pageOverlay .modal'); if(m) m.scrollTop = 0;
   $("#pageOverlay").classList.add('show');
 }
-function openPage(key){ const pg = PAGES[key]; if(!pg) return; showPageModal(pg.title || t('pg_'+key), '', pg.content); }
+function openPage(key){ const pg = PAGES[key]; if(!pg) return; if(key==='faq'){ showFaqModal(pg.title || t('pg_faq'), pg.content); return; } showPageModal(pg.title || t('pg_'+key), '', pg.content); }
+
+/* ---- FAQ: Q/A পার্স করে accordion বানায় ----
+   শিটের content ঘরে প্রতিটা প্রশ্ন-উত্তর এভাবে লিখুন:
+     প্রশ্ন: ডেলিভারি কত দিনে হয়?
+     উত্তর: ঢাকার ভেতরে ১-২ দিন, বাইরে ৩-৪ দিন।
+   (Q:/A: বা প্রশ্ন:/উত্তর: — দুইটাই চলবে; মার্কার না দিলে প্রতিটা ব্লকের প্রথম লাইন প্রশ্ন ধরা হবে) */
+function parseFaq(s){
+  const text = String(s||'').replace(/\r/g,'');
+  const qRe=/^\s*(?:Q\s*[:.\-)]|প্রশ্ন\s*[:.\-)]|প্র\s*[:.\-)])\s*(.*)$/i;
+  const aRe=/^\s*(?:A\s*[:.\-)]|Ans\s*[:.\-)]|উত্তর\s*[:.\-)]|উ\s*[:.\-)])\s*(.*)$/i;
+  const items=[]; let cur=null;
+  text.split('\n').forEach(line=>{
+    const qm=line.match(qRe), am=line.match(aRe);
+    if(qm){ if(cur) items.push(cur); cur={q:qm[1].trim(), a:''}; }
+    else if(am && cur){ cur.a += (cur.a?'\n':'') + am[1].trim(); }
+    else if(cur){ cur.a += (cur.a?'\n':'') + line.trim(); }
+  });
+  if(cur) items.push(cur);
+  // মার্কার না থাকলে: ফাঁকা লাইনে আলাদা ব্লক, প্রতিটার প্রথম লাইন = প্রশ্ন
+  if(!items.length){
+    text.split(/\n{2,}/).map(b=>b.trim()).filter(Boolean).forEach(b=>{
+      const l=b.split('\n'); const q=(l.shift()||'').trim(); const a=l.join('\n').trim();
+      if(q) items.push({q,a});
+    });
+  }
+  return items.map(it=>({q:it.q, a:(it.a||'').trim()})).filter(it=>it.q);
+}
+function showFaqModal(title, content){
+  $("#pgTitle").textContent = title || t('pg_faq');
+  $("#pgImgWrap").innerHTML = '';
+  const items = parseFaq(content);
+  $("#pgBody").innerHTML = items.length
+    ? '<div class="faq">' + items.map(it=>`<div class="faq-item">
+        <button class="faq-q" type="button" onclick="toggleFaq(this)"><span>${esc(it.q)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="faq-a">${it.a?fmtContent(it.a):''}</div>
+      </div>`).join('') + '</div>'
+    : fmtContent(content||'');
+  const m = document.querySelector('#pageOverlay .modal'); if(m) m.scrollTop = 0;
+  $("#pageOverlay").classList.add('show');
+}
+function toggleFaq(btn){ const it=btn.closest('.faq-item'); if(it) it.classList.toggle('open'); }
 function openBlogPost(i){ const b = BLOG[i]; if(!b) return; showPageModal(b.title, b.image, (b.date ? b.date + '\n\n' : '') + b.content); }
 function closePage(){ $("#pageOverlay").classList.remove('show'); }
 
@@ -1911,8 +2140,11 @@ function buildFooterLinks(){
     trackBtn.style.display = trackOn ? '' : 'none';
   }
   let h = '';
-  ['privacy','terms','refund','shipping'].forEach(k=>{
-    if(PAGES[k]) h += `<a href="#" onclick="openPage('${k}');return false;">\uD83D\uDCC4 ${esc(PAGES[k].title || t('pg_'+k))}</a>`;
+  ['privacy','terms','refund','shipping','faq'].forEach(k=>{
+    if(PAGES[k]){
+      const icon = k==='faq' ? '\u2753' : '\uD83D\uDCC4';
+      h += `<a href="#" onclick="openPage('${k}');return false;">${icon} ${esc(PAGES[k].title || t('pg_'+k))}</a>`;
+    }
   });
   if(BLOG.length){
     h += `<a href="#blogWrap" onclick="document.getElementById('blogWrap').scrollIntoView({behavior:'smooth'});return false;">\uD83D\uDCD6 ${t('blog_link')}</a>`;
@@ -2145,7 +2377,7 @@ function render(){
       ? `<button class="order-btn soldout-btn" disabled>${t('out_of_stock')}</button>`
       : `<button class="order-btn" data-cart="${p.id}">${t('add_to_cart')}</button>`;
     return `<div class="card${p.soldout?' is-sold':''}" data-id="${p.id}" style="cursor:pointer">
-      <div class="thumb">${showPctFlag?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${soldFlag}${multi}${img}</div>
+      <div class="thumb">${showPctFlag?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${soldFlag}${multi}${img}<button class="heart-btn${isWished(p.id)?' on':''}" type="button" data-wish="${p.id}" aria-label="Wishlist" aria-pressed="${isWished(p.id)?'true':'false'}"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div>
       <div class="body">
         ${p.category?`<div class="cat-tag">${p.category}</div>`:""}
         <div class="title">${p.name}</div>
@@ -2161,6 +2393,7 @@ function render(){
     </div>`;
   }).join("");
   $("#grid").querySelectorAll("[data-cart]").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); addToCart(b.dataset.cart); });
+  $("#grid").querySelectorAll("[data-wish]").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); b.classList.add('heart-pop'); setTimeout(()=>b.classList.remove('heart-pop'),300); toggleWish(b.dataset.wish); });
   $("#grid").querySelectorAll(".card").forEach(c=>c.onclick=()=>openModal(c.dataset.id));
 }
 
@@ -2215,9 +2448,9 @@ function openModal(id, fromLink){
   const mpInner = mSale
     ? `${bnNum(current.price)}${cur}<span class="m-was">${bnNum(current.old_price)}${cur}</span>${mExtra}`
     : `${bnNum(current.price)}${cur}`;
-  $("#mHead").innerHTML = `<div class="gallery">${galInner}</div><div class="m-title"><h3>${current.name}</h3><div class="mp">${mpInner}</div><button type="button" class="copy-link-btn" onclick="copyProductLink(this)">🔗 <span>${t('copy_link')}</span></button></div>`;
-  // 🔗 প্রোডাক্ট ডিপ-লিংক: URL-এ #p=ID বসাও — এই লিংক শেয়ার করলে সরাসরি এই প্রোডাক্ট খুলবে
-  try{ history.replaceState(null, '', '#p=' + encodeURIComponent(current.id)); }catch(e){ location.hash = 'p=' + encodeURIComponent(current.id); }
+  $("#mHead").innerHTML = `<div class="gallery">${galInner}</div><div class="m-title"><h3>${current.name}</h3><div class="mp">${mpInner}</div><button type="button" class="copy-link-btn" onclick="copyProductLink(this)">🔗 <span>${t('copy_link')}</span></button><button type="button" class="m-heart${isWished(current.id)?' on':''}" data-wish="${current.id}" onclick="toggleWish('${current.id}')"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> <span data-wishlabel>${isWished(current.id)?t('wish_saved'):t('wish_save')}</span></button></div>`;
+  // 🔗 প্রোডাক্ট ডিপ-লিংক: URL-এ #p=slug বসাও — কপি লিংকের সাথে মিল রেখে
+  try{ history.replaceState(null, '', '#p=' + encodeURIComponent(productSlug(current))); }catch(e){ location.hash = 'p=' + encodeURIComponent(productSlug(current)); }
   renderGalMain();
   const ovModal = document.querySelector('#overlay .modal'); if(ovModal) ovModal.scrollTop = 0;
   const desc = (current.description||"").trim();
@@ -2325,8 +2558,54 @@ function closeModal(){
    - লিংক শেয়ার করলে সরাসরি সেই প্রোডাক্টের মডাল খুলবে
    - মডালের "লিংক কপি" বাটনে ক্লিক করলে শেয়ারযোগ্য লিংক কপি হবে
    ============================================================ */
+/* বাংলা নাম → ইংলিশ (ল্যাটিন) লিপ্যন্তর — slug সবসময় ইংরেজিতে রাখার জন্য */
+function bnToLatin(s){
+  const C={'ক':'k','খ':'kh','গ':'g','ঘ':'gh','ঙ':'ng','চ':'ch','ছ':'chh','জ':'j','ঝ':'jh','ঞ':'n','ট':'t','ঠ':'th','ড':'d','ঢ':'dh','ণ':'n','ত':'t','থ':'th','দ':'d','ধ':'dh','ন':'n','প':'p','ফ':'f','ব':'b','ভ':'v','ম':'m','য':'j','র':'r','ল':'l','শ':'sh','ষ':'sh','স':'s','হ':'h'};
+  const V={'অ':'o','আ':'a','ই':'i','ঈ':'i','উ':'u','ঊ':'u','ঋ':'ri','এ':'e','ঐ':'oi','ও':'o','ঔ':'ou'};
+  const K={'া':'a','ি':'i','ী':'i','ু':'u','ূ':'u','ৃ':'ri','ে':'e','ৈ':'oi','ো':'o','ৌ':'ou'};
+  const D={'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+  const VIRAMA='\u09CD', NUKTA='\u09BC', ANUSVARA='\u0982', VISARGA='\u0983', CHANDRA='\u0981', KHANDA='\u09CE';
+  const arr=Array.from(String(s||"")); let out="";
+  const isCons=c=>!!C[c];
+  for(let i=0;i<arr.length;i++){
+    const ch=arr[i];
+    if(C[ch]){
+      let rom=C[ch];
+      if(arr[i+1]===NUKTA){ if(ch==='য')rom='y'; else if(ch==='ড')rom='r'; else if(ch==='ঢ')rom='rh'; i++; }
+      out+=rom;
+      const nx=arr[i+1];
+      if(nx===VIRAMA){ i++; }
+      else if(K[nx]){ out+=K[nx]; i++; }
+      else {
+        const wordEnd=(nx===undefined)||(nx===' ')||(!isCons(nx)&&!V[nx]&&!K[nx]&&!D[nx]&&nx!==ANUSVARA&&nx!==NUKTA);
+        if(!wordEnd) out+='o';
+      }
+    }
+    else if(V[ch]) out+=V[ch];
+    else if(D[ch]) out+=D[ch];
+    else if(ch===ANUSVARA) out+='ng';
+    else if(ch===VISARGA) out+='h';
+    else if(ch===KHANDA) out+='t';
+    else if(ch===CHANDRA){}
+    else if(/[a-zA-Z0-9]/.test(ch)) out+=ch;
+    else out+=' ';
+  }
+  return out;
+}
+/* নাম থেকে পরিষ্কার ইংলিশ slug — শুধু a-z 0-9 আর হাইফেন */
+function slugify(s){
+  return bnToLatin(String(s||"")).toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]+/g,"")
+    .replace(/[\s_]+/g,"-")
+    .replace(/-+/g,"-")
+    .replace(/^-+|-+$/g,"");
+}
+function productSlug(p){ return p ? (slugify(p.name) || ('product-'+p.id)) : ""; }
+/* লিঙ্কে এখন প্রোডাক্ট নাম (slug) বসে — কোড/আইডি নয় */
 function productLink(id){
-  return location.origin + location.pathname + location.search + '#p=' + encodeURIComponent(id);
+  const p = PRODUCTS.find(x=>String(x.id)===String(id)) || (current && String(current.id)===String(id) ? current : null);
+  const key = p ? productSlug(p) : id;
+  return location.origin + location.pathname + location.search + '#p=' + encodeURIComponent(key);
 }
 function copyProductLink(btn){
   if(!current) return;
@@ -2340,9 +2619,11 @@ function copyProductLink(btn){
 function openFromHash(){
   const m = location.hash.match(/^#p=(.+)$/);
   if(m){
-    const id = decodeURIComponent(m[1]);
-    const p = PRODUCTS.find(x=>String(x.id)===String(id));
-    if(p) openModal(id, true);   // লিংক থেকে এসেছে → অর্ডার বাটন উপরে
+    const key = decodeURIComponent(m[1]);
+    // আগে পুরনো লিঙ্কের জন্য সরাসরি id, না পেলে নাম-slug মিলিয়ে খোঁজে
+    let p = PRODUCTS.find(x=>String(x.id)===String(key));
+    if(!p){ const ks = slugify(key); p = PRODUCTS.find(x=>productSlug(x)===ks); }
+    if(p) openModal(p.id, true);   // লিংক থেকে এসেছে → অর্ডার বাটন উপরে
   } else {
     // hash মুছে গেলে (ব্যাক বাটন ইত্যাদি) — খোলা মডাল বন্ধ করো
     const ov = document.getElementById('overlay');
@@ -2388,6 +2669,63 @@ $("#modalBuyBtn").onclick=()=>{
 };
 
 $("#search").oninput=render;
+
+/* ---------- লোগো ক্লিক → পুরো সাইট রিফ্রেশ ---------- */
+function reloadSite(e){
+  if(e) e.preventDefault();
+  // hash থাকলে আগে মুছে দাও যাতে রিফ্রেশের পর কোনো মডাল না খোলে, তারপর reload
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){}
+  location.reload();
+}
+/* ---------- Back to top ---------- */
+function scrollTopSmooth(){ window.scrollTo({top:0, behavior:'smooth'}); }
+(function(){
+  const btn=document.getElementById('toTop');
+  if(!btn) return;
+  const onScroll=()=>{ btn.classList.toggle('show', (window.scrollY||document.documentElement.scrollTop) > 400); };
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+
+/* ---------- প্রথম-ভিজিট অফার পপআপ ---------- */
+function promoSeen(){
+  try{ return sessionStorage.getItem('ilm_promo_seen')==='1'; }
+  catch(e){ return !!window.__promoShown; }     // sessionStorage ব্লকড হলে মেমরি-ফ্ল্যাগ
+}
+function markPromoSeen(){
+  try{ sessionStorage.setItem('ilm_promo_seen','1'); }
+  catch(e){ window.__promoShown=true; }
+}
+function showPromo(){
+  const img=(S.popup_image||'').toString().trim();
+  if(!img) return;                              // ছবি না দিলে পপআপ নেই
+  if(promoSeen()) return;                       // এই সেশনে আগে দেখানো হয়েছে
+  const ov=document.getElementById('promoOverlay');
+  const wrap=document.getElementById('promoImgWrap');
+  const titleEl=document.getElementById('promoTitle');
+  const cta=document.getElementById('promoCta');
+  if(!ov||!wrap||!cta) return;
+  // প্রোডাক্ট ডিপ-লিংকে কোনো মডাল খোলা থাকলে পপআপ দেখাবে না (দুটো একসাথে নয়)
+  const pm=document.getElementById('overlay');
+  if(pm && pm.classList.contains('show')) return;
+  wrap.innerHTML=`<img src="${imgURL(img)}" alt="offer" onerror="this.style.display='none'">`;
+  const ttl=(S.popup_title||'').toString().trim();
+  if(ttl){ titleEl.textContent=ttl; titleEl.style.display='block'; }
+  else { titleEl.style.display='none'; }
+  cta.textContent=(S.popup_button||'').toString().trim() || t('popup_shop');
+  ov.classList.add('show');
+  markPromoSeen();
+}
+function closePromo(){ const ov=document.getElementById('promoOverlay'); if(ov) ov.classList.remove('show'); }
+function promoShopNow(){
+  closePromo();
+  const link=(S.popup_link||'').toString().trim();
+  if(link){ if(/^https?:/i.test(link)) window.open(link,'_blank'); else location.href=link; return; }
+  scrollToProducts();   // ডিফল্ট: প্রোডাক্ট সেকশনে স্ক্রল
+}
+// কালো ব্যাকগ্রাউন্ডে ক্লিক করলেও পপআপ বন্ধ হবে
+document.addEventListener('click', e=>{ if(e.target && e.target.id==='promoOverlay') closePromo(); });
+
 boot();
 </script>
 </body>
