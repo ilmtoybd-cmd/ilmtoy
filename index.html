@@ -301,6 +301,13 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 
 /* ---------- Shop By Category ---------- */
 .shopcat-wrap{margin-top:6px}
+/* collapsible dropdown হেডার (ট্যাপ করে খোলা/বন্ধ) */
+.scat-head{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;align-items:center}
+.scat-head h2{transition:color .15s}
+.scat-head:hover h2{color:var(--accent-deep)}
+.scat-chevron{font-size:1.1rem;font-weight:800;color:var(--accent-deep);transition:transform .25s ease;line-height:1}
+.shopcat-wrap.collapsed .scat-chevron{transform:rotate(-90deg)}
+.shopcat-wrap.collapsed .shopcat{display:none}
 .shopcat{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
 .scat{display:flex;flex-direction:column;align-items:center;gap:9px;padding:18px 12px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;transition:.18s;font-family:inherit;text-align:center}
 .scat:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--accent)}
@@ -672,13 +679,13 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
   </div>
 </div>
 
-<div class="wrap shopcat-wrap" id="shopcatWrap" style="display:none">
-  <div class="section-h"><h2 data-i18n="shop_by_cat">Shop By Category</h2></div>
+<div class="wrap shopcat-wrap collapsed" id="shopcatWrap" style="display:none">
+  <div class="section-h scat-head" onclick="toggleShopSec('shopcatWrap')"><h2 data-i18n="shop_by_cat">Shop By Category</h2><span class="scat-chevron" aria-hidden="true">▾</span></div>
   <div class="shopcat" id="shopcat"></div>
 </div>
 
-<div class="wrap shopcat-wrap" id="shopageWrap" style="display:none">
-  <div class="section-h"><h2 data-i18n="shop_by_age">Shop By Age</h2></div>
+<div class="wrap shopcat-wrap collapsed" id="shopageWrap" style="display:none">
+  <div class="section-h scat-head" onclick="toggleShopSec('shopageWrap')"><h2 data-i18n="shop_by_age">Shop By Age</h2><span class="scat-chevron" aria-hidden="true">▾</span></div>
   <div class="shopcat" id="shopage"></div>
 </div>
 
@@ -2255,6 +2262,7 @@ function selectCategory(cat){
   activeAge = "all";
   $("#cats").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on", x.dataset.c===cat));
   $("#secTitle").textContent = cat==="all" ? t('all_products') : cat;
+  document.querySelectorAll('.shopcat-wrap').forEach(w=>w.classList.add('collapsed'));
   render();
   scrollToProducts();
 }
@@ -2265,9 +2273,13 @@ function selectAge(age){
   activeCat = "all";
   $("#cats").querySelectorAll(".chip").forEach(x=>x.classList.toggle("on", x.dataset.c==="all"));
   $("#secTitle").textContent = age==="all" ? t('all_products') : (age + " " + t('years'));
+  document.querySelectorAll('.shopcat-wrap').forEach(w=>w.classList.add('collapsed'));
   render();
   scrollToProducts();
 }
+
+/* Shop By Category / Age — dropdown হেডার ট্যাপ করলে খোলা/বন্ধ হয় */
+function toggleShopSec(id){ const w=document.getElementById(id); if(w) w.classList.toggle('collapsed'); }
 
 /* Shop By Category — শিটের ক্যাটাগরি থেকে অটো টাইল */
 function buildShopCats(){
@@ -2630,7 +2642,9 @@ function copyProductLink(btn){
 function openFromHash(){
   const m = location.hash.match(/^#p=(.+)$/);
   if(m){
-    const key = decodeURIComponent(m[1]);
+    // ফেসবুক/মেসেঞ্জার শেয়ারে হ্যাশের পরে fbclid বা অন্য জাঙ্ক জুড়ে যেতে পারে
+    // (যেমন #p=slug?fbclid=... বা #p=slug&utm=...) — slug-এ কখনও ? & / থাকে না, তাই ছেঁটে নিই
+    let key = decodeURIComponent(m[1]).split(/[?&#/]/)[0].trim();
     // আগে পুরনো লিঙ্কের জন্য সরাসরি id, না পেলে নাম-slug মিলিয়ে খোঁজে
     let p = PRODUCTS.find(x=>String(x.id)===String(key));
     if(!p){ const ks = slugify(key); p = PRODUCTS.find(x=>productSlug(x)===ks); }
@@ -2703,7 +2717,17 @@ $("#modalBuyBtn").onclick=()=>{
   openCart();
 };
 
-$("#search").oninput=render;
+/* সার্চ করলে রেন্ডারের পর প্রোডাক্ট সেকশন ভিউতে উপরে নিয়ে আসে (নিচে পড়ে থাকে না) */
+function onSearchInput(){
+  render();
+  const q = $("#search").value.trim();
+  if(!q) return;
+  const sec = document.getElementById('productsSection');
+  if(!sec) return;
+  // শুধু তখনই স্ক্রল করি যখন সেকশন হেডারের নিচে আছে — উপরে থাকলে বারবার লাফাবে না
+  if(sec.getBoundingClientRect().top > 90) sec.scrollIntoView({behavior:'smooth', block:'start'});
+}
+$("#search").oninput=onSearchInput;
 
 /* ---------- লোগো ক্লিক → পুরো সাইট রিফ্রেশ ---------- */
 function reloadSite(e){
