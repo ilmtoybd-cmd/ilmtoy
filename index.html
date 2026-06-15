@@ -232,22 +232,24 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 }
 
 
-/* ---------- Trust badges ---------- */
-.trust{max-width:1180px;margin:20px auto 0;padding:26px 18px 8px;text-align:center}
-.trust .seal{width:112px;height:auto;display:block;margin:0 auto 16px;filter:drop-shadow(0 6px 14px rgba(255,107,74,.3))}
-.trust-list{display:inline-grid;grid-template-columns:1fr 1fr;gap:14px 46px;text-align:left}
-.trust-point{display:flex;align-items:center;gap:10px;font-weight:600;font-size:1rem;color:var(--ink)}
-.trust-point svg{width:20px;height:20px;color:var(--accent);flex-shrink:0}
-@media(max-width:640px){.trust .seal{width:90px}.trust-list{grid-template-columns:1fr;gap:10px}.trust-point{font-size:.9rem}}
+/* ---------- Trust strip (হিরোর নিচে পাতলা বার) ---------- */
+.trust-strip{max-width:1180px;margin:14px auto 0;padding:0 18px}
+.trust-bar{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow)}
+.trust-seal-sm{width:44px;height:auto;flex:0 0 auto;filter:drop-shadow(0 4px 9px rgba(255,107,74,.28))}
+.trust-bar .trust-list{display:flex;flex-wrap:wrap;gap:8px 10px;flex:1;min-width:0}
+.trust-point{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:.86rem;color:var(--ink);background:var(--accent-soft);border-radius:50px;padding:6px 13px}
+.trust-point svg{width:16px;height:16px;color:var(--green);flex-shrink:0}
+@media(max-width:640px){
+  .trust-strip{padding:0 12px}
+  .trust-bar{gap:10px;padding:9px 11px}
+  .trust-seal-sm{width:38px}
+  .trust-bar .trust-list{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .trust-bar .trust-list::-webkit-scrollbar{display:none}
+  .trust-point{flex:0 0 auto;font-size:.8rem;padding:6px 11px}
+}
 
-/* ব্যানারের নিচে: ট্রাস্ট (উপরে) + রিভিউ (নিচে) — উপরে-নিচে স্ট্যাক */
-.top-row{display:block;margin-top:18px}
-.top-row .trust{max-width:1180px;margin:8px auto 0;padding:24px 18px 4px;background:none;border:none;border-radius:0;box-shadow:none;text-align:center}
-.top-row .trust .seal{width:96px;margin:0 auto 14px}
-.top-row .trust-list{display:inline-grid;grid-template-columns:1fr 1fr;gap:14px 46px;text-align:left}
-.top-row .reviews-wrap{margin:30px auto 0;padding:0;max-width:1180px}
-.top-row .review-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
-@media(max-width:640px){.top-row .trust-list{grid-template-columns:1fr;gap:10px}}
+/* কাস্টমার রিভিউ — প্রোডাক্টের নিচে সেকশন */
+.reviews-wrap{margin-top:8px}
 
 /* ---------- Grid ---------- */
 .wrap{max-width:1180px;margin:0 auto;padding:18px}
@@ -301,13 +303,23 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 
 /* ---------- Shop By Category ---------- */
 .shopcat-wrap{margin-top:6px}
-/* collapsible dropdown হেডার (ট্যাপ করে খোলা/বন্ধ) */
-.scat-head{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;align-items:center}
-.scat-head h2{transition:color .15s}
-.scat-head:hover h2{color:var(--accent-deep)}
-.scat-chevron{font-size:1.1rem;font-weight:800;color:var(--accent-deep);transition:transform .25s ease;line-height:1}
+/* collapsible dropdown — স্পষ্ট ট্যাপযোগ্য বার (visitor সহজেই বুঝবে ভিতরে আছে) */
+.scat-head{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--card);border:1.5px solid var(--line);border-radius:16px;
+  padding:13px 16px;box-shadow:var(--shadow);transition:.18s;margin:10px 2px 0}
+.scat-head:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.scat-head-l{display:flex;align-items:center;gap:10px;min-width:0}
+.scat-head-ic{font-size:1.3rem;line-height:1}
+.scat-head h2{font-size:1.12rem;margin:0}
+.scat-count{font-size:.74rem;font-weight:700;color:var(--accent-deep);background:var(--accent-soft);
+  padding:3px 9px;border-radius:50px;white-space:nowrap}
+.scat-chevron{flex-shrink:0;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;background:var(--accent-soft);color:var(--accent-deep);transition:transform .25s ease}
+.scat-chevron svg{width:16px;height:16px}
 .shopcat-wrap.collapsed .scat-chevron{transform:rotate(-90deg)}
 .shopcat-wrap.collapsed .shopcat{display:none}
+.shopcat-wrap:not(.collapsed) .shopcat{margin-top:14px}
 .shopcat{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
 .scat{display:flex;flex-direction:column;align-items:center;gap:9px;padding:18px 12px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;transition:.18s;font-family:inherit;text-align:center}
 .scat:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--accent)}
@@ -644,14 +656,10 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
   </div>
 </div>
 
-<div class="wrap blog-wrap" id="blogWrap" style="display:none">
-  <div class="section-h"><h2 data-i18n="blog_title">👨‍👩‍👧 Parenting Blog</h2></div>
-  <div class="blog-row" id="blogRow"></div>
-</div>
-
-<div class="wrap top-row" id="topRow">
-  <div class="trust">
-    <svg class="seal" viewBox="0 0 120 124" xmlns="http://www.w3.org/2000/svg">
+<!-- হিরোর নিচে পাতলা ট্রাস্ট স্ট্রিপ — বাঁয়ে ছোট সিল + ডানে ট্রাস্ট পয়েন্ট -->
+<div class="trust-strip" id="trustStrip">
+  <div class="trust-bar">
+    <svg class="trust-seal-sm" viewBox="0 0 120 124" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <g fill="#FFB89F">
         <circle cx="106" cy="58" r="9"/><circle cx="100" cy="81" r="9"/><circle cx="83" cy="98" r="9"/>
         <circle cx="60" cy="104" r="9"/><circle cx="37" cy="98" r="9"/><circle cx="20" cy="81" r="9"/>
@@ -669,23 +677,21 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
     </svg>
     <div class="trust-list" id="trust"></div>
   </div>
-  <div class="reviews-wrap" id="reviewsSection" style="display:none">
-    <div class="reviews-head">
-      <h2 data-i18n="reviews_title">⭐ Customer Reviews</h2>
-      <p class="reviews-sub" data-i18n="reviews_sub">What our happy customers say</p>
-      <button class="review-add-btn" id="openReviewBtn" data-i18n="write_review" style="display:none">✍️ Write a Review</button>
-    </div>
-    <div id="reviewGrid" class="review-grid"></div>
-  </div>
 </div>
 
 <div class="wrap shopcat-wrap collapsed" id="shopcatWrap" style="display:none">
-  <div class="section-h scat-head" onclick="toggleShopSec('shopcatWrap')"><h2 data-i18n="shop_by_cat">Shop By Category</h2><span class="scat-chevron" aria-hidden="true">▾</span></div>
+  <div class="section-h scat-head" onclick="toggleShopSec('shopcatWrap')" role="button" tabindex="0">
+    <span class="scat-head-l"><span class="scat-head-ic">🗂️</span><h2 data-i18n="shop_by_cat">Shop By Category</h2><span class="scat-count" id="shopcatCount"></span></span>
+    <span class="scat-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></span>
+  </div>
   <div class="shopcat" id="shopcat"></div>
 </div>
 
 <div class="wrap shopcat-wrap collapsed" id="shopageWrap" style="display:none">
-  <div class="section-h scat-head" onclick="toggleShopSec('shopageWrap')"><h2 data-i18n="shop_by_age">Shop By Age</h2><span class="scat-chevron" aria-hidden="true">▾</span></div>
+  <div class="section-h scat-head" onclick="toggleShopSec('shopageWrap')" role="button" tabindex="0">
+    <span class="scat-head-l"><span class="scat-head-ic">🎂</span><h2 data-i18n="shop_by_age">Shop By Age</h2><span class="scat-count" id="shopageCount"></span></span>
+    <span class="scat-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg></span>
+  </div>
   <div class="shopcat" id="shopage"></div>
 </div>
 
@@ -706,6 +712,22 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
   </div>
   <div id="grid" class="grid"></div>
   <div id="status" class="loading" data-i18n="loading">Loading products...</div>
+</div>
+
+<!-- প্যারেন্টিং ব্লগ — প্রোডাক্টের নিচে -->
+<div class="wrap blog-wrap" id="blogWrap" style="display:none">
+  <div class="section-h"><h2 data-i18n="blog_title">👨‍👩‍👧 Parenting Blog</h2></div>
+  <div class="blog-row" id="blogRow"></div>
+</div>
+
+<!-- কাস্টমার রিভিউ — প্রোডাক্ট দেখার পর (social proof এখানে সবচেয়ে কার্যকর) -->
+<div class="wrap reviews-wrap" id="reviewsSection" style="display:none">
+  <div class="reviews-head">
+    <h2 data-i18n="reviews_title">⭐ Customer Reviews</h2>
+    <p class="reviews-sub" data-i18n="reviews_sub">What our happy customers say</p>
+    <button class="review-add-btn" id="openReviewBtn" data-i18n="write_review" style="display:none">✍️ Write a Review</button>
+  </div>
+  <div id="reviewGrid" class="review-grid"></div>
 </div>
 
 <!-- Review submit modal -->
@@ -1241,7 +1263,7 @@ function applyConfig(){
     .filter(t=>t && (""+t).trim());
   if(trusts.length){
     $("#trust").innerHTML = trusts.map(t=>`<div class="trust-point">${tIcon}<span>${t}</span></div>`).join("");
-  } else { $("#trust").parentNode.style.display="none"; }
+  } else { const ts=document.getElementById("trustStrip"); if(ts) ts.style.display="none"; }
 
   // Hero banner slider — শেষ থেকে প্রথমে ফেরা স্মুথ (প্রথম স্লাইডের ক্লোন শেষে যোগ করে)
   const banners = [S.banner1,S.banner2,S.banner3,S.banner4,S.banner5].filter(b=>b && (""+b).trim());
@@ -2294,6 +2316,7 @@ function buildShopCats(){
   [...inProducts].forEach(c=>{ if(!seen.has(c)){ seen.add(c); cats.push(c); } });
   if(cats.length < 2){ wrap.style.display="none"; return; }
   wrap.style.display="";
+  const ccEl=document.getElementById("shopcatCount"); if(ccEl) ccEl.textContent=bnNum(cats.length);
   const palette = ['#FF6B4A','#16A34A','#F59E0B','#6366F1','#EC4899','#0EA5E9','#8B5CF6','#EF4444'];
   const pickEmoji = c=>{
     const s = (""+c).toLowerCase();
@@ -2342,6 +2365,7 @@ function buildShopAges(){
     .sort((a,b)=>ageStartNum(a)-ageStartNum(b));
   if(ages.length < 2){ wrap.style.display="none"; return; }
   wrap.style.display="";
+  const acEl=document.getElementById("shopageCount"); if(acEl) acEl.textContent=bnNum(ages.length);
   const palette = ['#0EA5E9','#16A34A','#F59E0B','#EC4899','#8B5CF6','#FF6B4A','#6366F1','#EF4444'];
   box.innerHTML = ages.map((a,i)=>{
     const col = palette[i % palette.length];
