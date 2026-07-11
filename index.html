@@ -43,6 +43,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ============================================================
    থিম — রঙ বদলাতে চাইলে এখানে বদলাও
@@ -275,6 +276,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-size:2.6rem;font-weight:800;color:var(--accent);opacity:.55}
 .saleflag{position:absolute;top:10px;left:10px;background:var(--green);color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12)}
 .sold-flag{position:absolute;top:10px;left:10px;background:#6B5E50;color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12);z-index:2}
+.best-flag{position:absolute;bottom:10px;left:10px;background:linear-gradient(135deg,#FF6B4A,#E8492A);color:#fff;font-weight:700;font-size:.72rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.18);z-index:2}
 .card.is-sold .thumb img{filter:grayscale(.65);opacity:.72}
 .soldout-btn{background:#D8D0C5 !important;color:#7A6F60 !important;cursor:not-allowed}
 .soldout-btn:hover{background:#D8D0C5 !important;transform:none !important;filter:none !important}
@@ -952,6 +954,26 @@ const CONFIG = {
   reviewEndpoint : "https://script.google.com/macros/s/AKfycbwShHiVyqnMAg-RUWlIUd61Jyl0MceBuz7E8_I4rwZ4rxC1-87T_lzniX_M11hvvIxbeA/exec",
 };
 
+/* ══ Supabase ডেটা সোর্স (ডেমো) — Sheet-এর বদলে এখান থেকে পড়বে ══ */
+const SB_URL = "https://oygxxkpwnbzlinxzqtxj.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95Z3h4a3B3bmJ6bGlueHpxdHhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NDc0NDMsImV4cCI6MjA5OTMyMzQ0M30.LonMKVT7fnh7HK0dz72rzw3_YYmZokrhUKg1c_B1tiw";
+const SBc = window.supabase.createClient(SB_URL, SB_KEY);
+async function sbFetch(kind){
+  try{
+    let q;
+    if(kind==='products')      q = SBc.from('products').select('*').order('sort_order',{ascending:true});
+    else if(kind==='settings') q = SBc.from('settings').select('key,value');
+    else if(kind==='coupons')  q = SBc.from('coupons').select('code,type,value,min:min_amount').eq('active',true);
+    else if(kind==='reviews')  q = SBc.from('reviews').select('name,profession,product,rating,review,photo,video,status,date:created_at');
+    else if(kind==='pages')    q = SBc.from('pages').select('page,title,content,image');
+    else if(kind==='blog')     q = SBc.from('blog_posts').select('title,date:post_date,image,content,status');
+    else return [];
+    const { data, error } = await q;
+    if(error){ console.warn('sbFetch', kind, error.message); return []; }
+    return data || [];
+  }catch(e){ console.warn('sbFetch', kind, e); return []; }
+}
+
 /* শিট লিঙ্ক না দেওয়া পর্যন্ত এই ডিফল্ট মান দিয়ে সাইট দেখাবে */
 const DEFAULTS = {
   store_name:"Ilm Toy", logo_url:"", phone:"01XXXXXXXXX", whatsapp:"8801XXXXXXXXX",
@@ -1356,7 +1378,7 @@ async function fetchCSV(url){
 async function loadSettings(){
   if(!CONFIG.settingsCsvUrl) return;
   try{
-    const rows = await fetchCSV(CONFIG.settingsCsvUrl);   // key,value columns
+    const rows = await sbFetch('settings');
     rows.forEach(r=>{ if(r.key) S[r.key.trim()] = (r.value||"").trim(); });
   }catch(e){}
 }
@@ -1364,7 +1386,7 @@ async function loadSettings(){
 async function loadCoupons(){
   if(!CONFIG.couponsCsvUrl) return;
   try{
-    const rows = await fetchCSV(CONFIG.couponsCsvUrl);    // code,type,value,min
+    const rows = await sbFetch('coupons');
     const list = rows.filter(r=>r.code).map(r=>({
       code:r.code.trim(),
       type:(r.type||"flat").trim().toLowerCase(),
@@ -1391,7 +1413,7 @@ function gatherMedia(d, bases, sep){
 async function loadProducts(){
   if(!CONFIG.productsCsvUrl){ PRODUCTS = SAMPLE; return; }
   try{
-    const data = await fetchCSV(CONFIG.productsCsvUrl);
+    const data = await sbFetch('products');
     PRODUCTS = data.map(d=>{
       const imgs = gatherMedia(d, ['image_url','image'], /[|\n,]+/).map(imgURL);
       const vids = gatherMedia(d, ['video','product_video'], /[|\n]+/);
@@ -1409,6 +1431,7 @@ async function loadProducts(){
         battery:(d.battery||d.needs_battery||"").toString().toLowerCase().trim(),
         battery_size:(d.battery_size||d.battery_type||"").toString().trim(),
         status:st,
+        bestseller:(d.bestseller===true||d.bestseller==='true'||d.bestseller===1),
         soldout:['soldout','sold out','stockout','stock out','out','out of stock','no stock','nostock'].includes(st)
       };
     }).filter(p=>p.name && p.status!=="hidden");
@@ -1420,7 +1443,7 @@ async function loadProducts(){
 async function loadReviews(){
   if(!CONFIG.reviewsCsvUrl) return;
   try{
-    const data = await fetchCSV(CONFIG.reviewsCsvUrl);
+    const data = await sbFetch('reviews');
     const ok = s => ['approved','approve','show','active','yes','published'].includes((s||"").toLowerCase().trim());
     REVIEWS = data.filter(d => (d.name||d.review) && ok(d.status)).map(d=>({
       name:(d.name||"").trim(),
@@ -1449,7 +1472,7 @@ function pageKeyOf(raw){
 async function loadPages(){
   if(!CONFIG.pagesCsvUrl) return;
   try{
-    const rows = await fetchCSV(CONFIG.pagesCsvUrl);
+    const rows = await sbFetch('pages');
     rows.forEach(r=>{
       const key = pageKeyOf(r.page || r.key || r.slug || r.title);
       const content = (r.content||"").trim();
@@ -1463,7 +1486,7 @@ let BLOG = [];
 async function loadBlog(){
   if(!CONFIG.blogCsvUrl) return;
   try{
-    const rows = await fetchCSV(CONFIG.blogCsvUrl);
+    const rows = await sbFetch('blog');
     BLOG = rows.filter(r=>{
       const st = (r.status||"active").toLowerCase().trim();
       return (r.title||"").trim() && (r.content||"").trim() && !['hidden','off','no','draft'].includes(st);
@@ -1882,21 +1905,17 @@ async function submitCartOrder(){
   const productList = CART.map(x=>`${x.name} x${x.qty}`).join(" | ");
   const qtyTotal = CART.reduce((s,x)=>s+x.qty,0);
   document.getElementById("cartSubmitBtn").disabled=true;
-  if(CONFIG.orderEndpoint){
-    try{
-      const fd=new URLSearchParams({
-        form:"order",
-        time:new Date().toLocaleString('en-GB'),
-        product:productList, qty:qtyTotal, price:"-",
-        subtotal:c.subtotal, coupon:couponCode, discount:c.discount,
-        delivery_area:locText, delivery_charge:c.ship, total:c.grand,
-        name, phone, address:addr, note,
-        order_id:orderId, payment_method:payMethodText,
-        trx_id:payTrxV, sender_number:paySenderV, payment_status:payStatus
-      });
-      fetch(CONFIG.orderEndpoint,{method:"POST",mode:"no-cors",body:fd});
-    }catch(e){}
-  }
+  try{
+    const items = CART.map(x=>({ id:x.id, name:x.name, qty:x.qty, price:x.price }));
+    await SBc.from('orders').insert({
+      order_id:orderId, customer_name:name, phone:phone, address:addr, note:note,
+      items:items, product_summary:productList, qty_total:qtyTotal,
+      subtotal:c.subtotal, coupon:couponCode, discount:c.discount,
+      delivery_area:locText, delivery_charge:c.ship, total:c.grand,
+      payment_method:payMethodText, trx_id:payTrxV, sender_number:paySenderV,
+      payment_status:payStatus
+    });
+  }catch(e){ console.warn('order insert', e); }
   // 📲 Settings শিটে order_whatsapp = on থাকলে অর্ডারটা WhatsApp-এও পাঠাবে
   try{
     const waOn = ['on','yes','true','1'].includes((S.order_whatsapp||'').toString().toLowerCase().trim());
@@ -1996,12 +2015,9 @@ function initReviewModal(){
     const product=($("#rvProduct")?$("#rvProduct").value:"").trim();
     if(!name || !rvRating || !text){ alert(t('review_fill')); return; }
     $("#rvSubmit").disabled=true;
-    if(CONFIG.reviewEndpoint){
-      try{
-        const fd=new URLSearchParams({ form:"review", time:new Date().toLocaleString('en-GB'), name, profession, product, rating:rvRating, review:text, status:"pending" });
-        fetch(CONFIG.reviewEndpoint,{method:"POST",mode:"no-cors",body:fd});
-      }catch(e){}
-    }
+    try{
+      await SBc.from('reviews').insert({ name:name, profession:profession, product:product, rating:rvRating, review:text, status:'pending' });
+    }catch(e){ console.warn('review insert', e); }
     $("#reviewForm").style.display="none";
     $("#reviewDone").style.display="block";
     // Settings শিটে review_message লিখলে সেটাও ধন্যবাদের নিচে দেখাবে
@@ -2209,10 +2225,9 @@ async function doTrack(){
   if(q.length < 4){ box.innerHTML = `<div class="trk-msg">${t('track_none')}</div>`; return; }
   box.innerHTML = `<div class="trk-msg">${t('track_searching')}</div>`;
   try{
-    const sep = CONFIG.orderEndpoint.indexOf('?')>-1 ? '&' : '?';
-    const res = await fetch(CONFIG.orderEndpoint + sep + 'action=track&q=' + encodeURIComponent(q));
-    const data = await res.json();
-    if(!data.found || !data.orders || !data.orders.length){ box.innerHTML = `<div class="trk-msg">${t('track_none')}</div>`; return; }
+    const { data:trows, error:terr } = await SBc.rpc('track_order', { q });
+    if(terr || !trows || !trows.length){ box.innerHTML = `<div class="trk-msg">${t('track_none')}</div>`; return; }
+    const data = { orders: trows.map(o=>({ order_id:o.order_id, status:o.status, payment_status:o.payment_status, total:o.total, product:o.product_summary, time:(o.created_at ? new Date(o.created_at).toLocaleString('en-GB') : '') })) };
     box.innerHTML = data.orders.map(o=>{
       const st = o.status || 'Pending';
       const paid = /confirm|paid|done|received|verified|yes|পরিশোধ/i.test(o.payment_status||'') || /deliver/i.test(st);
@@ -2410,6 +2425,7 @@ function render(){
       ? `<span class="multi-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M21 7v12a2 2 0 0 1-2 2H7"/></svg>${p.images.length}</span>`
       : "";
     const soldFlag = p.soldout ? `<span class="sold-flag">${t('out_of_stock')}</span>` : "";
+    const bestFlag = (p.bestseller && !p.soldout) ? `<span class="best-flag">🔥 Best Seller</span>` : "";
     const saveAmt = sale ? (p.old_price - p.price) : 0;
     const dmode = discMode();
     const showPctFlag = sale && !p.soldout && (dmode==='percent'||dmode==='both');
@@ -2418,7 +2434,7 @@ function render(){
       ? `<button class="order-btn soldout-btn" disabled>${t('out_of_stock')}</button>`
       : `<button class="order-btn" data-cart="${p.id}">${t('add_to_cart')}</button>`;
     return `<div class="card${p.soldout?' is-sold':''}" data-id="${p.id}" style="cursor:pointer">
-      <div class="thumb">${showPctFlag?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${soldFlag}${multi}${img}<button class="heart-btn${isWished(p.id)?' on':''}" type="button" data-wish="${p.id}" aria-label="Wishlist" aria-pressed="${isWished(p.id)?'true':'false'}"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div>
+      <div class="thumb">${showPctFlag?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${soldFlag}${bestFlag}${multi}${img}<button class="heart-btn${isWished(p.id)?' on':''}" type="button" data-wish="${p.id}" aria-label="Wishlist" aria-pressed="${isWished(p.id)?'true':'false'}"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div>
       <div class="body">
         ${p.category?`<div class="cat-tag">${p.category}</div>`:""}
         <div class="title">${p.name}</div>

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ilm Toy — Admin Panel</title>
+
+<!-- ════════════════════════════════════════════════════════════
+     Step 1: Put your Supabase details in the two lines below.
+     Find them at: Supabase Dashboard → Project Settings → API
+       • Project URL      → SUPABASE_URL
+       • anon public key   → SUPABASE_ANON_KEY  (public, safe to keep in the file)
+     ════════════════════════════════════════════════════════════ -->
+<script>
+  const SUPABASE_URL      = "https://oygxxkpwnbzlinxzqtxj.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95Z3h4a3B3bmJ6bGlueHpxdHhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NDc0NDMsImV4cCI6MjA5OTMyMzQ0M30.LonMKVT7fnh7HK0dz72rzw3_YYmZokrhUKg1c_B1tiw";
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#FFF8F0; --card:#FFFFFF; --ink:#2A2118; --soft:#6B5E50;
+  --line:#EFE3D6; --accent:#FF6B4A; --accent-deep:#E8492A; --accent-soft:#FFE7E0;
+  --green:#16A34A; --green-soft:#DCFCE7; --amber:#B45309; --amber-soft:#FEF3C7;
+  --blue:#2563EB; --blue-soft:#DBEAFE; --red:#DC2626; --red-soft:#FEE2E2;
+  --radius:16px; --shadow:0 6px 24px rgba(120,80,40,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Hind Siliguri',system-ui,sans-serif; background:var(--bg); color:var(--ink);
+  font-size:15px; line-height:1.55;
+}
+h1,h2,h3,.disp{font-family:'Baloo Da 2',sans-serif;font-weight:700;letter-spacing:.2px}
+button{font-family:inherit;cursor:pointer}
+a{color:var(--accent-deep)}
+.hidden{display:none !important}
+
+/* ---------- Login ---------- */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);
+  width:100%;max-width:380px;padding:30px 26px;text-align:center}
+.login-card .logo{width:64px;height:64px;border-radius:18px;background:var(--accent-soft);
+  display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px}
+.login-card h1{margin:0 0 2px;font-size:24px}
+.login-card p.sub{color:var(--soft);margin:0 0 22px;font-size:14px}
+
+/* ---------- Inputs ---------- */
+label.fld{display:block;text-align:left;margin-bottom:12px}
+label.fld span{display:block;font-size:13px;color:var(--soft);margin-bottom:5px;font-weight:600}
+input,select,textarea{
+  width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:12px;
+  font-family:inherit;font-size:15px;background:#fff;color:var(--ink);outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+
+.btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:12px;
+  font-weight:700;font-size:15px;transition:background .15s;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{background:var(--accent-deep)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.full{width:100%;justify-content:center}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:var(--bg)}
+.btn.danger{background:var(--red)}.btn.danger:hover{background:#b91c1c}
+.btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}
+.btn.green{background:var(--green)}.btn.green:hover{background:#128a3e}
+
+/* ---------- App shell ---------- */
+#app{min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+.topbar-in{display:flex;align-items:center;gap:12px;padding:11px 16px;max-width:1120px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:9px;font-family:'Baloo Da 2';font-weight:800;font-size:19px}
+.brand .b-logo{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);
+  display:flex;align-items:center;justify-content:center;font-size:18px}
+.topbar .spacer{flex:1}
+.who{font-size:13px;color:var(--soft);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.nav{background:var(--card);border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav-in{display:flex;gap:4px;padding:6px 12px;max-width:1120px;margin:0 auto;min-width:max-content}
+.nav button{background:none;border:none;padding:9px 14px;border-radius:11px;font-weight:600;color:var(--soft);
+  font-size:14px;white-space:nowrap}
+.nav button.active{background:var(--accent-soft);color:var(--accent-deep)}
+
+main{flex:1;max-width:1120px;margin:0 auto;width:100%;padding:18px 16px 60px}
+.page-head{display:flex;align-items:center;gap:12px;margin:2px 0 16px}
+.page-head h2{margin:0;font-size:22px;flex:1}
+
+/* ---------- Cards / grid ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.stat .n{font-family:'Baloo Da 2';font-weight:800;font-size:30px;line-height:1}
+.stat .l{color:var(--soft);font-size:13px;margin-top:4px}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar .search{flex:1;min-width:180px}
+.toolbar select{width:auto;min-width:130px}
+
+.list{display:flex;flex-direction:column;gap:10px}
+.row{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;
+  display:flex;align-items:center;gap:13px}
+.row .thumb{width:52px;height:52px;border-radius:12px;object-fit:cover;background:var(--bg);flex-shrink:0;
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--soft)}
+.row .main{flex:1;min-width:0}
+.row .title{font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .meta{font-size:13px;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .acts{display:flex;gap:7px;flex-shrink:0}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--line);background:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--soft);padding:0}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent-deep)}
+.icon-btn.del:hover{border-color:var(--red);color:var(--red)}
+
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;line-height:1.5}
+.pill.green{background:var(--green-soft);color:var(--green)}
+.pill.gray{background:var(--line);color:var(--soft)}
+.pill.red{background:var(--red-soft);color:var(--red)}
+.pill.amber{background:var(--amber-soft);color:var(--amber)}
+.pill.blue{background:var(--blue-soft);color:var(--blue)}
+
+.empty{text-align:center;color:var(--soft);padding:44px 20px}
+.empty .em-ic{font-size:38px;margin-bottom:8px}
+.empty p{margin:0 0 14px}
+
+/* ---------- Modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(42,33,24,.5);z-index:50;display:flex;
+  align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:640px){.overlay{align-items:center;padding:20px}}
+.modal{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;
+  border-radius:22px 22px 0 0;box-shadow:var(--shadow)}
+@media(min-width:640px){.modal{border-radius:22px}}
+.modal-head{position:sticky;top:0;background:var(--card);padding:16px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;z-index:2}
+.modal-head h3{margin:0;font-size:19px;flex:1}
+.modal-body{padding:18px 20px}
+.modal-foot{padding:14px 20px 20px;display:flex;gap:10px}
+.modal-foot .btn{flex:1;justify-content:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.grid2{grid-template-columns:1fr}}
+.thumb-strip{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.thumb-strip img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--line)}
+.modal.wide{max-width:920px}
+.pform{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+@media(max-width:640px){.pform{grid-template-columns:1fr}}
+.pcol{min-width:0}
+.ord-badge{width:30px;height:30px;border-radius:9px;background:var(--accent);color:#fff;font-family:'Baloo Da 2';font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ---------- Toast ---------- */
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;font-weight:600;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);animation:pop .2s ease}
+.toast.ok{background:var(--green)}.toast.err{background:var(--red)}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.spin{display:inline-block;width:16px;height:16px;border:2.5px solid #fff;border-top-color:transparent;
+  border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:44px;color:var(--soft)}
+.setup-note{background:var(--amber-soft);color:var(--amber);border-radius:12px;padding:11px 14px;
+  font-size:13px;text-align:left;margin-bottom:16px;line-height:1.5}
+.hintbar{font-size:12px;color:var(--soft);margin-top:4px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="logo">🧸</div>
+    <h1>ilm Toy</h1>
+    <p class="sub">Admin Panel · v2 — Sign in</p>
+    <div id="setupNote" class="setup-note hidden"></div>
+    <form id="loginForm">
+      <label class="fld"><span>Email</span>
+        <input id="email" type="email" placeholder="admin@ilmtoy.com" autocomplete="username" required></label>
+      <label class="fld"><span>Password</span>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required></label>
+      <button class="btn full" id="loginBtn" type="submit">Sign in</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════ APP ═══════════ -->
+<div id="app" class="hidden">
+  <div class="topbar"><div class="topbar-in">
+    <div class="brand"><span class="b-logo">🧸</span> ilm Toy</div>
+    <div class="spacer"></div>
+    <span class="who" id="whoami"></span>
+    <button class="btn ghost sm" id="logoutBtn">Log out</button>
+  </div></div>
+
+  <div class="nav"><div class="nav-in" id="navTabs">
+    <button data-tab="dashboard" class="active">Dashboard</button>
+    <button data-tab="products">Products</button>
+    <button data-tab="orders">Orders</button>
+    <button data-tab="coupons">Coupons</button>
+    <button data-tab="reviews">Reviews</button>
+    <button data-tab="pages">Pages</button>
+    <button data-tab="blog">Blog</button>
+    <button data-tab="settings">Settings</button>
+  </div></div>
+
+  <main id="view"></main>
+</div>
+
+<div id="modalMount"></div>
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   ilm Toy Admin — logic
+   ============================================================ */
+let SB = null;
+let SESSION = null;
+
+const $  = (s,r=document)=>r.querySelector(s);
+const el = (html)=>{const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstChild;};
+const esc = (s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const bdt = (n)=>'৳'+Number(n||0).toLocaleString('en-US');
+const fmtDate = (s)=>{try{return new Date(s).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){return s||'';}};
+
+function toast(msg,type=''){ const t=el(`<div class="toast ${type}">${esc(msg)}</div>`); $('#toast').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},2600); }
+
+/* ---------- Boot ---------- */
+function boot(){
+  if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
+    const n=$('#setupNote'); n.classList.remove('hidden');
+    n.innerHTML='⚠️ First set <b>SUPABASE_URL</b> and <b>SUPABASE_ANON_KEY</b> in the file (Project Settings → API).';
+    $('#loginBtn').disabled=true; return;
+  }
+  SB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  SB.auth.getSession().then(({data})=>{ if(data.session){ SESSION=data.session; showApp(); } });
+}
+
+$('#loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const btn=$('#loginBtn'); btn.disabled=true; const old=btn.textContent; btn.innerHTML='<span class="spin"></span>';
+  const {data,error} = await SB.auth.signInWithPassword({ email:$('#email').value.trim(), password:$('#password').value });
+  btn.disabled=false; btn.textContent=old;
+  if(error){ toast(error.message||'Login failed', 'err'); return; }
+  SESSION=data.session; showApp();
+});
+
+$('#logoutBtn').addEventListener('click', async ()=>{ await SB.auth.signOut(); location.reload(); });
+
+function showApp(){
+  $('#loginScreen').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  $('#whoami').textContent = SESSION?.user?.email || '';
+  $('#navTabs').querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click',()=>{ setTab(b.dataset.tab); });
+  });
+  setTab('dashboard');
+}
+function setTab(tab){
+  $('#navTabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  ({dashboard:renderDashboard, products:renderProducts, orders:renderOrders, coupons:renderCoupons,
+    reviews:renderReviews, pages:renderPages, blog:renderBlog, settings:renderSettings}[tab])();
+}
+function loadingView(){ $('#view').innerHTML='<div class="loading"><span class="spin" style="border-color:var(--accent);border-top-color:transparent"></span></div>'; }
+function head(title, actionHtml=''){ return `<div class="page-head"><h2>${esc(title)}</h2>${actionHtml}</div>`; }
+function emptyBox(icon,msg,btn=''){ return `<div class="empty"><div class="em-ic">${icon}</div><p>${esc(msg)}</p>${btn}</div>`; }
+
+/* ---------- Generic DB helpers ---------- */
+async function dbList(table, order='id', asc=true){
+  const {data,error}=await SB.from(table).select('*').order(order,{ascending:asc});
+  if(error){ toast(error.message,'err'); return []; } return data||[];
+}
+async function dbSave(table, obj, id){
+  let res;
+  if(id!=null && id!=='') res=await SB.from(table).update(obj).eq('id',id);
+  else res=await SB.from(table).insert(obj);
+  if(res.error){ toast(res.error.message,'err'); return false; } return true;
+}
+async function dbDelete(table, id){
+  const {error}=await SB.from(table).delete().eq('id',id);
+  if(error){ toast(error.message,'err'); return false; } return true;
+}
+/* ---------- Storage: Image upload ---------- */
+async function uploadImages(fileList, statusEl, onUrl){
+  const files=[...fileList];
+  for(let i=0;i<files.length;i++){
+    const file=files[i];
+    if(statusEl) statusEl.textContent=`Uploading... (${i+1}/${files.length})`;
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+    const path='products/'+Date.now()+'-'+Math.random().toString(36).slice(2,7)+'.'+ext;
+    const {error}=await SB.storage.from('product-images').upload(path,file,{cacheControl:'3600',upsert:false});
+    if(error){ toast('Upload failed: '+error.message,'err'); if(statusEl)statusEl.textContent='❌ Upload failed ('+error.message+')'; continue; }
+    const {data}=SB.storage.from('product-images').getPublicUrl(path);
+    onUrl(data.publicUrl);
+  }
+  if(statusEl) statusEl.textContent='✓ Upload done';
+}
+
+/* ---------- Modal ---------- */
+function openModal(title, bodyHtml, onSave, saveLabel='Save', extraClass=''){
+  const ov=el(`<div class="overlay"><div class="modal ${extraClass}">
+    <div class="modal-head"><h3>${esc(title)}</h3><button class="icon-btn" data-x>✕</button></div>
+    <div class="modal-body">${bodyHtml}</div>
+    <div class="modal-foot">
+      <button class="btn ghost" data-x>Cancel</button>
+      <button class="btn" data-save>${esc(saveLabel)}</button>
+    </div></div></div>`);
+  const close=()=>ov.remove();
+  ov.addEventListener('click',(e)=>{ if(e.target===ov) close(); });
+  ov.querySelectorAll('[data-x]').forEach(b=>b.addEventListener('click',close));
+  ov.querySelector('[data-save]').addEventListener('click', async (e)=>{
+    const btn=e.currentTarget; btn.disabled=true; const t=btn.textContent; btn.innerHTML='<span class="spin"></span>';
+    const ok=await onSave(ov); btn.disabled=false; btn.textContent=t; if(ok!==false) close();
+  });
+  $('#modalMount').appendChild(ov); return ov;
+}
+function confirmModal(msg, onYes){
+  const ov=el(`<div class="overlay"><div class="modal" style="max-width:360px">
+    <div class="modal-body" style="padding-top:22px;text-align:center">${esc(msg)}</div>
+    <div class="modal-foot"><button class="btn ghost" data-x>No</button><button class="btn danger" data-yes>Yes, delete</button></div>
+  </div></div>`);
+  const close=()=>ov.remove();
+  ov.addEventListener('click',(e)=>{if(e.target===ov)close();});
+  ov.querySelector('[data-x]').addEventListener('click',close);
+  ov.querySelector('[data-yes]').addEventListener('click',async(e)=>{e.currentTarget.disabled=true;await onYes();close();});
+  $('#modalMount').appendChild(ov);
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+async function renderDashboard(){
+  loadingView();
+  const count = async (t,filter)=>{ let q=SB.from(t).select('*',{count:'exact',head:true}); if(filter)q=filter(q);
+    const {count:c}=await q; return c||0; };
+  const today = new Date(); today.setHours(0,0,0,0);
+  const [prod, active, orders, ordToday, pendRev, coup] = await Promise.all([
+    count('products'),
+    count('products', q=>q.eq('status','active')),
+    count('orders'),
+    count('orders', q=>q.gte('created_at', today.toISOString())),
+    count('reviews', q=>q.eq('status','pending')),
+    count('coupons', q=>q.eq('active',true)),
+  ]);
+  $('#view').innerHTML = head('Dashboard') + `
+    <div class="stat-grid">
+      <div class="stat"><div class="n">${prod}</div><div class="l">Total Products</div></div>
+      <div class="stat"><div class="n">${active}</div><div class="l">Active</div></div>
+      <div class="stat"><div class="n">${orders}</div><div class="l">Total Orders</div></div>
+      <div class="stat"><div class="n" style="color:var(--accent-deep)">${ordToday}</div><div class="l">Today's Orders</div></div>
+      <div class="stat"><div class="n" style="color:${pendRev?'var(--amber)':'inherit'}">${pendRev}</div><div class="l">Pending Reviews</div></div>
+      <div class="stat"><div class="n">${coup}</div><div class="l">Active Coupons</div></div>
+    </div>
+    <p class="hintbar" style="margin-top:16px">Use the tabs above to open any section. To add a product go to the "Products" tab.</p>`;
+}
+
+/* ============================================================
+   PRODUCTS
+   ============================================================ */
+let _products=[];
+async function renderProducts(){
+  loadingView();
+  _products = await dbList('products','sort_order',true);
+  drawProducts();
+}
+function drawProducts(){
+  const bar = `<button class="btn" id="addProd">+ New Product</button>`;
+  const tools = `<div class="toolbar">
+    <input class="search" id="pSearch" placeholder="Search by name...">
+    <select id="pStatus">
+      <option value="">All status</option><option value="active">Active</option>
+      <option value="hidden">Hidden</option><option value="soldout">Sold out</option>
+    </select></div>`;
+  $('#view').innerHTML = head('Products', bar) + tools + '<div class="list" id="pList"></div>';
+  $('#addProd').addEventListener('click',()=>productForm());
+  $('#pSearch').addEventListener('input', filterProducts);
+  $('#pStatus').addEventListener('change', filterProducts);
+  filterProducts();
+}
+function filterProducts(){
+  const q=($('#pSearch')?.value||'').toLowerCase().trim();
+  const st=$('#pStatus')?.value||'';
+  const rows=_products.filter(p=>(!q||(p.name||'').toLowerCase().includes(q))&&(!st||p.status===st));
+  const list=$('#pList');
+  if(!rows.length){ list.innerHTML=emptyBox('📦', q||st?'Nothing found.':'No products yet.',
+    q||st?'':'<button class="btn" onclick="productForm()">+ Add your first product</button>'); return; }
+  list.innerHTML='';
+  rows.forEach(p=>{
+    const img=(p.image_url||'').split('|')[0].trim();
+    const stPill = p.status==='active'?'<span class="pill green">Active</span>'
+      : p.status==='hidden'?'<span class="pill gray">Hidden</span>'
+      : '<span class="pill red">Sold out</span>';
+    const row=el(`<div class="row">
+      <div class="ord-badge">${p.sort_order||'–'}</div>
+      <div class="thumb">${img?`<img src="${esc(img)}" style="width:100%;height:100%;border-radius:11px;object-fit:cover" onerror="this.replaceWith(document.createTextNode('📦'))">`:'📦'}</div>
+      <div class="main">
+        <div class="title">${p.bestseller?'🔥 ':''}${esc(p.name)}</div>
+        <div class="meta">${bdt(p.price)} ${p.old_price?`· <s>${bdt(p.old_price)}</s>`:''} · ${esc(p.category||'—')} ${stPill}</div>
+      </div>
+      <div class="acts">
+        <button class="icon-btn" title="Edit">✏️</button>
+        <button class="icon-btn del" title="Delete">🗑️</button>
+      </div></div>`);
+    row.querySelector('.icon-btn:not(.del)').addEventListener('click',()=>productForm(p));
+    row.querySelector('.del').addEventListener('click',()=>{
+      confirmModal(`"${p.name}" — delete this?`, async ()=>{ if(await dbDelete('products',p.id)){ toast('Deleted','ok'); renderProducts(); } });
+    });
+    list.appendChild(row);
+  });
+}
+window.productForm=function(p){
+  p=p||{};
+  const isNew=!p.id;
+  const imgs=(p.image_url||'').split('|').map(s=>s.trim()).filter(Boolean).join('\n');
+  const vids=(p.video||'').split('|').map(s=>s.trim()).filter(Boolean).join('\n');
+  const body=`
+   <div class="pform">
+    <div class="pcol">
+      <label class="fld"><span>Main image</span>
+        <input id="f_mainfile" type="file" accept="image/*" style="padding:8px">
+        <div class="hintbar">One image — shown on the card / top</div>
+        <div class="thumb-strip" id="f_mainprev"></div></label>
+      <label class="fld"><span>Gallery (multiple images)</span>
+        <input id="f_galfile" type="file" accept="image/*" multiple style="padding:8px">
+        <div class="hintbar" id="f_upstat">Extra images — you can add several at once</div></label>
+      <label class="fld"><span>All image links (top line is the main image)</span>
+        <textarea id="f_img" placeholder="Choose File-Choosing a file puts the link here; you can also paste (one per line)">${esc(imgs)}</textarea>
+        <div class="thumb-strip" id="f_imgprev"></div></label>
+      <label class="fld"><span>Video link (one per line, optional)</span><textarea id="f_vid" placeholder="https://youtu.be/XXXX">${esc(vids)}</textarea></label>
+    </div>
+    <div class="pcol">
+      <div class="grid2">
+        <label class="fld"><span>Product ID ${isNew?'(leave empty for auto)':''}</span>
+          <input id="f_pid" type="number" value="${isNew?'':(p.id??'')}" ${isNew?'':'readonly style="background:var(--bg)"'} placeholder="e.g. 1200170"></label>
+        <label class="fld"><span>Order (sort — smaller first)</span><input id="f_sort" type="number" value="${p.sort_order??0}"></label>
+      </div>
+      <label class="fld"><span>Name *</span><input id="f_name" value="${esc(p.name||'')}" placeholder="Product name"></label>
+      <label class="fld"><span>Category (comma-separated for multiple)</span><input id="f_cat" value="${esc(p.category||'')}" placeholder="e.g. Science Kits, Best Seller"></label>
+      <div class="grid2">
+        <label class="fld"><span>Price (৳) *</span><input id="f_price" type="number" value="${p.price??''}"></label>
+        <label class="fld"><span>Old price (৳)</span><input id="f_old" type="number" value="${p.old_price??''}"></label>
+      </div>
+      <div class="grid2">
+        <label class="fld"><span>Age (optional)</span><input id="f_age" value="${esc(p.age||'')}" placeholder="4+"></label>
+        <label class="fld"><span>Base likes</span><input id="f_likes" type="number" value="${p.likes??0}"></label>
+      </div>
+      <div class="grid2">
+        <label class="fld"><span>Needs battery?</span><select id="f_bat">
+          <option value=""${p.battery?'':' selected'}>No</option>
+          <option value="yes"${p.battery?' selected':''}>Yes</option></select></label>
+        <label class="fld"><span>Battery size</span><input id="f_batsz" value="${esc(p.battery_size||'')}" placeholder="AA / AAA"></label>
+      </div>
+      <label class="fld"><span>Status</span><select id="f_status">
+        <option value="active"${p.status==='active'?' selected':''}>Active</option>
+        <option value="soldout"${p.status==='soldout'?' selected':''}>Sold Out</option>
+        <option value="hidden"${p.status==='hidden'?' selected':''}>Hidden</option>
+      </select></label>
+      <label class="fld"><span><input type="checkbox" id="f_best" ${p.bestseller?'checked':''} style="width:auto;margin-right:6px">🔥 Show Best Seller badge</span></label>
+    </div>
+   </div>
+   <label class="fld"><span>Description</span><textarea id="f_desc" style="min-height:110px">${esc(p.description||'')}</textarea></label>`;
+  const ov=openModal(isNew?'New Product':'Edit Product', body, async (ov)=>{
+    const name=$('#f_name',ov).value.trim();
+    if(!name){ toast('Name is required','err'); return false; }
+    const joinLines=(id)=>$(id,ov).value.split('\n').map(s=>s.trim()).filter(Boolean).join(' | ');
+    const obj={
+      name, price:Number($('#f_price',ov).value||0), old_price:Number($('#f_old',ov).value||0),
+      category:$('#f_cat',ov).value.trim(), age:$('#f_age',ov).value.trim(),
+      status:$('#f_status',ov).value, image_url:joinLines('#f_img'), video:joinLines('#f_vid'),
+      description:$('#f_desc',ov).value.trim(),
+      battery:$('#f_bat',ov).value, battery_size:$('#f_batsz',ov).value.trim(),
+      sort_order:Number($('#f_sort',ov).value||0),
+      likes:Number($('#f_likes',ov).value||0), bestseller:$('#f_best',ov).checked,
+    };
+    if(isNew){ const pid=$('#f_pid',ov).value.trim(); if(pid) obj.id=Number(pid); }
+    if(await dbSave('products',obj,p.id)){ toast(isNew?'Added':'Updated','ok'); renderProducts(); return true; }
+    return false;
+  }, 'Save', 'wide');
+  const prev=()=>{
+    const arr=$('#f_img',ov).value.split('\n').map(s=>s.trim()).filter(Boolean);
+    const box=$('#f_imgprev',ov); box.innerHTML='';
+    arr.forEach(u=>box.appendChild(el(`<img src="${esc(u)}" onerror="this.style.display='none'">`)));
+    const mp=$('#f_mainprev',ov); mp.innerHTML='';
+    if(arr[0]) mp.appendChild(el(`<img src="${esc(arr[0])}" onerror="this.style.display='none'">`));
+  };
+  $('#f_img',ov).addEventListener('input',prev); prev();
+  $('#f_mainfile',ov).addEventListener('change', async (e)=>{
+    if(!e.target.files.length) return;
+    await uploadImages(e.target.files, $('#f_upstat',ov), (url)=>{
+      const ta=$('#f_img',ov); const rest=ta.value.split('\n').map(s=>s.trim()).filter(Boolean);
+      ta.value=[url, ...rest].join('\n'); prev();
+    });
+    e.target.value='';
+  });
+  $('#f_galfile',ov).addEventListener('change', async (e)=>{
+    if(!e.target.files.length) return;
+    await uploadImages(e.target.files, $('#f_upstat',ov), (url)=>{
+      const ta=$('#f_img',ov); ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+url; prev();
+    });
+    e.target.value='';
+  });
+};
+
+/* ============================================================
+   ORDERS
+   ============================================================ */
+let _orders=[];
+const ORDER_STATES=['new','processing','shipped','delivered','cancelled'];
+const ORDER_LABEL={new:'New',processing:'Processing',shipped:'Shipped',delivered:'Delivered',cancelled:'Cancelled'};
+const ORDER_PILL={new:'blue',processing:'amber',shipped:'blue',delivered:'green',cancelled:'red'};
+async function renderOrders(){
+  loadingView();
+  _orders = await dbList('orders','created_at',false);
+  const tools=`<div class="toolbar">
+    <input class="search" id="oSearch" placeholder="Name / phone / order ID...">
+    <select id="oStatus"><option value="">All</option>${ORDER_STATES.map(s=>`<option value="${s}">${ORDER_LABEL[s]}</option>`).join('')}</select>
+  </div>`;
+  $('#view').innerHTML=head('Orders')+tools+'<div class="list" id="oList"></div>';
+  $('#oSearch').addEventListener('input',drawOrders); $('#oStatus').addEventListener('change',drawOrders);
+  drawOrders();
+}
+function drawOrders(){
+  const q=($('#oSearch')?.value||'').toLowerCase().trim(); const st=$('#oStatus')?.value||'';
+  const rows=_orders.filter(o=>{
+    const hay=`${o.order_id} ${o.customer_name} ${o.phone}`.toLowerCase();
+    return (!q||hay.includes(q))&&(!st||o.status===st);
+  });
+  const list=$('#oList');
+  if(!rows.length){ list.innerHTML=emptyBox('🧾', q||st?'Nothing found.':'No orders yet.'); return; }
+  list.innerHTML='';
+  rows.forEach(o=>{
+    const pill=`<span class="pill ${ORDER_PILL[o.status]||'gray'}">${ORDER_LABEL[o.status]||o.status}</span>`;
+    const row=el(`<div class="row">
+      <div class="main">
+        <div class="title">${esc(o.customer_name)} · ${bdt(o.total)} ${pill}</div>
+        <div class="meta">${esc(o.phone)} · ${esc(o.order_id)} · ${fmtDate(o.created_at)}</div>
+      </div>
+      <div class="acts"><button class="icon-btn" title="Details">👁️</button></div></div>`);
+    row.addEventListener('click',()=>orderDetail(o));
+    list.appendChild(row);
+  });
+}
+function orderDetail(o){
+  let items=[]; try{ items=Array.isArray(o.items)?o.items:JSON.parse(o.items||'[]'); }catch(e){}
+  const itemsHtml = items.length
+    ? items.map(it=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)"><span>${esc(it.name)} × ${it.qty}</span><span>${bdt((it.price||0)*(it.qty||1))}</span></div>`).join('')
+    : `<div style="color:var(--soft)">${esc(o.product_summary||'—')}</div>`;
+  const body=`
+    <div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:14px">
+      <div style="font-weight:700">${esc(o.customer_name)}</div>
+      <div style="color:var(--soft);font-size:14px">📞 ${esc(o.phone)}</div>
+      <div style="color:var(--soft);font-size:14px;margin-top:2px">📍 ${esc(o.address||'—')}</div>
+      ${o.note?`<div style="color:var(--soft);font-size:14px;margin-top:2px">📝 ${esc(o.note)}</div>`:''}
+    </div>
+    <div style="margin-bottom:14px">${itemsHtml}</div>
+    <div style="font-size:14px;color:var(--soft);line-height:1.8">
+      Subtotal: ${bdt(o.subtotal)}<br>
+      ${o.coupon?`Coupon (${esc(o.coupon)}): −${bdt(o.discount)}<br>`:''}
+      Delivery (${esc(o.delivery_area||'')}): ${bdt(o.delivery_charge)}<br>
+      <b style="color:var(--ink);font-size:16px">Total: ${bdt(o.total)}</b><br>
+      Payment: ${esc(o.payment_method||'')} ${o.trx_id?`· TrxID ${esc(o.trx_id)}`:''}
+    </div>
+    <label class="fld" style="margin-top:16px"><span>Order status</span>
+      <select id="o_status">${ORDER_STATES.map(s=>`<option value="${s}"${o.status===s?' selected':''}>${ORDER_LABEL[s]}</option>`).join('')}</select></label>`;
+  openModal('Order — '+o.order_id, body, async (ov)=>{
+    const ns=$('#o_status',ov).value;
+    if(ns!==o.status){ if(!await dbSave('orders',{status:ns},o.id)) return false; toast('Status updated','ok'); renderOrders(); }
+    return true;
+  }, 'Save');
+}
+
+/* ============================================================
+   COUPONS
+   ============================================================ */
+async function renderCoupons(){
+  loadingView();
+  const rows=await dbList('coupons','id',true);
+  $('#view').innerHTML=head('Coupons',`<button class="btn" id="addC">+ New Coupon</button>`)+'<div class="list" id="cList"></div>';
+  $('#addC').addEventListener('click',()=>couponForm());
+  const list=$('#cList');
+  if(!rows.length){ list.innerHTML=emptyBox('🎟️','No coupons yet.','<button class="btn" onclick="couponForm()">+ Add a coupon</button>'); return; }
+  list.innerHTML='';
+  rows.forEach(c=>{
+    const val=c.type==='percent'?`${c.value}%`:bdt(c.value);
+    const row=el(`<div class="row"><div class="main">
+      <div class="title">${esc(c.code)} ${c.active?'<span class="pill green">On</span>':'<span class="pill gray">Off</span>'}</div>
+      <div class="meta">${val} off · min ${bdt(c.min_amount)}</div></div>
+      <div class="acts"><button class="icon-btn">✏️</button><button class="icon-btn del">🗑️</button></div></div>`);
+    row.querySelector('.icon-btn:not(.del)').addEventListener('click',()=>couponForm(c));
+    row.querySelector('.del').addEventListener('click',()=>confirmModal(`"${c.code}" — delete?`,async()=>{if(await dbDelete('coupons',c.id)){toast('Deleted','ok');renderCoupons();}}));
+    list.appendChild(row);
+  });
+}
+window.couponForm=function(c){ c=c||{};
+  const body=`
+    <label class="fld"><span>Coupon code *</span><input id="c_code" value="${esc(c.code||'')}" placeholder="EID10" style="text-transform:uppercase"></label>
+    <div class="grid2">
+      <label class="fld"><span>Type</span><select id="c_type">
+        <option value="flat"${c.type==='flat'?' selected':''}>Fixed amount (৳)</option>
+        <option value="percent"${c.type==='percent'?' selected':''}>Percent (%)</option></select></label>
+      <label class="fld"><span>Value *</span><input id="c_val" type="number" value="${c.value??''}"></label>
+    </div>
+    <label class="fld"><span>Minimum order (৳)</span><input id="c_min" type="number" value="${c.min_amount??0}"></label>
+    <label class="fld"><span><input type="checkbox" id="c_active" ${c.active!==false?'checked':''} style="width:auto;margin-right:6px">On</span></label>`;
+  openModal(c.id?'Edit Coupon':'New Coupon', body, async(ov)=>{
+    const code=$('#c_code',ov).value.trim().toUpperCase(); if(!code){toast('Code is required','err');return false;}
+    const obj={code,type:$('#c_type',ov).value,value:Number($('#c_val',ov).value||0),
+      min_amount:Number($('#c_min',ov).value||0),active:$('#c_active',ov).checked};
+    if(await dbSave('coupons',obj,c.id)){toast('Saved','ok');renderCoupons();return true;} return false;
+  });
+};
+
+/* ============================================================
+   REVIEWS
+   ============================================================ */
+async function renderReviews(){
+  loadingView();
+  const rows=await dbList('reviews','created_at',false);
+  $('#view').innerHTML=head('Reviews')+'<div class="list" id="rList"></div>';
+  const list=$('#rList');
+  if(!rows.length){ list.innerHTML=emptyBox('⭐','No reviews yet.'); return; }
+  list.innerHTML='';
+  rows.forEach(r=>{
+    const stars='★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0));
+    const pill=r.status==='approved'?'<span class="pill green">Approved</span>':'<span class="pill amber">Pending</span>';
+    const row=el(`<div class="row"><div class="main">
+      <div class="title">${esc(r.name)} <span style="color:var(--accent)">${stars}</span> ${pill}</div>
+      <div class="meta">${esc(r.product||'')} · ${esc((r.review||'').slice(0,60))}</div></div>
+      <div class="acts">
+        ${r.status!=='approved'?'<button class="icon-btn" title="Approve" style="color:var(--green)">✓</button>':''}
+        <button class="icon-btn del">🗑️</button></div></div>`);
+    const ap=row.querySelector('.icon-btn:not(.del)');
+    if(ap) ap.addEventListener('click',async()=>{ if(await dbSave('reviews',{status:'approved'},r.id)){toast('Approved','ok');renderReviews();} });
+    row.querySelector('.del').addEventListener('click',()=>confirmModal('Delete review?',async()=>{if(await dbDelete('reviews',r.id)){toast('Deleted','ok');renderReviews();}}));
+    list.appendChild(row);
+  });
+}
+
+/* ============================================================
+   PAGES
+   ============================================================ */
+async function renderPages(){
+  loadingView();
+  const rows=await dbList('pages','id',true);
+  $('#view').innerHTML=head('Pages',`<button class="btn" id="addPg">+ New Page</button>`)
+    +`<p class="hintbar" style="margin-bottom:12px">Privacy / Terms / Refund / Shipping and other policy pages.</p><div class="list" id="pgList"></div>`;
+  $('#addPg').addEventListener('click',()=>pageForm());
+  const list=$('#pgList');
+  if(!rows.length){ list.innerHTML=emptyBox('📄','No pages yet.','<button class="btn" onclick="pageForm()">+ Add a page</button>'); return; }
+  list.innerHTML='';
+  rows.forEach(p=>{
+    const row=el(`<div class="row"><div class="main">
+      <div class="title">${esc(p.title||p.page)}</div><div class="meta">${esc(p.page)}</div></div>
+      <div class="acts"><button class="icon-btn">✏️</button><button class="icon-btn del">🗑️</button></div></div>`);
+    row.querySelector('.icon-btn:not(.del)').addEventListener('click',()=>pageForm(p));
+    row.querySelector('.del').addEventListener('click',()=>confirmModal('Delete page?',async()=>{if(await dbDelete('pages',p.id)){toast('Deleted','ok');renderPages();}}));
+    list.appendChild(row);
+  });
+}
+window.pageForm=function(p){ p=p||{};
+  const body=`
+    <label class="fld"><span>Page key * (slug)</span><input id="pg_page" value="${esc(p.page||'')}" placeholder="privacy / terms / refund / shipping"></label>
+    <label class="fld"><span>Title</span><input id="pg_title" value="${esc(p.title||'')}"></label>
+    <label class="fld"><span>Image (optional)</span><input id="pg_img" value="${esc(p.image||'')}"></label>
+    <label class="fld"><span>Content</span><textarea id="pg_content" style="min-height:180px">${esc(p.content||'')}</textarea></label>`;
+  openModal(p.id?'Edit Page':'New Page',body,async(ov)=>{
+    const page=$('#pg_page',ov).value.trim(); if(!page){toast('page key is required','err');return false;}
+    const obj={page,title:$('#pg_title',ov).value.trim(),image:$('#pg_img',ov).value.trim(),content:$('#pg_content',ov).value};
+    if(await dbSave('pages',obj,p.id)){toast('Saved','ok');renderPages();return true;} return false;
+  });
+};
+
+/* ============================================================
+   BLOG
+   ============================================================ */
+async function renderBlog(){
+  loadingView();
+  const rows=await dbList('blog_posts','created_at',false);
+  $('#view').innerHTML=head('Blog',`<button class="btn" id="addB">+ New Post</button>`)+'<div class="list" id="bList"></div>';
+  $('#addB').addEventListener('click',()=>blogForm());
+  const list=$('#bList');
+  if(!rows.length){ list.innerHTML=emptyBox('📝','No blog posts yet.','<button class="btn" onclick="blogForm()">+ Add a post</button>'); return; }
+  list.innerHTML='';
+  rows.forEach(b=>{
+    const pill=b.status==='published'?'<span class="pill green">Published</span>':'<span class="pill gray">Hidden</span>';
+    const row=el(`<div class="row">
+      <div class="thumb">${b.image?`<img src="${esc(b.image)}" style="width:100%;height:100%;border-radius:11px;object-fit:cover" onerror="this.replaceWith(document.createTextNode('📝'))">`:'📝'}</div>
+      <div class="main"><div class="title">${esc(b.title)} ${pill}</div><div class="meta">${esc(b.post_date||'')}</div></div>
+      <div class="acts"><button class="icon-btn">✏️</button><button class="icon-btn del">🗑️</button></div></div>`);
+    row.querySelector('.icon-btn:not(.del)').addEventListener('click',()=>blogForm(b));
+    row.querySelector('.del').addEventListener('click',()=>confirmModal('Delete post?',async()=>{if(await dbDelete('blog_posts',b.id)){toast('Deleted','ok');renderBlog();}}));
+    list.appendChild(row);
+  });
+}
+window.blogForm=function(b){ b=b||{};
+  const body=`
+    <label class="fld"><span>Title *</span><input id="b_title" value="${esc(b.title||'')}"></label>
+    <div class="grid2">
+      <label class="fld"><span>Date</span><input id="b_date" value="${esc(b.post_date||'')}" placeholder="10 Jul 2026"></label>
+      <label class="fld"><span>Status</span><select id="b_status">
+        <option value="published"${b.status==='published'?' selected':''}>Published</option>
+        <option value="hidden"${b.status==='hidden'?' selected':''}>Hidden</option></select></label>
+    </div>
+    <label class="fld"><span>Image</span><input id="b_img" value="${esc(b.image||'')}"></label>
+    <label class="fld"><span>Content</span><textarea id="b_content" style="min-height:180px">${esc(b.content||'')}</textarea></label>`;
+  openModal(b.id?'Edit Post':'New Post',body,async(ov)=>{
+    const title=$('#b_title',ov).value.trim(); if(!title){toast('Title is required','err');return false;}
+    const obj={title,post_date:$('#b_date',ov).value.trim(),status:$('#b_status',ov).value,
+      image:$('#b_img',ov).value.trim(),content:$('#b_content',ov).value};
+    if(await dbSave('blog_posts',obj,b.id)){toast('Saved','ok');renderBlog();return true;} return false;
+  });
+};
+
+/* ============================================================
+   SETTINGS  (Full form — ghorerrong style)
+   ============================================================ */
+const SETTINGS_GROUPS = [
+  { title:'Store info', fields:[
+    {k:'store_name', l:'Store name'},
+    {k:'logo_url',   l:'Logo link'},
+    {k:'phone',      l:'Phone number'},
+    {k:'whatsapp',   l:'WhatsApp number', hint:'8801XXXXXXXXX'},
+    {k:'email',      l:'Email'},
+    {k:'address',    l:'Address'},
+  ]},
+  { title:'Delivery charge', fields:[
+    {k:'delivery_dhaka',   l:'Inside Dhaka (৳)', t:'number'},
+    {k:'delivery_outside', l:'Outside Dhaka (৳)', t:'number'},
+  ]},
+  { title:'Home page text', fields:[
+    {k:'hero_title', l:'Headline'},
+    {k:'hero_sub',   l:'Sub-headline'},
+    {k:'announce',   l:'Announcement bar', t:'textarea'},
+  ]},
+  { title:'Trust badges (4)', fields:[
+    {k:'trust1', l:'Badge 1'}, {k:'trust2', l:'Badge 2'},
+    {k:'trust3', l:'Badge 3'}, {k:'trust4', l:'Badge 4'},
+  ]},
+  { title:'Banner images (links)', fields:[
+    {k:'banner1', l:'Banner 1'}, {k:'banner2', l:'Banner 2'},
+    {k:'banner3', l:'Banner 3'}, {k:'banner4', l:'Banner 4'}, {k:'banner5', l:'Banner 5'},
+  ]},
+  { title:'Offer popup (optional)', fields:[
+    {k:'popup_image',  l:'Popup image link'},
+    {k:'popup_title',  l:'Popup title'},
+    {k:'popup_button', l:'Button text'},
+    {k:'popup_link',   l:'Button link'},
+  ]},
+  { title:'Social links', fields:[
+    {k:'facebook',  l:'Facebook'}, {k:'messenger', l:'Messenger'},
+    {k:'instagram', l:'Instagram'}, {k:'youtube',  l:'YouTube'},
+    {k:'map_link',  l:'Google Map link'},
+  ]},
+  { title:'Payment', fields:[
+    {k:'online_payment', l:'Online payment', t:'select', o:[['off','Off'],['on','On']]},
+    {k:'payment_type',   l:'Payment type', t:'select', o:[['send_money','Send Money'],['payment','Payment']]},
+    {k:'bkash_number',   l:'bKash number'},
+    {k:'nagad_number',   l:'Nagad number'},
+    {k:'rocket_number',  l:'Rocket number'},
+    {k:'payment_note',   l:'Payment instructions', t:'textarea'},
+  ]},
+  { title:'Others', fields:[
+    {k:'order_tracking', l:'Order tracking', t:'select', o:[['on','On'],['off','Off']]},
+    {k:'order_whatsapp', l:'Also send orders to WhatsApp', t:'select', o:[['off','Off'],['on','On']]},
+    {k:'categories',     l:'Category order (top bar)', t:'textarea', note:'Type the category names in the order you want them to appear, separated by commas — e.g. Science Kits, Best Seller, Books. Any category you do not list here shows up after these, automatically.'},
+    {k:'footer_tagline', l:'Footer tagline'},
+    {k:'owner_name',     l:'Owner name'},
+    {k:'owner_quote',    l:'Owner quote', t:'textarea'},
+    {k:'order_message',  l:'Order success message', t:'textarea'},
+    {k:'review_message', l:'Review success message', t:'textarea'},
+  ]},
+];
+async function renderSettings(){
+  loadingView();
+  const rows = await dbList('settings','key',true);
+  const map = {}; rows.forEach(r=>{ map[r.key]=r.value; });
+  let html = head('Settings', `<button class="btn" id="saveAllS">💾 Save all</button>`);
+  html += `<p class="hintbar" style="margin-bottom:14px">Store name, phone, delivery charge, etc. — the storefront reads these. Edit and click save below.</p>`;
+  SETTINGS_GROUPS.forEach(g=>{
+    html += `<div style="background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
+      <div class="disp" style="font-size:16px;margin-bottom:10px">${esc(g.title)}</div><div class="grid2">`;
+    g.fields.forEach(f=>{
+      const cur = map[f.k]!=null ? map[f.k] : '';
+      const v = esc(cur);
+      let input, wide='';
+      if(f.t==='textarea'){ input=`<textarea data-k="${f.k}">${v}</textarea>`; wide=' style="grid-column:1/-1"'; }
+      else if(f.t==='select'){ input=`<select data-k="${f.k}">${f.o.map(o=>`<option value="${o[0]}"${(cur||f.o[0][0])===o[0]?' selected':''}>${esc(o[1])}</option>`).join('')}</select>`; }
+      else input=`<input data-k="${f.k}" type="${f.t||'text'}" value="${v}" placeholder="${esc(f.hint||'')}">`;
+      const note = f.note ? `<div class="hintbar">${esc(f.note)}</div>` : '';
+      html += `<label class="fld"${wide}><span>${esc(f.l)}</span>${input}${note}</label>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `<button class="btn full" id="saveAllS2" style="margin-bottom:20px">💾 Save all settings</button>`;
+  $('#view').innerHTML = html;
+  const doSave = async (btn)=>{
+    btn.disabled=true; const t=btn.innerHTML; btn.innerHTML='<span class="spin"></span>';
+    const payload = [...$('#view').querySelectorAll('[data-k]')].map(el=>({ key:el.getAttribute('data-k'), value:el.value }));
+    const { error } = await SB.from('settings').upsert(payload);
+    btn.disabled=false; btn.innerHTML=t;
+    if(error){ toast(error.message,'err'); return; }
+    toast('All settings saved','ok');
+  };
+  $('#saveAllS').addEventListener('click', e=>doSave(e.currentTarget));
+  $('#saveAllS2').addEventListener('click', e=>doSave(e.currentTarget));
+}
+
+/* ---------- go ---------- */
+boot();
+</script>
+</body>
+</html>
