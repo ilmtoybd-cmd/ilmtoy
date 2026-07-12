@@ -107,6 +107,7 @@ main{flex:1;max-width:1120px;margin:0 auto;width:100%;padding:18px 16px 60px}
 .row .main{flex:1;min-width:0}
 .row .title{font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .meta{font-size:13px;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .pcode{font-family:ui-monospace,'SF Mono',Consolas,monospace;font-weight:700;font-size:12px;color:var(--accent-deep,#E8492A);background:var(--accent-soft,#FFE7E0);padding:1px 7px;border-radius:6px;margin-right:2px}
 .row .acts{display:flex;gap:7px;flex-shrink:0}
 .icon-btn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--line);background:#fff;
   display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--soft);padding:0}
@@ -357,9 +358,22 @@ async function renderDashboard(){
    PRODUCTS
    ============================================================ */
 let _products=[];
+/* সিরিয়াল র‍্যাঙ্ক: খালি / 0 / non-number → সবার নিচে (Infinity) */
+function serialRank(p){
+  var s = p && p.sort_order;
+  if(s===null || s===undefined || s==='' || Number(s)===0) return Infinity;
+  var n = Number(s);
+  return isNaN(n) ? Infinity : n;
+}
+function sortBySerial(a,b){
+  var d = serialRank(a) - serialRank(b);
+  if(d!==0) return d;                       // ছোট সিরিয়াল আগে; 0/blank সব শেষে
+  return (a.name||'').localeCompare(b.name||''); // tie হলে নাম অনুসারে
+}
 async function renderProducts(){
   loadingView();
   _products = await dbList('products','sort_order',true);
+  _products.sort(sortBySerial);            // 0/blank নিচে নামানোর জন্য ক্লায়েন্ট-সাইড রি-সর্ট
   drawProducts();
 }
 function drawProducts(){
@@ -394,7 +408,7 @@ function filterProducts(){
       <div class="thumb">${img?`<img src="${esc(img)}" style="width:100%;height:100%;border-radius:11px;object-fit:cover" onerror="this.replaceWith(document.createTextNode('📦'))">`:'📦'}</div>
       <div class="main">
         <div class="title">${p.bestseller?'🔥 ':''}${esc(p.name)}</div>
-        <div class="meta">${bdt(p.price)} ${p.old_price?`· <s>${bdt(p.old_price)}</s>`:''} · ${esc(p.category||'—')} ${stPill}</div>
+        <div class="meta">${(p.id!=null&&p.id!=='')?`<span class="pcode">#${esc(String(p.id))}</span> `:''}${bdt(p.price)} ${p.old_price?`· <s>${bdt(p.old_price)}</s>`:''} · ${esc(p.category||'—')} ${stPill}</div>
       </div>
       <div class="acts">
         <button class="icon-btn" title="Edit">✏️</button>
