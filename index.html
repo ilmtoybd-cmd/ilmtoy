@@ -511,6 +511,18 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
 .m-heart svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
 .m-heart.on{border-color:var(--accent);color:var(--accent)}
 .m-heart.on svg{fill:var(--accent);stroke:var(--accent)}
+/* ❤️ Likes — কার্ডের ছবির নিচে-বাঁয়ে ব্যাজ (wishlist heart-এর উল্টো পাশে) */
+.like-badge{position:absolute;bottom:10px;left:10px;z-index:3;display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:none;border-radius:50px;background:rgba(255,255,255,.92);box-shadow:0 3px 10px rgba(0,0,0,.15);cursor:pointer;font-family:'Baloo Da 2';font-weight:700;font-size:.78rem;color:var(--ink);transition:.18s}
+.like-badge:hover{transform:scale(1.06)}
+.like-badge svg{width:15px;height:15px;fill:none;stroke:var(--ink-soft);stroke-width:2;transition:.18s}
+.like-badge.on{color:var(--accent)}
+.like-badge.on svg{fill:var(--accent);stroke:var(--accent)}
+.like-badge.like-pop svg,.m-like.like-pop svg{animation:heartpop .3s ease}
+/* ডিটেইল পেজের লাইক বাটন */
+.m-like{display:inline-flex;align-items:center;gap:6px;margin-top:8px;margin-left:8px;padding:6px 13px;border-radius:50px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-family:'Baloo Da 2';font-weight:700;font-size:.8rem;cursor:pointer;transition:.18s}
+.m-like svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.m-like.on{border-color:var(--accent);color:var(--accent)}
+.m-like.on svg{fill:var(--accent);stroke:var(--accent)}
 .wish-add{background:var(--accent);color:#fff;border:none;border-radius:50px;padding:8px 14px;font-family:'Baloo Da 2';font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:.18s}
 .wish-add:hover{background:var(--accent-deep)}
 .wish-add:disabled{background:#cabfb2;cursor:not-allowed}
@@ -1422,7 +1434,7 @@ async function loadProducts(){
       // category ঘরে কমা (বা | / ) দিয়ে একাধিক — যেমন "Book, Best Seller"
       const catArr = String(d.category||"").split(/\s*[,|/]\s*/).map(s=>s.trim()).filter(Boolean);
       return {
-        id:d.id, name:d.name, sort_order:d.sort_order,
+        id:d.id, name:d.name, sort_order:d.sort_order, likes:Number(d.likes)||0,
         category:catArr[0]||"",     // মূল ক্যাটেগরি (কার্ডে দেখানোর জন্য — কমার প্রথমটা)
         categories:catArr,          // সব ক্যাটেগরি — Book, Best Seller সব এখানে
         price:parseFloat(String(d.price).replace(/[^0-9.]/g,''))||0,
@@ -1697,6 +1709,43 @@ function saveWish(){
   if(!ok){ try{ sessionStorage.setItem(WISH_KEY, s); ok=true; }catch(e){} }
   window.__wish = WISHLIST.slice();   // স্টোরেজ ব্লকড হলেও অন্তত এই সেশনে টিকবে
 }
+
+/* ❤️ Likes — base likes (admin) + এই ব্রাউজারের নিজের লাইক (localStorage) */
+let LIKED = [];
+const LIKE_KEY = 'ilm_liked';
+function loadLikes(){
+  let raw=null;
+  try{ raw=localStorage.getItem(LIKE_KEY); }catch(e){}
+  if(raw===null){ try{ raw=sessionStorage.getItem(LIKE_KEY); }catch(e){} }
+  if(raw===null && window.__liked){ LIKED=window.__liked.slice(); return; }
+  try{ LIKED = raw ? (JSON.parse(raw)||[]).map(String) : []; }catch(e){ LIKED=[]; }
+}
+function saveLikes(){
+  const s=JSON.stringify(LIKED);
+  let ok=false;
+  try{ localStorage.setItem(LIKE_KEY, s); ok=true; }catch(e){}
+  if(!ok){ try{ sessionStorage.setItem(LIKE_KEY, s); ok=true; }catch(e){} }
+  window.__liked = LIKED.slice();
+}
+function isLiked(id){ return LIKED.indexOf(String(id))>-1; }
+function likeCount(p){ return (Math.max(0, Number(p&&p.likes)||0)) + (isLiked(p&&p.id)?1:0); }
+function toggleLike(id){
+  id=String(id);
+  if(isLiked(id)){ LIKED=LIKED.filter(x=>x!==id); } else { LIKED.push(id); }
+  saveLikes();
+  syncLikeButtons(id);
+}
+function syncLikeButtons(id){
+  id=String(id);
+  const p=PRODUCTS.find(x=>String(x.id)===id);
+  const on=isLiked(id);
+  const cnt=p?likeCount(p):(on?1:0);
+  document.querySelectorAll('[data-like="'+id+'"]').forEach(function(b){
+    b.classList.toggle('on', on);
+    b.classList.add('like-pop'); setTimeout(function(){ b.classList.remove('like-pop'); },300);
+    const n=b.querySelector('.like-n'); if(n) n.textContent=bnNum(cnt);
+  });
+}
 function isWished(id){ return WISHLIST.indexOf(String(id))>-1; }
 function toggleWish(id){
   id=String(id);
@@ -1768,7 +1817,7 @@ function addToCart(id, qty){
 }
 
 function removeFromCart(id){
-  CART = CART.filter(x=>x.id!==id);
+  CART = CART.filter(x=>String(x.id)!==String(id));
   cartCoupon = null;
   updateCartUI();
   renderCartBody();
@@ -1776,7 +1825,7 @@ function removeFromCart(id){
 }
 
 function changeCartQty(id, delta){
-  const item = CART.find(x=>x.id===id);
+  const item = CART.find(x=>String(x.id)===String(id));
   if(!item) return;
   item.qty = Math.max(1, item.qty + delta);
   renderCartBody();
@@ -1973,6 +2022,7 @@ async function boot(){
   await Promise.all([loadSettings(), loadCoupons(), loadProducts(), loadReviews(), loadPages(), loadBlog()]);
   cur = S.currency || "৳";
   loadWish();
+  loadLikes();
   applyConfig();
   buildCats();
   buildShopCats();
@@ -2441,7 +2491,7 @@ function render(){
       ? `<button class="order-btn soldout-btn" disabled>${t('out_of_stock')}</button>`
       : `<button class="order-btn" data-cart="${p.id}">${t('add_to_cart')}</button>`;
     return `<div class="card${p.soldout?' is-sold':''}" data-id="${p.id}" style="cursor:pointer">
-      <div class="thumb">${showPctFlag?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${soldFlag}${bestFlag}${multi}${img}<button class="heart-btn${isWished(p.id)?' on':''}" type="button" data-wish="${p.id}" aria-label="Wishlist" aria-pressed="${isWished(p.id)?'true':'false'}"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div>
+      <div class="thumb">${showPctFlag?`<span class="saleflag">${bnNum(off)}% OFF</span>`:""}${soldFlag}${bestFlag}${multi}${img}<button class="heart-btn${isWished(p.id)?' on':''}" type="button" data-wish="${p.id}" aria-label="Wishlist" aria-pressed="${isWished(p.id)?'true':'false'}"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button><button class="like-badge${isLiked(p.id)?' on':''}" type="button" data-like="${p.id}" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="like-n">${bnNum(likeCount(p))}</span></button></div>
       <div class="body">
         ${p.category?`<div class="cat-tag">${p.category}</div>`:""}
         <div class="title">${p.name}</div>
@@ -2458,6 +2508,7 @@ function render(){
   }).join("");
   $("#grid").querySelectorAll("[data-cart]").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); addToCart(b.dataset.cart); });
   $("#grid").querySelectorAll("[data-wish]").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); b.classList.add('heart-pop'); setTimeout(()=>b.classList.remove('heart-pop'),300); toggleWish(b.dataset.wish); });
+  $("#grid").querySelectorAll("[data-like]").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); toggleLike(b.dataset.like); });
   $("#grid").querySelectorAll(".card").forEach(c=>c.onclick=()=>openModal(c.dataset.id));
 }
 
@@ -2512,7 +2563,7 @@ function openModal(id, fromLink){
   const mpInner = mSale
     ? `${bnNum(current.price)}${cur}<span class="m-was">${bnNum(current.old_price)}${cur}</span>${mExtra}`
     : `${bnNum(current.price)}${cur}`;
-  $("#mHead").innerHTML = `<div class="gallery">${galInner}</div><div class="m-title"><h3>${current.name}</h3><div class="mp">${mpInner}</div><button type="button" class="copy-link-btn" onclick="copyProductLink(this)">🔗 <span>${t('copy_link')}</span></button><button type="button" class="m-heart${isWished(current.id)?' on':''}" data-wish="${current.id}" onclick="toggleWish('${current.id}')"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> <span data-wishlabel>${isWished(current.id)?t('wish_saved'):t('wish_save')}</span></button></div>`;
+  $("#mHead").innerHTML = `<div class="gallery">${galInner}</div><div class="m-title"><h3>${current.name}</h3><div class="mp">${mpInner}</div><button type="button" class="copy-link-btn" onclick="copyProductLink(this)">🔗 <span>${t('copy_link')}</span></button><button type="button" class="m-heart${isWished(current.id)?' on':''}" data-wish="${current.id}" onclick="toggleWish('${current.id}')"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> <span data-wishlabel>${isWished(current.id)?t('wish_saved'):t('wish_save')}</span></button><button type="button" class="m-like${isLiked(current.id)?' on':''}" data-like="${current.id}" onclick="toggleLike('${current.id}')"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> <span class="like-n">${bnNum(likeCount(current))}</span></button></div>`;
   // 🔗 প্রোডাক্ট ডিপ-লিংক: URL-এ #p=slug বসাও — কপি লিংকের সাথে মিল রেখে
   // fromLink হলে হ্যাশ আগে থেকেই আছে (deep-link/ব্যাক) → replace; নইলে নতুন এন্ট্রি push,
   // যাতে মোবাইলের ব্যাক বাটন সাইট থেকে বের না হয়ে মডাল বন্ধ করে।
