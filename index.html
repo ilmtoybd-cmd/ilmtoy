@@ -180,11 +180,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .cats::-webkit-scrollbar{display:none}
 /* মোবাইলে ডান পাশে হালকা ফেইড — বোঝাতে যে ডানে আরও ক্যাটেগরি আছে */
 .cats-wrap::after{content:"";position:absolute;top:0;right:0;bottom:4px;width:34px;pointer-events:none;background:linear-gradient(90deg,rgba(255,248,240,0),var(--bg))}
-/* ডেস্কটপ/ট্যাবে — সব ক্যাটেগরি কয়েক লাইনে ভাগ হয়ে একসাথে দেখা যাবে */
-@media(min-width:768px){
-  .cats{flex-wrap:wrap;overflow-x:visible}
-  .cats-wrap::after{display:none}
-}
+/* ঘরের রং-এর মতো — সব স্ক্রিনে ক্যাটেগরি এক লাইনে, ডানে স্ক্রল */
 .chip{
   border:1px solid #F0E7DB;background:#fff;color:var(--ink);
   padding:9px 18px;border-radius:50px;font-family:inherit;font-weight:600;font-size:.9rem;
@@ -1409,6 +1405,12 @@ function gatherMedia(d, bases, sep){
   return [...new Set(out)];
 }
 
+/* প্রোডাক্ট সিরিয়াল র‍্যাঙ্ক: খালি / 0 / non-number → সবার নিচে */
+function prodSerialRank(p){
+  var s = p && p.sort_order;
+  if(s===null || s===undefined || s==='' || Number(s)===0) return Infinity;
+  var n = Number(s); return isNaN(n) ? Infinity : n;
+}
 async function loadProducts(){
   if(!CONFIG.productsCsvUrl){ PRODUCTS = SAMPLE; return; }
   try{
@@ -1420,7 +1422,7 @@ async function loadProducts(){
       // category ঘরে কমা (বা | / ) দিয়ে একাধিক — যেমন "Book, Best Seller"
       const catArr = String(d.category||"").split(/\s*[,|/]\s*/).map(s=>s.trim()).filter(Boolean);
       return {
-        id:d.id, name:d.name,
+        id:d.id, name:d.name, sort_order:d.sort_order,
         category:catArr[0]||"",     // মূল ক্যাটেগরি (কার্ডে দেখানোর জন্য — কমার প্রথমটা)
         categories:catArr,          // সব ক্যাটেগরি — Book, Best Seller সব এখানে
         price:parseFloat(String(d.price).replace(/[^0-9.]/g,''))||0,
@@ -1434,6 +1436,12 @@ async function loadProducts(){
         soldout:['soldout','sold out','stockout','stock out','out','out of stock','no stock','nostock'].includes(st)
       };
     }).filter(p=>p.name && p.status!=="hidden");
+    // admin-এর মতোই সিরিয়াল সর্ট: ছোট sort_order আগে, 0/blank সবার নিচে
+    PRODUCTS.sort(function(a,b){
+      var ra=prodSerialRank(a), rb=prodSerialRank(b);
+      if(ra!==rb) return ra-rb;
+      return (a.name||'').localeCompare(b.name||'');
+    });
     if(!PRODUCTS.length) PRODUCTS = SAMPLE;
   }catch(e){ PRODUCTS = SAMPLE; }
 }
