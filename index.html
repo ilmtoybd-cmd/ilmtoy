@@ -180,6 +180,15 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .cats::-webkit-scrollbar{display:none}
 /* মোবাইলে ডান পাশে হালকা ফেইড — বোঝাতে যে ডানে আরও ক্যাটেগরি আছে */
 .cats-wrap::after{content:"";position:absolute;top:0;right:0;bottom:4px;width:34px;pointer-events:none;background:linear-gradient(90deg,rgba(255,248,240,0),var(--bg))}
+/* ডেস্কটপে ক্যাটেগরি স্ক্রল তীর (মোবাইলে টাচ-স্ক্রল, তাই লুকানো) */
+.cat-nav{display:none;position:absolute;top:50%;transform:translateY(-50%);z-index:4;
+  width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;
+  align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 9px rgba(0,0,0,.14);
+  color:var(--ink);transition:.15s;padding:0}
+.cat-nav:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cat-nav svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6}
+.cat-prev{left:2px}.cat-next{right:2px}
+.cat-nav.show{display:flex}
 /* ঘরের রং-এর মতো — সব স্ক্রিনে ক্যাটেগরি এক লাইনে, ডানে স্ক্রল */
 .chip{
   border:1px solid #F0E7DB;background:#fff;color:var(--ink);
@@ -651,7 +660,7 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
       </button>
     </div>
   </div>
-  <div class="cats-wrap"><div class="cats" id="cats"></div></div>
+  <div class="cats-wrap"><button class="cat-nav cat-prev" id="catPrev" type="button" aria-label="Scroll left"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><div class="cats" id="cats"></div><button class="cat-nav cat-next" id="catNext" type="button" aria-label="Scroll right"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button></div>
 </header>
 
 <div class="hero">
@@ -2341,6 +2350,38 @@ function buildCats(){
     if(b.classList.contains("disabled")) return;   // খালি/হিডেন — ক্লিক হবে না
     b.onclick=()=>selectCategory(b.dataset.c);
   });
+  setupCatNav();
+}
+
+/* ডেস্কটপে ক্যাটেগরি বার স্ক্রল — তীর বাটন + মাউস-হুইল হরাইজন্টাল */
+function updateCatNav(){
+  const cats=document.getElementById('cats');
+  const prev=document.getElementById('catPrev'), next=document.getElementById('catNext');
+  if(!cats||!prev||!next) return;
+  const desktop = window.matchMedia('(min-width:768px)').matches;
+  const overflow = (cats.scrollWidth - cats.clientWidth) > 4;
+  prev.classList.toggle('show', desktop && overflow && cats.scrollLeft > 4);
+  next.classList.toggle('show', desktop && overflow && (cats.scrollLeft < cats.scrollWidth - cats.clientWidth - 4));
+}
+let _catNavWired=false;
+function setupCatNav(){
+  const cats=document.getElementById('cats');
+  const prev=document.getElementById('catPrev'), next=document.getElementById('catNext');
+  if(!cats) return;
+  updateCatNav();
+  requestAnimationFrame(updateCatNav);   // লেআউট সেটল হওয়ার পর আবার
+  if(_catNavWired) return;
+  _catNavWired=true;
+  const step=()=>Math.max(160, cats.clientWidth*0.7);
+  if(prev) prev.addEventListener('click',()=>cats.scrollBy({left:-step(),behavior:'smooth'}));
+  if(next) next.addEventListener('click',()=>cats.scrollBy({left:step(),behavior:'smooth'}));
+  cats.addEventListener('scroll',updateCatNav,{passive:true});
+  window.addEventListener('resize',updateCatNav);
+  // মাউস-হুইল → হরাইজন্টাল স্ক্রল (ওভারফ্লো থাকলে)
+  cats.addEventListener('wheel',(e)=>{
+    if((cats.scrollWidth - cats.clientWidth) <= 4) return;
+    if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){ cats.scrollLeft += e.deltaY; e.preventDefault(); }
+  }, {passive:false});
 }
 
 /* প্রোডাক্ট গ্রিড সেকশনে স্ক্রল (আগে ভুল করে পেজের একদম উপরে চলে যেত) */
