@@ -186,26 +186,16 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
   .cats-wrap::after{display:none}
 }
 .chip{
-  border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);
-  padding:8px 16px;border-radius:50px;font-family:inherit;font-weight:600;font-size:.88rem;
+  border:1px solid #F0E7DB;background:#fff;color:var(--ink);
+  padding:9px 18px;border-radius:50px;font-family:inherit;font-weight:600;font-size:.9rem;
   cursor:pointer;white-space:nowrap;transition:.18s;
+  box-shadow:0 2px 6px rgba(90,60,30,.07);
 }
-/* ---------- আলাদা Track Order বার (হেডারের নিচে) ---------- */
-.track-bar{display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
-  background:var(--accent-soft);color:var(--accent-deep);border-bottom:1px solid var(--line);
-  padding:10px 16px;font-family:'Baloo Da 2';font-weight:700;font-size:.92rem;transition:.18s}
-.track-bar:hover{background:var(--accent);color:#fff}
-.track-bar svg{width:19px;height:19px;flex:0 0 auto}
-.track-bar-hint{font-family:inherit;font-weight:600;font-size:.85rem;opacity:.85}
-@media(max-width:640px){
-  .track-bar{padding:9px 12px;font-size:.88rem}
-  .track-bar-hint{display:none}
-}
-.chip:hover{border-color:var(--accent)}
-.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(255,107,74,.3)}
+.chip:hover{border-color:var(--accent);color:var(--accent-deep);box-shadow:0 3px 10px rgba(255,107,74,.16)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(255,107,74,.32)}
 /* যে ক্যাটেগরিতে প্রোডাক্ট নেই/হিডেন — দেখা যাবে কিন্তু ক্লিক হবে না */
-.chip.disabled{opacity:.42;cursor:not-allowed;background:#fff;color:var(--ink-soft);border-style:dashed}
-.chip.disabled:hover{border-color:var(--line)}
+.chip.disabled{opacity:.45;cursor:not-allowed;background:#fff;color:var(--ink-soft);border-color:#EEE2D3;box-shadow:none}
+.chip.disabled:hover{border-color:#EEE2D3;color:var(--ink-soft);box-shadow:none}
 /* "Shop By" থেকে এলে প্রোডাক্ট সেকশন যেন sticky হেডারের নিচে ঢাকা না পড়ে */
 #productsSection{scroll-margin-top:84px}
 
@@ -483,8 +473,7 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
   .hactions{gap:7px;margin-left:auto}
   .iconbtn{width:40px;height:40px}
   .iconbtn.lang-ic{padding:0 11px}
-  .iconbtn.track-ic{width:40px;padding:0}
-  .iconbtn.track-ic span{display:none}
+  .iconbtn.track-ic{width:auto;padding:0 11px}
   .title{font-size:.9rem}
 }
 
@@ -640,6 +629,10 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
       <a class="iconbtn" id="emailBtn" href="#" title="Email" aria-label="Email" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
       <a class="iconbtn" id="callBtn" href="#" title="Call" aria-label="Call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span id="callNum" hidden></span></a>
       <button class="iconbtn lang-ic" id="langToggle" type="button" onclick="setLang(LANG==='en'?'bn':'en')" aria-label="Change language"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg><span id="langLabel">বাংলা</span></button>
+      <button class="iconbtn track-ic" id="trackHBtn" type="button" onclick="openTrack()" aria-label="Track Order" title="Track Order" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        <span data-i18n="track_short">Track</span>
+      </button>
       <button class="iconbtn" id="wishHBtn" type="button" onclick="openWish()" aria-label="Wishlist" title="Wishlist">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         <span class="cart-badge wish-badge" id="wishBadge" style="display:none">0</span>
@@ -652,14 +645,6 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
   </div>
   <div class="cats-wrap"><div class="cats" id="cats"></div></div>
 </header>
-
-<!-- 📦 আলাদা Track Order বার — সব স্ক্রিনে লেখাসহ (মোবাইলে শুধু লোগো দেখলেও এখানে লেখা থাকবে) -->
-<div class="track-bar" id="trackBar" style="display:none" onclick="openTrack()" role="button" tabindex="0"
-     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTrack();}">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-  <span data-i18n="track_order">Track Order</span>
-  <span class="track-bar-hint" data-i18n="track_bar_hint">— order ID বা মোবাইল দিয়ে খুঁজুন</span>
-</div>
 
 <div class="hero">
   <div class="hero-in" id="heroText">
@@ -1074,7 +1059,7 @@ const T = {
     copy:"Copy", copied:"Copied!", copy_link:"Copy Link", popup_shop:"Shop Now", pay_fill:"Please enter the TrxID and the number you paid from.",
     pay_verify_note:"Your order will be confirmed after we verify the payment — then the due amount becomes 0.",
     order_id_label:"Order ID", keep_order_id:"Save this ID to track your order.",
-    track_order:"Track Order", track_bar_hint:"— search by order ID or mobile", track_title:"📦 Track Your Order", track_ph:"Order ID or mobile number", track_btn:"Track",
+    track_order:"Track Order", track_short:"Track", track_bar_hint:"— search by order ID or mobile", track_title:"📦 Track Your Order", track_ph:"Order ID or mobile number", track_btn:"Track",
     track_searching:"Searching...", track_none:"No order found. Please check the Order ID / number.", track_fail:"Could not check right now. Please try again later.",
     payment_label:"Payment", due_label:"Due",
     blog_title:"👨‍👩‍👧 Parenting Blog", blog_link:"Parenting Blog", read_more:"Read",
@@ -1111,7 +1096,7 @@ const T = {
     copy:"কপি", copied:"কপি হয়েছে!", copy_link:"লিংক কপি", popup_shop:"এখনই কিনুন", pay_fill:"TrxID ও যে নম্বর থেকে টাকা পাঠিয়েছেন তা লিখুন।",
     pay_verify_note:"পেমেন্ট যাচাইয়ের পর আপনার অর্ডার কনফার্ম হবে — তখন বাকি ০ দেখাবে।",
     order_id_label:"অর্ডার নম্বর", keep_order_id:"অর্ডার ট্র্যাক করতে এই নম্বরটি রেখে দিন।",
-    track_order:"অর্ডার ট্র্যাক করুন", track_bar_hint:"— অর্ডার নম্বর বা মোবাইল দিয়ে খুঁজুন", track_title:"📦 অর্ডার ট্র্যাক করুন", track_ph:"অর্ডার নম্বর বা মোবাইল নম্বর", track_btn:"খুঁজুন",
+    track_order:"অর্ডার ট্র্যাক করুন", track_short:"ট্র্যাক", track_bar_hint:"— অর্ডার নম্বর বা মোবাইল দিয়ে খুঁজুন", track_title:"📦 অর্ডার ট্র্যাক করুন", track_ph:"অর্ডার নম্বর বা মোবাইল নম্বর", track_btn:"খুঁজুন",
     track_searching:"খোঁজা হচ্ছে...", track_none:"কোনো অর্ডার পাওয়া যায়নি। অর্ডার নম্বর/মোবাইল মিলিয়ে দেখুন।", track_fail:"এখন চেক করা যাচ্ছে না। একটু পরে চেষ্টা করুন।",
     payment_label:"পেমেন্ট", due_label:"বাকি",
     blog_title:"👨‍👩‍👧 প্যারেন্টিং ব্লগ", blog_link:"প্যারেন্টিং ব্লগ", read_more:"পড়ুন",
@@ -2196,11 +2181,11 @@ function renderBlog(){
 function buildFooterLinks(){
   const col = document.getElementById('linksCol'), box = document.getElementById('footLinks');
   if(!col || !box) return;
-  // 📦 Track Order এখন হেডারের নিচে আলাদা বারে
-  const trackBar = document.getElementById('trackBar');
-  if(trackBar){
+  // 📦 Track Order — হেডারের আইকন সারিতে (call/wishlist-এর সাথে), লেখাসহ, সবসময় দৃশ্যমান
+  const trackBtn = document.getElementById('trackHBtn');
+  if(trackBtn){
     const trackOn = CONFIG.orderEndpoint && !['off','no','false','0'].includes((S.order_tracking||'on').toString().toLowerCase().trim());
-    trackBar.style.display = trackOn ? 'flex' : 'none';
+    trackBtn.style.display = trackOn ? '' : 'none';
   }
   let h = '';
   ['privacy','terms','refund','shipping','faq'].forEach(k=>{

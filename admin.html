@@ -140,8 +140,17 @@ main{flex:1;max-width:1120px;margin:0 auto;width:100%;padding:18px 16px 60px}
 .modal-foot .btn{flex:1;justify-content:center}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:520px){.grid2{grid-template-columns:1fr}}
-.thumb-strip{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.thumb-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .thumb-strip img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--line)}
+.thumb-item{position:relative;display:inline-block;line-height:0}
+.thumb-item img{width:56px;height:56px;border-radius:9px;object-fit:cover;border:1px solid var(--line)}
+.thumb-item .thumb-x{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;
+  background:#EF4444;color:#fff;border:2px solid #fff;font-size:13px;line-height:1;cursor:pointer;padding:0;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.thumb-item .thumb-x:hover{background:#DC2626}
+.thumb-item .thumb-badge{position:absolute;left:3px;bottom:3px;background:var(--accent);color:#fff;
+  font-family:'Baloo Da 2';font-weight:800;font-size:9px;padding:1px 6px;border-radius:5px;line-height:1.3}
+.gal-empty{color:var(--soft);font-size:12.5px;margin-top:6px}
 .modal.wide{max-width:920px}
 .pform{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
 @media(max-width:640px){.pform{grid-template-columns:1fr}}
@@ -370,6 +379,11 @@ function sortBySerial(a,b){
   if(d!==0) return d;                       // ছোট সিরিয়াল আগে; 0/blank সব শেষে
   return (a.name||'').localeCompare(b.name||''); // tie হলে নাম অনুসারে
 }
+/* নতুন প্রোডাক্টের অটো-সিরিয়াল কোড = বর্তমান সর্বোচ্চ Product ID + ১ */
+function nextProductCode(){
+  var ids=(_products||[]).map(function(p){return Number(p && p.id);}).filter(function(n){return isFinite(n);});
+  return ids.length ? Math.max.apply(null, ids)+1 : '';
+}
 async function renderProducts(){
   loadingView();
   _products = await dbList('products','sort_order',true);
@@ -435,7 +449,8 @@ window.productForm=function(p){
         <div class="thumb-strip" id="f_mainprev"></div></label>
       <label class="fld"><span>Gallery (multiple images)</span>
         <input id="f_galfile" type="file" accept="image/*" multiple style="padding:8px">
-        <div class="hintbar" id="f_upstat">Extra images — you can add several at once</div></label>
+        <div class="hintbar" id="f_upstat">Extra images — you can add several at once</div>
+        <div class="thumb-strip" id="f_galprev"></div></label>
       <label class="fld"><span>All image links (top line is the main image)</span>
         <textarea id="f_img" placeholder="Choose File-Choosing a file puts the link here; you can also paste (one per line)">${esc(imgs)}</textarea>
         <div class="thumb-strip" id="f_imgprev"></div></label>
@@ -443,8 +458,8 @@ window.productForm=function(p){
     </div>
     <div class="pcol">
       <div class="grid2">
-        <label class="fld"><span>Product ID ${isNew?'(leave empty for auto)':''}</span>
-          <input id="f_pid" type="number" value="${isNew?'':(p.id??'')}" ${isNew?'':'readonly style="background:var(--bg)"'} placeholder="e.g. 1200170"></label>
+        <label class="fld"><span>Product ID ${isNew?'(auto serial — change only if needed)':''}</span>
+          <input id="f_pid" type="number" value="${isNew?nextProductCode():(p.id??'')}" ${isNew?'':'readonly style="background:var(--bg)"'} placeholder="e.g. 1200170"></label>
         <label class="fld"><span>Order (sort — smaller first)</span><input id="f_sort" type="number" value="${p.sort_order??0}"></label>
       </div>
       <label class="fld"><span>Name *</span><input id="f_name" value="${esc(p.name||'')}" placeholder="Product name"></label>
@@ -485,16 +500,42 @@ window.productForm=function(p){
       sort_order:Number($('#f_sort',ov).value||0),
       likes:Number($('#f_likes',ov).value||0), bestseller:$('#f_best',ov).checked,
     };
-    if(isNew){ const pid=$('#f_pid',ov).value.trim(); if(pid) obj.id=Number(pid); }
+    if(isNew){ let pid=$('#f_pid',ov).value.trim(); if(!pid) pid=String(nextProductCode()); if(pid) obj.id=Number(pid); }
     if(await dbSave('products',obj,p.id)){ toast(isNew?'Added':'Updated','ok'); renderProducts(); return true; }
     return false;
   }, 'Save', 'wide');
+  const mkThumb=(u,i,removable,badge)=>{
+    const item=el(`<span class="thumb-item"></span>`);
+    // থাম্বনেইলগুলো <label>-এর ভেতরে; ক্লিক যেন label → file input-এ না যায় (ডায়ালগ না খোলে)
+    item.addEventListener('click',(ev)=>{ ev.preventDefault(); ev.stopPropagation(); });
+    item.appendChild(el(`<img src="${esc(u)}" onerror="this.style.display='none'">`));
+    if(badge) item.appendChild(el(`<span class="thumb-badge">${badge}</span>`));
+    if(removable){
+      const x=el(`<button type="button" class="thumb-x" title="Remove">×</button>`);
+      x.addEventListener('click',(ev)=>{
+        ev.preventDefault(); ev.stopPropagation();
+        const ta=$('#f_img',ov);
+        const list=ta.value.split('\n').map(s=>s.trim()).filter(Boolean);
+        list.splice(i,1); ta.value=list.join('\n'); prev();
+      });
+      item.appendChild(x);
+    }
+    return item;
+  };
   const prev=()=>{
     const arr=$('#f_img',ov).value.split('\n').map(s=>s.trim()).filter(Boolean);
-    const box=$('#f_imgprev',ov); box.innerHTML='';
-    arr.forEach(u=>box.appendChild(el(`<img src="${esc(u)}" onerror="this.style.display='none'">`)));
-    const mp=$('#f_mainprev',ov); mp.innerHTML='';
-    if(arr[0]) mp.appendChild(el(`<img src="${esc(arr[0])}" onerror="this.style.display='none'">`));
+    // Main image (first line)
+    const mp=$('#f_mainprev',ov); if(mp){ mp.innerHTML=''; if(arr[0]) mp.appendChild(mkThumb(arr[0],0,false,'')); }
+    // Gallery (extra images = line 2+), each shown small + removable
+    const gp=$('#f_galprev',ov);
+    if(gp){
+      gp.innerHTML='';
+      if(arr.length>1){ arr.slice(1).forEach((u,k)=> gp.appendChild(mkThumb(u,k+1,true,''))); }
+      else { gp.innerHTML='<div class="gal-empty">এখনও কোনো গ্যালারি ছবি নেই</div>'; }
+    }
+    // All links (main badged), each removable
+    const box=$('#f_imgprev',ov);
+    if(box){ box.innerHTML=''; arr.forEach((u,i)=> box.appendChild(mkThumb(u,i,true,i===0?'Main':''))); }
   };
   $('#f_img',ov).addEventListener('input',prev); prev();
   $('#f_mainfile',ov).addEventListener('change', async (e)=>{
