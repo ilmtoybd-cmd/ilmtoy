@@ -594,33 +594,70 @@ function drawOrders(){
     list.appendChild(row);
   });
 }
-function orderDetail(o){
+let _delivCharges=null;
+async function getDelivCharges(){
+  if(_delivCharges) return _delivCharges;
+  try{
+    const rows=await dbList('settings','key',true);
+    const m={}; rows.forEach(r=>{ m[r.key]=r.value; });
+    _delivCharges={ dhaka:Number(m.delivery_dhaka)||0, outside:Number(m.delivery_outside)||0 };
+  }catch(e){ _delivCharges={dhaka:0,outside:0}; }
+  return _delivCharges;
+}
+async function orderDetail(o){
+  const charges=await getDelivCharges();
   let items=[]; try{ items=Array.isArray(o.items)?o.items:JSON.parse(o.items||'[]'); }catch(e){}
   const itemsHtml = items.length
     ? items.map(it=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)"><span>${esc(it.name)} × ${it.qty}</span><span>${bdt((it.price||0)*(it.qty||1))}</span></div>`).join('')
     : `<div style="color:var(--soft)">${esc(o.product_summary||'—')}</div>`;
+  const isOutside = /out|bair|বাইর|বাহির/i.test(String(o.delivery_area||''));
   const body=`
-    <div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:14px">
-      <div style="font-weight:700">${esc(o.customer_name)}</div>
-      <div style="color:var(--soft);font-size:14px">📞 ${esc(o.phone)}</div>
-      <div style="color:var(--soft);font-size:14px;margin-top:2px">📍 ${esc(o.address||'—')}</div>
-      ${o.note?`<div style="color:var(--soft);font-size:14px;margin-top:2px">📝 ${esc(o.note)}</div>`:''}
+    <div class="grid2">
+      <label class="fld"><span>Customer name</span><input id="o_name" value="${esc(o.customer_name||'')}"></label>
+      <label class="fld"><span>Phone</span><input id="o_phone" value="${esc(o.phone||'')}"></label>
     </div>
-    <div style="margin-bottom:14px">${itemsHtml}</div>
-    <div style="font-size:14px;color:var(--soft);line-height:1.8">
+    <label class="fld"><span>Address</span><textarea id="o_addr" style="min-height:60px">${esc(o.address||'')}</textarea></label>
+    <label class="fld"><span>Note</span><input id="o_note" value="${esc(o.note||'')}"></label>
+    <div style="margin:14px 0">${itemsHtml}</div>
+    <div style="font-size:14px;color:var(--soft);line-height:1.8;margin-bottom:8px">
       Subtotal: ${bdt(o.subtotal)}<br>
       ${o.coupon?`Coupon (${esc(o.coupon)}): −${bdt(o.discount)}<br>`:''}
-      Delivery (${esc(o.delivery_area||'')}): ${bdt(o.delivery_charge)}<br>
-      <b style="color:var(--ink);font-size:16px">Total: ${bdt(o.total)}</b><br>
       Payment: ${esc(o.payment_method||'')} ${o.trx_id?`· TrxID ${esc(o.trx_id)}`:''}
     </div>
-    <label class="fld" style="margin-top:16px"><span>Order status</span>
+    <div class="grid2">
+      <label class="fld"><span>Delivery zone</span>
+        <select id="o_zone">
+          <option value="dhaka"${isOutside?'':' selected'}>Inside Dhaka</option>
+          <option value="outside"${isOutside?' selected':''}>Outside Dhaka</option>
+        </select></label>
+      <label class="fld"><span>Delivery charge (৳)</span><input id="o_ship" type="number" value="${Number(o.delivery_charge)||0}"></label>
+    </div>
+    <div style="font-weight:800;font-size:16px;color:var(--ink);margin:2px 2px 2px">Total: <span id="o_total">${bdt(o.total)}</span></div>
+    <label class="fld" style="margin-top:14px"><span>Order status</span>
       <select id="o_status">${ORDER_STATES.map(s=>`<option value="${s}"${o.status===s?' selected':''}>${ORDER_LABEL[s]}</option>`).join('')}</select></label>`;
-  openModal('Order — '+o.order_id, body, async (ov)=>{
-    const ns=$('#o_status',ov).value;
-    if(ns!==o.status){ if(!await dbSave('orders',{status:ns},o.id)) return false; toast('Status updated','ok'); renderOrders(); }
-    return true;
+  const ov=openModal('Order — '+o.order_id, body, async (ov)=>{
+    const zone=$('#o_zone',ov).value;
+    const ship=Number($('#o_ship',ov).value)||0;
+    const subN=Number(o.subtotal)||0, discN=Number(o.discount)||0;
+    const obj={
+      customer_name:$('#o_name',ov).value.trim(),
+      phone:$('#o_phone',ov).value.trim(),
+      address:$('#o_addr',ov).value.trim(),
+      note:$('#o_note',ov).value.trim(),
+      delivery_area: zone==='outside'?'Outside Dhaka':'Inside Dhaka',
+      delivery_charge: ship,
+      total: subN-discN+ship,
+      status:$('#o_status',ov).value
+    };
+    if(!await dbSave('orders',obj,o.id)) return false;
+    toast('Order updated','ok'); renderOrders(); return true;
   }, 'Save');
+  // live: zone বদলালে চার্জ বসে, চার্জ বদলালে total রিক্যালকুলেট
+  const subN=Number(o.subtotal)||0, discN=Number(o.discount)||0;
+  const zoneSel=$('#o_zone',ov), shipInp=$('#o_ship',ov), totOut=$('#o_total',ov);
+  const recalc=()=>{ totOut.textContent=bdt(subN-discN+(Number(shipInp.value)||0)); };
+  zoneSel.addEventListener('change',()=>{ shipInp.value = zoneSel.value==='outside'?charges.outside:charges.dhaka; recalc(); });
+  shipInp.addEventListener('input',recalc);
 }
 
 /* ============================================================
