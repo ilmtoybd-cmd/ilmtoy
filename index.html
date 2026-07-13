@@ -217,10 +217,10 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .hero .badge{display:inline-block;background:var(--green);color:#fff;font-weight:700;font-size:.78rem;padding:5px 12px;border-radius:50px;margin-bottom:10px}
 
 /* ---------- Hero slider ---------- */
-.hero-slider{position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#FBF2E9;aspect-ratio:7/2}
+.hero-slider{position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#FBF2E9;aspect-ratio:3/1}
 .hero-track{display:flex;height:100%;transition:transform .6s cubic-bezier(.4,0,.2,1);will-change:transform}
 .hero-slider .slide{position:relative;flex:0 0 100%;height:100%}
-.hero-slider .slide img{width:100%;height:100%;object-fit:contain;object-position:center;background:#FBF2E9;display:block}
+.hero-slider .slide img{width:100%;height:100%;object-fit:cover;object-position:center;background:#FBF2E9;display:block}
 .hero-slider .slide .slide-video{width:100%;height:100%;border:0;display:block;background:#FBF2E9;object-fit:cover}
 .hero-slider .slide .ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center;gap:10px;padding:0 7% 28px;background:linear-gradient(0deg,rgba(40,33,24,.7),rgba(40,33,24,.2) 45%,transparent 75%)}
 .hero-slider .slide .ov h2{font-family:'Baloo Da 2',cursive;color:#fff;font-size:2.05rem;line-height:1.15;max-width:90%;text-shadow:0 2px 14px rgba(0,0,0,.45);margin:0}
@@ -284,7 +284,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-size:2.6rem;font-weight:800;color:var(--accent);opacity:.55}
 .saleflag{position:absolute;top:10px;left:10px;background:var(--green);color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12)}
 .sold-flag{position:absolute;top:10px;left:10px;background:#6B5E50;color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12);z-index:2}
-.best-flag{position:absolute;top:10px;right:10px;z-index:4;background:#F7C325;color:#7A2410;font-weight:700;font-size:.82rem;padding:6px 13px;border-radius:50px;box-shadow:0 3px 9px rgba(0,0,0,.18);display:inline-flex;align-items:center;gap:5px;white-space:nowrap;line-height:1.05;animation:bsPulse 1.6s ease-in-out infinite}
+.best-flag{position:absolute;top:10px;right:10px;z-index:4;background:#F7C325;color:#A00E2E;font-weight:700;font-size:.82rem;padding:6px 13px;border-radius:50px;box-shadow:0 3px 9px rgba(0,0,0,.18);display:inline-flex;align-items:center;gap:5px;white-space:nowrap;line-height:1.05;animation:bsPulse 1.6s ease-in-out infinite}
 @keyframes bsPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 @media (prefers-reduced-motion:reduce){.best-flag{animation:none}}
 .card.is-sold .thumb img{filter:grayscale(.65);opacity:.72}
