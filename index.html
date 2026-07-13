@@ -217,7 +217,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .hero .badge{display:inline-block;background:var(--green);color:#fff;font-weight:700;font-size:.78rem;padding:5px 12px;border-radius:50px;margin-bottom:10px}
 
 /* ---------- Hero slider ---------- */
-.hero-slider{position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#FBF2E9;aspect-ratio:8/3}
+.hero-slider{position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#FBF2E9;aspect-ratio:7/2}
 .hero-track{display:flex;height:100%;transition:transform .6s cubic-bezier(.4,0,.2,1);will-change:transform}
 .hero-slider .slide{position:relative;flex:0 0 100%;height:100%}
 .hero-slider .slide img{width:100%;height:100%;object-fit:contain;object-position:center;background:#FBF2E9;display:block}
@@ -284,8 +284,7 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 .thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Baloo Da 2';font-size:2.6rem;font-weight:800;color:var(--accent);opacity:.55}
 .saleflag{position:absolute;top:10px;left:10px;background:var(--green);color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12)}
 .sold-flag{position:absolute;top:10px;left:10px;background:#6B5E50;color:#fff;font-weight:700;font-size:.74rem;padding:4px 10px;border-radius:50px;box-shadow:0 4px 10px rgba(0,0,0,.12);z-index:2}
-.best-flag{position:absolute;top:8px;right:8px;z-index:4;width:62px;line-height:0;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.24))}
-.best-flag svg{width:100%;height:auto;display:block}
+.best-flag{position:absolute;top:10px;right:10px;z-index:4;background:#F7C325;color:#7A2410;font-weight:700;font-size:.74rem;padding:5px 11px;border-radius:50px;box-shadow:0 3px 9px rgba(0,0,0,.16);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;line-height:1.05}
 .card.is-sold .thumb img{filter:grayscale(.65);opacity:.72}
 .soldout-btn{background:#D8D0C5 !important;color:#7A6F60 !important;cursor:not-allowed}
 .soldout-btn:hover{background:#D8D0C5 !important;transform:none !important;filter:none !important}
@@ -481,7 +480,7 @@ footer{background:var(--footer);color:#F3E9DD;margin-top:30px;padding:38px 18px 
   .iconbtn.lang-ic{padding:0 11px}
   .iconbtn.track-ic{width:auto;padding:0 11px}
   .title{font-size:.9rem}
-  .best-flag{width:50px;top:6px;right:6px}
+  .best-flag{top:8px;right:8px;font-size:.66rem;padding:4px 9px}
   .like-line{font-size:.7rem}
 }
 
@@ -2338,13 +2337,22 @@ async function doTrack(){
 /* একটা প্রোডাক্টের সব ক্যাটেগরি (পুরোনো single-category ডেটার জন্যও কাজ করে) */
 const prodCats = p => (p.categories && p.categories.length) ? p.categories : (p.category ? [p.category] : []);
 
+/* বেস্ট সেলার — অ্যাডমিনে ব্যাজ (bestseller flag) দিলেই প্রোডাক্ট "Best Seller" ক্যাটেগরিতে গণ্য হবে,
+   category ঘরে "Best Seller" লেখা না থাকলেও */
+const BEST_CAT = "Best Seller";
+function isBestCat(c){ const s=String(c||""); return /^\s*best\s*seller\s*$/i.test(s) || /বেস্ট\s*সেলার/.test(s); }
+function prodInCat(p, c){
+  if(isBestCat(c)) return !!p.bestseller || prodCats(p).some(isBestCat);
+  return prodCats(p).includes(c);
+}
+
 /* Settings শিটের key=categories লাইন থেকে পুরো তালিকা ও ক্রম (কমা/নতুন লাইন দিয়ে আলাদা) */
 function catMasterList(){
   const raw = (S.categories || S.category_order || S.category_list || "").toString();
   return raw.split(/\s*[,|\n]\s*/).map(s=>s.trim()).filter(Boolean);
 }
 /* একটা ক্যাটেগরিতে কয়টা দেখানোর মতো (non-hidden) প্রোডাক্ট আছে — ০ হলে চিপ ক্লিক হবে না */
-function catCount(c){ return PRODUCTS.filter(p=>prodCats(p).includes(c)).length; }
+function catCount(c){ return PRODUCTS.filter(p=>prodInCat(p,c)).length; }
 
 /* উপরের ক্যাটেগরি চিপ — Settings এর তালিকা+ক্রম অনুযায়ী সব ক্যাটেগরি;
    যেগুলোতে প্রোডাক্ট নেই/হিডেন সেগুলো দেখাবে কিন্তু ক্লিক হবে না */
@@ -2373,6 +2381,7 @@ function buildCats(){
   // শিটে আসলে যেসব ক্যাটেগরি প্রোডাক্টে আছে
   const inProducts = new Set();
   PRODUCTS.forEach(p=>prodCats(p).forEach(c=>inProducts.add(c)));
+  if(PRODUCTS.some(p=>p.bestseller)) inProducts.add(BEST_CAT);   // ব্যাজওয়ালা প্রোডাক্ট থাকলে Best Seller চিপ দেখাবে
   // চূড়ান্ত ক্রম: আগে Settings এর তালিকা, তারপর তালিকায় নেই কিন্তু প্রোডাক্টে আছে এমনগুলো
   const seen = new Set(), finalCats = [];
   catMasterList().forEach(c=>{ if(c && !seen.has(c)){ seen.add(c); finalCats.push(c); } });
@@ -2462,6 +2471,7 @@ function buildShopCats(){
   // প্রোডাক্টে আছে এমন সব ক্যাটেগরি, Settings এর ক্রম অনুযায়ী সাজানো
   const inProducts = new Set();
   PRODUCTS.forEach(p=>prodCats(p).forEach(c=>inProducts.add(c)));
+  if(PRODUCTS.some(p=>p.bestseller)) inProducts.add(BEST_CAT);   // ব্যাজওয়ালা প্রোডাক্ট থাকলে Best Seller টাইল
   const seen = new Set(), cats = [];
   catMasterList().forEach(c=>{ if(inProducts.has(c) && !seen.has(c)){ seen.add(c); cats.push(c); } });
   [...inProducts].forEach(c=>{ if(!seen.has(c)){ seen.add(c); cats.push(c); } });
@@ -2528,7 +2538,7 @@ function discMode(){
 
 function render(){
   const q = $("#search").value.trim().toLowerCase();
-  let list = PRODUCTS.filter(p=>(activeCat==="all"||prodCats(p).includes(activeCat)) && (activeAge==="all"||p.age===activeAge));
+  let list = PRODUCTS.filter(p=>(activeCat==="all"||prodInCat(p,activeCat)) && (activeAge==="all"||p.age===activeAge));
   if(q) list = list.filter(p=>p.name.toLowerCase().includes(q));
   if(sortMode==='low') list = list.slice().sort((a,b)=>a.price-b.price);
   else if(sortMode==='high') list = list.slice().sort((a,b)=>b.price-a.price);
@@ -2545,7 +2555,7 @@ function render(){
       ? `<span class="multi-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M21 7v12a2 2 0 0 1-2 2H7"/></svg>${p.images.length}</span>`
       : "";
     const soldFlag = p.soldout ? `<span class="sold-flag">${t('out_of_stock')}</span>` : "";
-    const bestFlag = (p.bestseller && !p.soldout) ? `<span class="best-flag" aria-label="Best Seller" title="Best Seller"><svg viewBox="0 0 100 128" xmlns="http://www.w3.org/2000/svg"><polygon points="34,78 22,120 40,110 46,124 52,86" fill="#C0392B"/><polygon points="66,78 78,120 60,110 54,124 48,86" fill="#C0392B"/><circle cx="50" cy="46" r="42" fill="#D99A24"/><circle cx="50" cy="46" r="42" fill="none" stroke="#B87A18" stroke-width="3" stroke-dasharray="4 3"/><circle cx="50" cy="46" r="34" fill="#F0C24E"/><circle cx="50" cy="46" r="34" fill="none" stroke="#D9A62E" stroke-width="1.5"/><text x="50" y="43" text-anchor="middle" font-size="15" font-weight="700" fill="#B02A1F" font-family="Arial, sans-serif">BEST</text><text x="50" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="#B02A1F" font-family="Arial, sans-serif">SELLER</text></svg></span>` : "";
+    const bestFlag = (p.bestseller && !p.soldout) ? `<span class="best-flag" aria-label="Best Seller" title="Best Seller">🔥 Best Seller</span>` : "";
     const saveAmt = sale ? (p.old_price - p.price) : 0;
     const dmode = discMode();
     const showPctFlag = sale && !p.soldout && (dmode==='percent'||dmode==='both');
