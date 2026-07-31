@@ -1840,7 +1840,7 @@ function addToCart(id, qty){
   updateCartUI();
   showToast(t('added_cart'));
   // Analytics: AddToCart ইভেন্ট (Meta Pixel + GA4)
-  try{ if(window.fbq) fbq('track','AddToCart',{ content_name:p.name, value:p.price*qty, currency:'BDT', contents:[{id:String(p.id), quantity:qty}], content_type:'product' }); }catch(e){}
+  try{ if(window.fbq) fbq('track','AddToCart',{ content_name:p.name, content_ids:[String(p.id)], content_type:'product', value:p.price*qty, currency:'BDT', contents:[{id:String(p.id), quantity:qty, item_price:p.price}] }); }catch(e){}
   try{ if(window.gtag) gtag('event','add_to_cart',{ value:p.price*qty, currency:'BDT', items:[{item_id:String(p.id), item_name:p.name, quantity:qty}] }); }catch(e){}
   // bounce animation on cart buttons
   ["cartBadge","cartFabBadge"].forEach(bid=>{ const el=document.getElementById(bid); if(el){el.style.transform="scale(1.5)"; setTimeout(()=>el.style.transform="",250); } });
@@ -1883,8 +1883,9 @@ function openCart(){
       if(window.fbq) fbq('track','InitiateCheckout',{
         value:ic.grand, currency:'BDT',
         num_items:CART.reduce((s,x)=>s+x.qty,0),
-        contents:CART.map(x=>({id:String(x.id), quantity:x.qty})),
-        content_type:'product'
+        content_ids:CART.map(x=>String(x.id)),
+        content_type:'product',
+        contents:CART.map(x=>({id:String(x.id), quantity:x.qty, item_price:x.price}))
       });
     }catch(e){}
     try{ if(window.gtag) gtag('event','begin_checkout',{ value:calcCart().grand, currency:'BDT' }); }catch(e){}
@@ -1991,9 +1992,10 @@ async function submitCartOrder(){
   const productList = CART.map(x=>`${x.name} x${x.qty}`).join(" | ");
   const qtyTotal = CART.reduce((s,x)=>s+x.qty,0);
   document.getElementById("cartSubmitBtn").disabled=true;
+  let orderSaved = false;
   try{
     const items = CART.map(x=>({ id:x.id, name:x.name, qty:x.qty, price:x.price }));
-    await SBc.from('orders').insert({
+    const { error } = await SBc.from('orders').insert({
       order_id:orderId, customer_name:name, phone:phone, address:addr, note:note,
       items:items, product_summary:productList, qty_total:qtyTotal,
       subtotal:c.subtotal, coupon:couponCode, discount:c.discount,
@@ -2001,6 +2003,8 @@ async function submitCartOrder(){
       payment_method:payMethodText, trx_id:payTrxV, sender_number:paySenderV,
       payment_status:payStatus
     });
+    if(error) console.warn('order insert', error.message);
+    else orderSaved = true;
   }catch(e){ console.warn('order insert', e); }
   // 📲 Settings শিটে order_whatsapp = on থাকলে অর্ডারটা WhatsApp-এও পাঠাবে
   try{
@@ -2023,14 +2027,16 @@ async function submitCartOrder(){
   }catch(e){}
   // Analytics: অর্ডার ইভেন্ট (GA4 + Meta Pixel)
   try{ if(window.gtag) gtag('event','purchase',{ value:c.grand, currency:'BDT', items_count:qtyTotal }); }catch(e){}
-  try{
-    const purchaseEventId = 'ord_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-    if(window.fbq) fbq('track','Purchase',{
-      value:c.grand, currency:'BDT', num_items:qtyTotal,
-      contents:CART.map(x=>({id:String(x.id), quantity:x.qty})),
-      content_type:'product'
-    }, { eventID: purchaseEventId });
-  }catch(e){}
+  if(orderSaved){
+    try{
+      if(window.fbq) fbq('track','Purchase',{
+        value:c.grand, currency:'BDT', num_items:qtyTotal,
+        content_ids:CART.map(x=>String(x.id)),
+        content_type:'product',
+        contents:CART.map(x=>({id:String(x.id), quantity:x.qty, item_price:x.price}))
+      }, { eventID: orderId });
+    }catch(e){}
+  }
   // clear cart
   CART=[]; cartCoupon=null; __payMethod='cod'; updateCartUI();
   document.getElementById("cartSubmitBtn").style.display="none";
