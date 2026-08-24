@@ -1220,14 +1220,14 @@ function typeLogo(text){
 function applyConfig(){
   typeAnnounce(S.announce);
   if(S.logo_url){
-    const __lu = imgURL(S.logo_url);
+    const __lu = cdn(S.logo_url, 200);
     const __li = $("#logoImg");
     __li.onerror = function(){ this.onerror=null; this.style.display="none"; const e=$("#logoEmoji"); if(e) e.style.display=""; };
     __li.src = __lu;
     __li.style.display = "block";
     $("#logoEmoji").style.display = "none";
     const __fav = $("#faviconLink");
-    if(__fav) __fav.href = __lu + (__lu.indexOf("?")>-1 ? "&" : "?") + "v=" + Date.now();
+    if(__fav) __fav.href = __lu;
   }
   typeLogo(S.store_name);
   const __ls = $("#logoSizer"); if(__ls) __ls.textContent = S.store_name || "";
@@ -1252,7 +1252,7 @@ function applyConfig(){
   // ফুটারে লোগো (logo_url থাকলে) — থাকলে নামের উপরে লোগো দেখাবে
   const fLogo = $("#fLogo");
   if(fLogo){
-    if(S.logo_url && (""+S.logo_url).trim()){ fLogo.src = imgURL((""+S.logo_url).trim()); fLogo.alt = S.store_name||""; fLogo.style.display="block"; }
+    if(S.logo_url && (""+S.logo_url).trim()){ fLogo.src = cdn((""+S.logo_url).trim(), 160); fLogo.alt = S.store_name||""; fLogo.style.display="block"; }
     else { fLogo.style.display="none"; }
   }
   // ফুটারের ট্যাগ লাইন — শিটের footer_tagline
@@ -1563,6 +1563,20 @@ function imgURL(url){
   const id = driveId(url);
   return id ? `https://lh3.googleusercontent.com/d/${id}=w1600` : String(url||"");
 }
+/* ============================================================
+   🖼️ ছবি ফ্রি CDN (wsrv.nl) দিয়ে ছোট করে দেখায়
+   - ছবি Supabase থেকে একবারই নামে, তারপর CDN নিজে জমা রাখে
+   - ফলে Supabase-এর egress প্রায় শূন্যে নেমে আসে
+   - পুরনো ছবি নতুন করে আপলোড করার দরকার নেই
+   ============================================================ */
+function cdn(url, w){
+  const u = imgURL(url);
+  if(!u || !/^https?:\/\//i.test(u)) return u;
+  if(/wsrv\.nl/i.test(u)) return u;                       // আগেই CDN হয়ে থাকলে আবার নয়
+  if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(u)) return u;        // ভিডিও CDN দিয়ে নয়
+  return "https://wsrv.nl/?url=" + encodeURIComponent(u) +
+         "&w=" + (w||600) + "&q=80&output=webp&we&default=" + encodeURIComponent(u);
+}
 /* ব্যানার ছবি লোড না হলে ধাপে ধাপে বিকল্প URL চেষ্টা করে — আর "সাদা" দেখায় না */
 function bannerImgFallback(img){
   const step = +(img.dataset.step||0);
@@ -1582,7 +1596,7 @@ function bannerMediaHTML(url){
   if(yt) return `<iframe class="slide-video" src="https://www.youtube.com/embed/${yt}?rel=0&autoplay=1&mute=1&loop=1&playlist=${yt}&controls=0&modestbranding=1&playsinline=1&disablekb=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
   if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)) return `<video class="slide-video" src="${url}" autoplay muted loop playsinline></video>`;
   const id  = driveId(url);
-  const src = imgURL(url);
+  const src = cdn(url, 1400);
   const fb1 = id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600` : "";   // Drive বিকল্প endpoint
   const fb2 = id ? `https://lh3.googleusercontent.com/d/${id}` : "";              // আকার ছাড়া lh3
   const fb3 = id ? "" : "1";                                                      // Drive না হলে: একই URL আবার চেষ্টা
@@ -1602,7 +1616,7 @@ function galMediaHTML(it){
     if(yt) return `<iframe class="gal-video" src="https://www.youtube.com/embed/${yt}?rel=0&modestbranding=1&playsinline=1" allow="encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
     return `<video class="gal-video" src="${it.url}" controls playsinline preload="metadata"></video>`;
   }
-  return `<img id="galImg" src="${it.url}" alt="${escAttr(current?current.name:'')}">`;
+  return `<img id="galImg" src="${cdn(it.url,900)}" alt="${escAttr(current?current.name:'')}">`;
 }
 function starHTML(n){
   let s="";
@@ -1634,7 +1648,7 @@ function renderReviews(){
   sec.style.display = "";
   grid.innerHTML = REVIEWS.map(r=>{
     const initial = (r.name[0]||"★").toUpperCase();
-    const ava = r.photo ? `<img src="${r.photo}" alt="${r.name}">` : initial;
+    const ava = r.photo ? `<img src="${cdn(r.photo,90)}" alt="${r.name}">` : initial;
     const dateTxt = fmtRvDate(r.date);
     let media = "";
     const yt = ytId(r.video);
@@ -1812,7 +1826,7 @@ function renderWishBody(){
   const items=WISHLIST.map(id=>PRODUCTS.find(p=>String(p.id)===String(id))).filter(Boolean);
   if(!items.length){ body.innerHTML='<div class="cart-empty">'+t('wish_empty')+'</div>'; return; }
   body.innerHTML = items.map(p=>{
-    const imgHTML = p.image_url ? `<img src="${p.image_url}" alt="${escAttr(p.name)}">` : (p.name[0]||'?');
+    const imgHTML = p.image_url ? `<img src="${cdn(p.image_url,100)}" alt="${escAttr(p.name)}">` : (p.name[0]||'?');
     const act = p.soldout
       ? `<button class="wish-add" disabled>${t('out_of_stock')}</button>`
       : `<button class="wish-add" onclick="wishAddToCart('${p.id}')">${t('add_to_cart')}</button>`;
@@ -1908,7 +1922,7 @@ function renderCartBody(){
   checkout.style.display="block";
   body.innerHTML = CART.map(item=>{
     const imgHTML = item.image_url
-      ? `<img src="${item.image_url}" alt="${item.name}">`
+      ? `<img src="${cdn(item.image_url,100)}" alt="${item.name}">`
       : item.name[0]||'?';
     return `<div class="ci">
       <div class="ci-img">${imgHTML}</div>
@@ -2199,7 +2213,7 @@ function fmtContent(s){
 }
 function showPageModal(title, image, content){
   $("#pgTitle").textContent = title || '';
-  $("#pgImgWrap").innerHTML = image ? `<img src="${escAttr(image)}" alt="">` : '';
+  $("#pgImgWrap").innerHTML = image ? `<img src="${escAttr(cdn(image,700))}" alt="">` : '';
   $("#pgBody").innerHTML = fmtContent(content || '');
   const m = document.querySelector('#pageOverlay .modal'); if(m) m.scrollTop = 0;
   ovPush();
@@ -2257,7 +2271,7 @@ function renderBlog(){
   if(!BLOG.length){ wrap.style.display='none'; return; }
   wrap.style.display='';
   row.innerHTML = BLOG.map((b,i)=>{
-    const img = b.image ? `<img src="${escAttr(b.image)}" alt="" loading="lazy">` : `<div class="blog-ph">\uD83D\uDCD6</div>`;
+    const img = b.image ? `<img src="${escAttr(cdn(b.image,480))}" alt="" loading="lazy">` : `<div class="blog-ph">\uD83D\uDCD6</div>`;
     return `<button class="blog-card" type="button" onclick="openBlogPost(${i})">
       <div class="blog-thumb">${img}</div>
       <div class="blog-meta">
@@ -2560,7 +2574,7 @@ function render(){
     const sale = p.old_price && p.old_price>p.price;
     const off = sale ? Math.round((1-p.price/p.old_price)*100) : 0;
     const img = p.image_url
-      ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" onerror="this.parentNode.innerHTML='<div class=&quot;ph&quot;>${(p.name[0]||'?')}</div>'">`
+      ? `<img src="${cdn(p.image_url,400)}" alt="${p.name}" loading="lazy" onerror="this.parentNode.innerHTML='<div class=&quot;ph&quot;>${(p.name[0]||'?')}</div>'">`
       : `<div class="ph">${p.name[0]||'?'}</div>`;
     const multi = (p.images && p.images.length>1)
       ? `<span class="multi-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M21 7v12a2 2 0 0 1-2 2H7"/></svg>${p.images.length}</span>`
@@ -2629,7 +2643,7 @@ function openModal(id, fromLink){
       ? `<div class="gal-thumbs">${galItems.map((it,i)=>{
           const inner = it.type==='video'
             ? `${ytThumb(it.url)}<span class="gal-thumb-play">▶</span>`
-            : `<img src="${it.url}" alt="" loading="lazy">`;
+            : `<img src="${cdn(it.url,120)}" alt="" loading="lazy">`;
           return `<button type="button" class="gal-thumb${it.type==='video'?' vid':''}${i===0?' on':''}" onclick="showGalImg(${i})">${inner}</button>`;
         }).join("")}</div>`
       : "";
@@ -2739,7 +2753,7 @@ function renderRelated(){
   wrap.innerHTML = `<div class="rel-title">${t('related_title')}</div><div class="rel-grid">` +
     rel.map(p=>{
       const img = p.image_url
-        ? `<img src="${p.image_url}" alt="${escAttr(p.name)}" loading="lazy">`
+        ? `<img src="${cdn(p.image_url,250)}" alt="${escAttr(p.name)}" loading="lazy">`
         : `<div class="rel-ph">${esc(p.name[0]||'?')}</div>`;
       return `<button class="rel-card" type="button" data-rel="${p.id}">
         <div class="rel-thumb">${img}</div>
@@ -2949,7 +2963,7 @@ function showPromo(){
   // প্রোডাক্ট ডিপ-লিংকে কোনো মডাল খোলা থাকলে পপআপ দেখাবে না (দুটো একসাথে নয়)
   const pm=document.getElementById('overlay');
   if(pm && pm.classList.contains('show')) return;
-  wrap.innerHTML=`<img src="${imgURL(img)}" alt="offer" onerror="this.style.display='none'">`;
+  wrap.innerHTML=`<img src="${cdn(img,800)}" alt="offer" onerror="this.style.display='none'">`;
   const ttl=(S.popup_title||'').toString().trim();
   if(ttl){ titleEl.textContent=ttl; titleEl.style.display='block'; }
   else { titleEl.style.display='none'; }

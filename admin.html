@@ -290,14 +290,41 @@ async function dbDelete(table, id){
   if(error){ toast(error.message,'err'); return false; } return true;
 }
 /* ---------- Storage: Image upload ---------- */
+/* আপলোডের আগে ছবি ছোট + কম্প্রেস করে — ৪ MB এর ছবি ~২০০ KB হয়ে যায় */
+function compressImage(file, maxW=1400, quality=0.82){
+  return new Promise(resolve=>{
+    if(!/^image\//.test(file.type) || /gif|svg/i.test(file.type)) return resolve(file);
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        URL.revokeObjectURL(url);
+        const scale=Math.min(1, maxW/(img.naturalWidth||img.width||maxW));
+        const c=document.createElement('canvas');
+        c.width =Math.max(1, Math.round((img.naturalWidth ||img.width )*scale));
+        c.height=Math.max(1, Math.round((img.naturalHeight||img.height)*scale));
+        const ctx=c.getContext('2d');
+        ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);   // PNG-এর স্বচ্ছ অংশ কালো না হওয়ার জন্য
+        ctx.drawImage(img,0,0,c.width,c.height);
+        c.toBlob(b=>resolve((b && b.size < file.size) ? b : file), 'image/jpeg', quality);
+      }catch(e){ resolve(file); }
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); resolve(file); };
+    img.src=url;
+  });
+}
 async function uploadImages(fileList, statusEl, onUrl){
   const files=[...fileList];
   for(let i=0;i<files.length;i++){
-    const file=files[i];
-    if(statusEl) statusEl.textContent=`Uploading... (${i+1}/${files.length})`;
-    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+    const orig=files[i];
+    if(statusEl) statusEl.textContent=`Compressing... (${i+1}/${files.length})`;
+    const file=await compressImage(orig);
+    const isJpg=(file!==orig);
+    const ext=isJpg?'jpg':((orig.name.split('.').pop()||'jpg').toLowerCase());
+    const kb=Math.round(file.size/1024);
+    if(statusEl) statusEl.textContent=`Uploading... (${i+1}/${files.length}) — ${kb} KB`;
     const path='products/'+Date.now()+'-'+Math.random().toString(36).slice(2,7)+'.'+ext;
-    const {error}=await SB.storage.from('product-images').upload(path,file,{cacheControl:'3600',upsert:false});
+    const {error}=await SB.storage.from('product-images').upload(path,file,{cacheControl:'31536000',contentType:isJpg?'image/jpeg':(orig.type||undefined),upsert:false});
     if(error){ toast('Upload failed: '+error.message,'err'); if(statusEl)statusEl.textContent='❌ Upload failed ('+error.message+')'; continue; }
     const {data}=SB.storage.from('product-images').getPublicUrl(path);
     onUrl(data.publicUrl);
