@@ -2885,10 +2885,14 @@ function slugify(s){
 }
 function productSlug(p){ return p ? (slugify(p.name) || ('product-'+p.id)) : ""; }
 /* লিঙ্কে এখন প্রোডাক্ট নাম (slug) বসে — কোড/আইডি নয় */
+/* শেয়ারের লিংক এখন /p/<slug>/ — ওই পাতায় প্রোডাক্টের নিজস্ব
+   og:image ও দাম বসানো থাকে, তাই ফেসবুকে সঠিক প্রিভিউ আসে।
+   পাতাটা সাথে সাথে #p=<id> এ পাঠিয়ে দেয়, গ্রাহক পার্থক্য টের পায় না।
+   পাতা এখনো তৈরি না হলে 404.html ধরে নিয়ে সাইটে পৌঁছে দেয়। */
 function productLink(id){
   const p = PRODUCTS.find(x=>String(x.id)===String(id)) || (current && String(current.id)===String(id) ? current : null);
   const key = p ? productSlug(p) : id;
-  return location.origin + location.pathname + location.search + '#p=' + encodeURIComponent(key);
+  return location.origin + '/p/' + encodeURIComponent(key) + '/';
 }
 function copyProductLink(btn){
   if(!current) return;
