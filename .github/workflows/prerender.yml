@@ -1,0 +1,49 @@
+name: Prerender product pages
+
+on:
+  # index.html বা স্ক্রিপ্ট বদলালে
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'scripts/prerender.mjs'
+      - '.github/workflows/prerender.yml'
+  # প্রতি ২ ঘণ্টায় — অ্যাডমিনে নতুন পণ্য যোগ করলে ধরার জন্য
+  schedule:
+    - cron: '0 */2 * * *'
+  # Actions ট্যাব থেকে হাতে চালানোর জন্য
+  workflow_dispatch:
+
+# নিজের কমিট পুশ করার অনুমতি
+permissions:
+  contents: write
+
+# দুটো রান একসাথে চললে পুশে সংঘর্ষ হয়
+concurrency:
+  group: prerender
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate pages
+        run: node scripts/prerender.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add p sitemap.xml robots.txt 404.html
+          if git diff --staged --quiet; then
+            echo "কোনো পরিবর্তন নেই — কমিট করার দরকার নেই"
+          else
+            git commit -m "chore: prerender product pages"
+            git push
+          fi
