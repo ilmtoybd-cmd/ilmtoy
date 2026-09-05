@@ -1483,7 +1483,11 @@ async function loadProducts(){
         battery_size:(d.battery_size||d.battery_type||"").toString().trim(),
         status:st,
         bestseller:(d.bestseller===true||d.bestseller==='true'||d.bestseller===1),
+        // stock খালি (null) মানে ওই পণ্যের হিসাব রাখা হচ্ছে না — আগের মতোই চলবে।
+        // সংখ্যা বসানো থাকলে ০ হলেই নিজে থেকে "স্টক শেষ" হয়ে যাবে।
+        stock:(d.stock===null||d.stock===undefined||d.stock==='')?null:Number(d.stock),
         soldout:['soldout','sold out','stockout','stock out','out','out of stock','no stock','nostock'].includes(st)
+                || (d.stock!==null && d.stock!==undefined && d.stock!=='' && Number(d.stock)<=0)
       };
     }).filter(p=>p.name && p.status!=="hidden");
     // admin-এর মতোই সিরিয়াল সর্ট: ছোট sort_order আগে, 0/blank সবার নিচে
