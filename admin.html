@@ -121,6 +121,30 @@ main{flex:1;max-width:1120px;margin:0 auto;width:100%;padding:18px 16px 60px}
 .pill.amber{background:var(--amber-soft);color:var(--amber)}
 .pill.blue{background:var(--blue-soft);color:var(--blue)}
 
+/* ---------- Order status tabs ---------- */
+.stabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.stab{background:var(--card);border:1.5px solid var(--line);color:var(--soft);
+  padding:6px 13px;border-radius:20px;font-size:13px;font-weight:600;font-family:inherit;
+  white-space:nowrap;transition:all .15s}
+.stab:hover{border-color:var(--accent);color:var(--ink)}
+.stab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.stab.green.on{background:var(--green);border-color:var(--green)}
+.stab.amber.on{background:var(--amber);border-color:var(--amber)}
+.stab.red.on{background:var(--red);border-color:var(--red)}
+.stab.blue.on{background:var(--blue);border-color:var(--blue)}
+
+/* ---------- Bulk action bar ---------- */
+.bulkbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;
+  padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.bulkbar select{width:auto;min-width:150px;padding:7px 10px;font-size:13px;border-radius:10px}
+.ckwrap{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--soft);
+  font-weight:600;cursor:pointer;user-select:none}
+.ckwrap input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;flex:none}
+.toolbar input[type=date]{width:auto;min-width:140px;color:var(--soft)}
+.row.orow{gap:10px}
+.row.orow.sel{border-color:var(--accent);background:var(--accent-soft)}
+.row .rowck{flex:none}
+
 .empty{text-align:center;color:var(--soft);padding:44px 20px}
 .empty .em-ic{font-size:38px;margin-bottom:8px}
 .empty p{margin:0 0 14px}
@@ -588,42 +612,301 @@ window.productForm=function(p){
 /* ============================================================
    ORDERS
    ============================================================ */
-let _orders=[];
-const ORDER_STATES=['new','processing','shipped','delivered','cancelled'];
-const ORDER_LABEL={new:'New',processing:'Processing',shipped:'Shipped',delivered:'Delivered',cancelled:'Cancelled'};
-const ORDER_PILL={new:'blue',processing:'amber',shipped:'blue',delivered:'green',cancelled:'red'};
+let _orders=[], _oCounts={}, _oSel=new Set(), _oTab='', _oTrunc=false;
+
+const ORDER_STATES=['new','confirm','processing','on_the_way','in_courier','delivered','cancelled','returned'];
+const ORDER_LABEL={new:'Pending',confirm:'Confirmed',processing:'Processing',on_the_way:'On The Way',
+                   in_courier:'In Courier',delivered:'Completed',cancelled:'Cancelled',returned:'Returned'};
+const ORDER_PILL ={new:'blue',confirm:'blue',processing:'amber',on_the_way:'amber',
+                   in_courier:'amber',delivered:'green',cancelled:'red',returned:'red'};
+const ORDER_LIMIT=300;   // একবারে সর্বোচ্চ কত সারি আনবে
+
+/* সাইটের নাম/ফোন — প্রিন্টের হেডারে লাগে */
+let _siteInfo=null;
+async function getSiteInfo(){
+  if(_siteInfo) return _siteInfo;
+  try{
+    const rows=await dbList('settings','key',true);
+    const m={}; rows.forEach(r=>{ m[r.key]=r.value; });
+    _siteInfo={ name:m.store_name||'ilm Toy', phone:m.phone||'', address:m.address||'' };
+  }catch(e){ _siteInfo={name:'ilm Toy',phone:'',address:''}; }
+  return _siteInfo;
+}
+
 async function renderOrders(){
-  loadingView();
-  _orders = await dbList('orders','created_at',false);
-  const tools=`<div class="toolbar">
-    <input class="search" id="oSearch" placeholder="Name / phone / order ID...">
-    <select id="oStatus"><option value="">All</option>${ORDER_STATES.map(s=>`<option value="${s}">${ORDER_LABEL[s]}</option>`).join('')}</select>
-  </div>`;
-  $('#view').innerHTML=head('Orders')+tools+'<div class="list" id="oList"></div>';
-  $('#oSearch').addEventListener('input',drawOrders); $('#oStatus').addEventListener('change',drawOrders);
+  _oSel.clear(); _oTab='';
+  $('#view').innerHTML = head('Orders', '<button class="btn ghost sm" id="oRefresh">\u21bb Refresh</button>')
+    + '<div class="stabs" id="oTabs"></div>'
+    + '<div class="toolbar">'
+    +   '<input class="search" id="oSearch" placeholder="Name / phone / order ID...">'
+    +   '<input type="date" id="oFrom" title="From date">'
+    +   '<input type="date" id="oTo" title="To date">'
+    +   '<button class="btn sm" id="oGo">Search</button>'
+    +   '<button class="btn ghost sm" id="oClear">Clear</button>'
+    + '</div>'
+    + '<div class="bulkbar">'
+    +   '<label class="ckwrap"><input type="checkbox" id="oAll"><span id="oSelN">None selected</span></label>'
+    +   '<select id="oBulkStatus"><option value="">Change status to\u2026</option>'
+    +     ORDER_STATES.map(s=>'<option value="'+s+'">'+ORDER_LABEL[s]+'</option>').join('')
+    +   '</select>'
+    +   '<button class="btn sm bulk-act" id="oApply" disabled>Apply</button>'
+    +   '<button class="btn ghost sm bulk-act" id="oPrintS" disabled>\ud83c\udff7\ufe0f Sticker</button>'
+    +   '<button class="btn ghost sm bulk-act" id="oPrintI" disabled>\ud83e\uddfe Invoice</button>'
+    +   '<button class="btn ghost sm" id="oCsv">\u2b07 CSV</button>'
+    +   '<button class="btn danger sm bulk-act" id="oDel" disabled>Delete</button>'
+    + '</div>'
+    + '<div class="list" id="oList"></div>';
+
+  $('#oRefresh').addEventListener('click', loadOrders);
+  $('#oGo').addEventListener('click', loadOrders);
+  $('#oSearch').addEventListener('keydown', e=>{ if(e.key==='Enter') loadOrders(); });
+  $('#oClear').addEventListener('click', ()=>{
+    $('#oSearch').value=''; $('#oFrom').value=''; $('#oTo').value=''; _oTab=''; loadOrders();
+  });
+  $('#oAll').addEventListener('change', e=>{
+    if(e.target.checked) _orders.forEach(o=>_oSel.add(o.id)); else _oSel.clear();
+    drawOrders();
+  });
+  $('#oApply').addEventListener('click', bulkStatus);
+  $('#oDel').addEventListener('click', bulkDelete);
+  $('#oCsv').addEventListener('click', exportCsv);
+  $('#oPrintS').addEventListener('click', ()=>printOrders('sticker'));
+  $('#oPrintI').addEventListener('click', ()=>printOrders('invoice'));
+
+  await loadOrders();
+}
+
+async function loadOrders(){
+  const list=$('#oList');
+  if(list) list.innerHTML='<div class="loading"><span class="spin" style="border-color:var(--accent);border-top-color:transparent"></span></div>';
+  _oSel.clear();
+
+  const q    = ($('#oSearch')?.value||'').trim();
+  const from = $('#oFrom')?.value||'';
+  const to   = $('#oTo')?.value||'';
+
+  let sel = SB.from('orders').select('*').order('created_at',{ascending:false}).limit(ORDER_LIMIT);
+  if(_oTab) sel = sel.eq('status', _oTab);
+  if(from)  sel = sel.gte('created_at', from+'T00:00:00');
+  if(to)    sel = sel.lte('created_at', to+'T23:59:59.999');
+  if(q){
+    const safe = q.replace(/[,()%]/g,' ').trim();
+    if(safe) sel = sel.or('order_id.ilike.%'+safe+'%,customer_name.ilike.%'+safe+'%,phone.ilike.%'+safe+'%');
+  }
+
+  const [res, cnt] = await Promise.all([ sel, SB.rpc('order_counts') ]);
+  if(res.error){ toast(res.error.message,'err'); _orders=[]; }
+  else _orders = res.data||[];
+  _oTrunc  = _orders.length >= ORDER_LIMIT;
+  _oCounts = (cnt && !cnt.error && cnt.data) ? cnt.data : {};
+
+  drawOrderTabs();
   drawOrders();
 }
-function drawOrders(){
-  const q=($('#oSearch')?.value||'').toLowerCase().trim(); const st=$('#oStatus')?.value||'';
-  const rows=_orders.filter(o=>{
-    const hay=`${o.order_id} ${o.customer_name} ${o.phone}`.toLowerCase();
-    return (!q||hay.includes(q))&&(!st||o.status===st);
+
+function drawOrderTabs(){
+  const box=$('#oTabs'); if(!box) return;
+  const total = Object.values(_oCounts).reduce((s,n)=>s+Number(n||0),0);
+  let html = '<button class="stab'+(_oTab===''?' on':'')+'" data-s="">All ('+total+')</button>';
+  ORDER_STATES.forEach(s=>{
+    const n = Number(_oCounts[s]||0);
+    html += '<button class="stab '+(ORDER_PILL[s]||'gray')+(_oTab===s?' on':'')+'" data-s="'+s+'">'
+          + ORDER_LABEL[s]+' ('+n+')</button>';
   });
-  const list=$('#oList');
-  if(!rows.length){ list.innerHTML=emptyBox('🧾', q||st?'Nothing found.':'No orders yet.'); return; }
-  list.innerHTML='';
-  rows.forEach(o=>{
-    const pill=`<span class="pill ${ORDER_PILL[o.status]||'gray'}">${ORDER_LABEL[o.status]||o.status}</span>`;
-    const row=el(`<div class="row">
-      <div class="main">
-        <div class="title">${esc(o.customer_name)} · ${bdt(o.total)} ${pill}</div>
-        <div class="meta">${esc(o.phone)} · ${esc(o.order_id)} · ${fmtDate(o.created_at)}</div>
-      </div>
-      <div class="acts"><button class="icon-btn" title="Details">👁️</button></div></div>`);
+  box.innerHTML=html;
+  box.querySelectorAll('.stab').forEach(b=>{
+    b.addEventListener('click',()=>{ _oTab=b.dataset.s; loadOrders(); });
+  });
+}
+
+function refreshBulkBar(){
+  const n=_oSel.size;
+  const lbl=$('#oSelN'); if(lbl) lbl.textContent = n ? (n+' selected') : 'None selected';
+  document.querySelectorAll('.bulk-act').forEach(b=>{ b.disabled = n===0; });
+  const all=$('#oAll');
+  if(all) all.checked = n>0 && n===_orders.length;
+}
+
+function drawOrders(){
+  const list=$('#oList'); if(!list) return;
+  if(!_orders.length){
+    list.innerHTML=emptyBox('\ud83e\uddfe','No orders found.');
+    refreshBulkBar(); return;
+  }
+  list.innerHTML = _oTrunc
+    ? '<div class="hintbar">Showing the latest '+ORDER_LIMIT+' orders. Narrow it down with the date range or search.</div>'
+    : '';
+  _orders.forEach(o=>{
+    const pill='<span class="pill '+(ORDER_PILL[o.status]||'gray')+'">'+(ORDER_LABEL[o.status]||o.status)+'</span>';
+    const paid=/paid|confirm|verified/i.test(o.payment_status||'')
+      ? '<span class="pill green">Paid</span>' : '';
+    const row=el('<div class="row orow'+(_oSel.has(o.id)?' sel':'')+'">'
+      + '<label class="ckwrap rowck"><input type="checkbox" '+(_oSel.has(o.id)?'checked':'')+'></label>'
+      + '<div class="main">'
+      +   '<div class="title">'+esc(o.customer_name)+' \u00b7 '+bdt(o.total)+' '+pill+' '+paid+'</div>'
+      +   '<div class="meta">'+esc(o.phone)+' \u00b7 '+esc(o.order_id)+' \u00b7 '+fmtDate(o.created_at)+'</div>'
+      + '</div>'
+      + '<div class="acts"><button class="icon-btn" title="Details">\ud83d\udc41\ufe0f</button></div></div>');
+    const ck=row.querySelector('input[type=checkbox]');
+    ck.addEventListener('change',e=>{
+      e.stopPropagation();
+      if(ck.checked) _oSel.add(o.id); else _oSel.delete(o.id);
+      row.classList.toggle('sel', ck.checked);
+      refreshBulkBar();
+    });
+    row.querySelector('.rowck').addEventListener('click',e=>e.stopPropagation());
     row.addEventListener('click',()=>orderDetail(o));
     list.appendChild(row);
   });
+  refreshBulkBar();
 }
+
+/* ---------- Bulk actions ---------- */
+async function bulkStatus(){
+  const st=$('#oBulkStatus').value;
+  if(!st){ toast('Pick a status first','err'); return; }
+  const ids=[..._oSel];
+  const {error}=await SB.from('orders').update({status:st}).in('id',ids);
+  if(error){ toast(error.message,'err'); return; }
+  toast(ids.length+' order(s) \u2192 '+ORDER_LABEL[st],'ok');
+  $('#oBulkStatus').value='';
+  loadOrders();
+}
+
+async function bulkDelete(){
+  const ids=[..._oSel];
+  if(!confirm(ids.length+' order(s) will be deleted permanently. This cannot be undone.\n\nContinue?')) return;
+  const {error}=await SB.from('orders').delete().in('id',ids);
+  if(error){ toast(error.message,'err'); return; }
+  toast(ids.length+' order(s) deleted','ok');
+  loadOrders();
+}
+
+function selectedOrders(){
+  return _oSel.size ? _orders.filter(o=>_oSel.has(o.id)) : _orders;
+}
+
+/* ---------- CSV ---------- */
+function exportCsv(){
+  const rows=selectedOrders();
+  if(!rows.length){ toast('Nothing to export','err'); return; }
+  const cols=['order_id','created_at','customer_name','phone','address','product_summary',
+              'qty_total','subtotal','coupon','discount','delivery_area','delivery_charge',
+              'total','payment_method','payment_status','trx_id','status','note'];
+  const cell=v=>{
+    const s=String(v??'').replace(/"/g,'""');
+    return /[",\n]/.test(s) ? '"'+s+'"' : s;
+  };
+  const csv=[cols.join(',')].concat(rows.map(o=>cols.map(c=>cell(o[c])).join(','))).join('\r\n');
+  // \uFEFF = BOM — না দিলে Excel-এ বাংলা লেখা ভেঙে যায়
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='orders-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  toast(rows.length+' order(s) exported','ok');
+}
+
+/* ---------- Print ---------- */
+function orderItems(o){
+  try{ return Array.isArray(o.items)?o.items:JSON.parse(o.items||'[]'); }catch(e){ return []; }
+}
+
+async function printOrders(mode){
+  const rows=selectedOrders();
+  if(!rows.length){ toast('Nothing to print','err'); return; }
+  const si=await getSiteInfo();
+  const paid=o=>/paid|confirm|verified/i.test(o.payment_status||'');
+
+  const sticker=o=>'<div class="stk">'
+    + '<div class="stk-top"><b>'+esc(si.name)+'</b><span>'+esc(o.order_id)+'</span></div>'
+    + '<div class="stk-to">'
+    +   '<div class="nm">'+esc(o.customer_name)+'</div>'
+    +   '<div class="ph">'+esc(o.phone)+'</div>'
+    +   '<div class="ad">'+esc(o.address)+'</div>'
+    + '</div>'
+    + (o.note?'<div class="stk-note">Note: '+esc(o.note)+'</div>':'')
+    + '<div class="stk-cod">'+(paid(o)
+        ? 'PAID \u2014 collect \u09f30'
+        : 'COD: <b>'+bdt(o.total)+'</b>')+'</div>'
+    + '<div class="stk-ft">'+esc(o.product_summary||'')+'</div>'
+    + '<div class="stk-ft">From: '+esc(si.name)+(si.phone?' \u00b7 '+esc(si.phone):'')+'</div>'
+    + '</div>';
+
+  const invoice=o=>{
+    const items=orderItems(o);
+    const lines = items.length
+      ? items.map(it=>'<tr><td>'+esc(it.name)+'</td><td class="c">'+(it.qty||1)+'</td>'
+          +'<td class="r">'+bdt(it.price)+'</td><td class="r">'+bdt((it.price||0)*(it.qty||1))+'</td></tr>').join('')
+      : '<tr><td colspan="4">'+esc(o.product_summary||'\u2014')+'</td></tr>';
+    return '<div class="inv">'
+      + '<div class="inv-h"><div><h2>'+esc(si.name)+'</h2>'
+      +   (si.address?'<div class="mut">'+esc(si.address)+'</div>':'')
+      +   (si.phone?'<div class="mut">'+esc(si.phone)+'</div>':'')+'</div>'
+      +   '<div class="r"><div class="inv-no">'+esc(o.order_id)+'</div>'
+      +   '<div class="mut">'+fmtDate(o.created_at)+'</div></div></div>'
+      + '<div class="inv-to"><b>'+esc(o.customer_name)+'</b><br>'+esc(o.phone)+'<br>'+esc(o.address)+'</div>'
+      + '<table class="inv-t"><thead><tr><th>Item</th><th class="c">Qty</th>'
+      +   '<th class="r">Price</th><th class="r">Amount</th></tr></thead><tbody>'+lines+'</tbody></table>'
+      + '<table class="inv-s">'
+      +   '<tr><td>Subtotal</td><td class="r">'+bdt(o.subtotal)+'</td></tr>'
+      +   (Number(o.discount)?'<tr><td>Discount'+(o.coupon?' ('+esc(o.coupon)+')':'')+'</td><td class="r">\u2212'+bdt(o.discount)+'</td></tr>':'')
+      +   '<tr><td>Delivery ('+esc(o.delivery_area||'')+')</td><td class="r">'+bdt(o.delivery_charge)+'</td></tr>'
+      +   '<tr class="tot"><td>Total</td><td class="r">'+bdt(o.total)+'</td></tr>'
+      +   '<tr><td>Payment</td><td class="r">'+esc(o.payment_method||'')+'</td></tr>'
+      +   '<tr class="tot"><td>'+(paid(o)?'Paid':'Due on delivery')+'</td><td class="r">'+(paid(o)?bdt(0):bdt(o.total))+'</td></tr>'
+      + '</table>'
+      + (o.note?'<div class="mut">Note: '+esc(o.note)+'</div>':'')
+      + '<div class="inv-ty">Thank you for shopping with '+esc(si.name)+'!</div>'
+      + '</div>';
+  };
+
+  const css=''
+    + '*{box-sizing:border-box}'
+    + 'body{font-family:"Hind Siliguri",system-ui,sans-serif;margin:0;padding:10mm;color:#111;font-size:13px}'
+    + '.wrap{display:grid;grid-template-columns:1fr 1fr;gap:6mm}'
+    + '.stk{border:1.5px dashed #666;border-radius:6px;padding:4mm;page-break-inside:avoid;min-height:52mm}'
+    + '.stk-top{display:flex;justify-content:space-between;border-bottom:1px solid #ccc;padding-bottom:2mm;margin-bottom:2mm;font-size:12px}'
+    + '.stk-to .nm{font-size:17px;font-weight:800}'
+    + '.stk-to .ph{font-size:15px;font-weight:700;margin:1mm 0}'
+    + '.stk-to .ad{font-size:13px;line-height:1.45}'
+    + '.stk-note{font-size:12px;margin-top:2mm;font-style:italic}'
+    + '.stk-cod{margin-top:3mm;padding:2mm;border:1.5px solid #111;border-radius:4px;text-align:center;font-size:15px}'
+    + '.stk-ft{font-size:10px;color:#555;margin-top:2mm;line-height:1.4}'
+    + '.inv{page-break-after:always;padding-bottom:6mm}'
+    + '.inv:last-child{page-break-after:auto}'
+    + '.inv-h{display:flex;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:3mm;margin-bottom:4mm}'
+    + '.inv-h h2{margin:0 0 1mm;font-size:20px}'
+    + '.inv-no{font-weight:800;font-size:15px}'
+    + '.mut{color:#666;font-size:12px}'
+    + '.inv-to{margin-bottom:4mm;line-height:1.6}'
+    + '.inv-t{width:100%;border-collapse:collapse;margin-bottom:4mm}'
+    + '.inv-t th,.inv-t td{border-bottom:1px solid #ddd;padding:2mm 1mm;text-align:left}'
+    + '.inv-t th{background:#f4f4f4;font-size:12px}'
+    + '.inv-s{width:60mm;margin-left:auto;border-collapse:collapse}'
+    + '.inv-s td{padding:1.5mm 1mm;border-bottom:1px solid #eee}'
+    + '.inv-s .tot td{font-weight:800;font-size:15px;border-bottom:2px solid #111}'
+    + '.inv-ty{text-align:center;color:#666;font-size:12px;margin-top:6mm}'
+    + '.c{text-align:center}.r{text-align:right}'
+    + '@page{margin:8mm}';
+
+  const body = mode==='sticker'
+    ? '<div class="wrap">'+rows.map(sticker).join('')+'</div>'
+    : rows.map(invoice).join('');
+
+  const w=window.open('','_blank');
+  if(!w){ toast('Allow pop-ups to print','err'); return; }
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8">'
+    + '<title>'+(mode==='sticker'?'Courier labels':'Invoices')+' \u2014 '+rows.length+'</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700;800&display=swap" rel="stylesheet">'
+    + '<style>'+css+'</style></head><body>'+body+'</body></html>');
+  w.document.close();
+  // ফন্ট নামার সময় দিয়ে তারপর প্রিন্ট, নইলে বাংলা লেখা ভাঙা দেখায়
+  setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} }, 700);
+}
+
+/* ---------- Detail ---------- */
 let _delivCharges=null;
 async function getDelivCharges(){
   if(_delivCharges) return _delivCharges;
@@ -634,38 +917,62 @@ async function getDelivCharges(){
   }catch(e){ _delivCharges={dhaka:0,outside:0}; }
   return _delivCharges;
 }
+
 async function orderDetail(o){
   const charges=await getDelivCharges();
-  let items=[]; try{ items=Array.isArray(o.items)?o.items:JSON.parse(o.items||'[]'); }catch(e){}
+  const items=orderItems(o);
   const itemsHtml = items.length
-    ? items.map(it=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)"><span>${esc(it.name)} × ${it.qty}</span><span>${bdt((it.price||0)*(it.qty||1))}</span></div>`).join('')
-    : `<div style="color:var(--soft)">${esc(o.product_summary||'—')}</div>`;
-  const isOutside = /out|bair|বাইর|বাহির/i.test(String(o.delivery_area||''));
-  const body=`
-    <div class="grid2">
-      <label class="fld"><span>Customer name</span><input id="o_name" value="${esc(o.customer_name||'')}"></label>
-      <label class="fld"><span>Phone</span><input id="o_phone" value="${esc(o.phone||'')}"></label>
-    </div>
-    <label class="fld"><span>Address</span><textarea id="o_addr" style="min-height:60px">${esc(o.address||'')}</textarea></label>
-    <label class="fld"><span>Note</span><input id="o_note" value="${esc(o.note||'')}"></label>
-    <div style="margin:14px 0">${itemsHtml}</div>
-    <div style="font-size:14px;color:var(--soft);line-height:1.8;margin-bottom:8px">
-      Subtotal: ${bdt(o.subtotal)}<br>
-      ${o.coupon?`Coupon (${esc(o.coupon)}): −${bdt(o.discount)}<br>`:''}
-      Payment: ${esc(o.payment_method||'')} ${o.trx_id?`· TrxID ${esc(o.trx_id)}`:''}
-    </div>
-    <div class="grid2">
-      <label class="fld"><span>Delivery zone</span>
-        <select id="o_zone">
-          <option value="dhaka"${isOutside?'':' selected'}>Inside Dhaka</option>
-          <option value="outside"${isOutside?' selected':''}>Outside Dhaka</option>
-        </select></label>
-      <label class="fld"><span>Delivery charge (৳)</span><input id="o_ship" type="number" value="${Number(o.delivery_charge)||0}"></label>
-    </div>
-    <div style="font-weight:800;font-size:16px;color:var(--ink);margin:2px 2px 2px">Total: <span id="o_total">${bdt(o.total)}</span></div>
-    <label class="fld" style="margin-top:14px"><span>Order status</span>
-      <select id="o_status">${ORDER_STATES.map(s=>`<option value="${s}"${o.status===s?' selected':''}>${ORDER_LABEL[s]}</option>`).join('')}</select></label>`;
-  const ov=openModal('Order — '+o.order_id, body, async (ov)=>{
+    ? items.map(it=>'<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)"><span>'+esc(it.name)+' \u00d7 '+it.qty+'</span><span>'+bdt((it.price||0)*(it.qty||1))+'</span></div>').join('')
+    : '<div style="color:var(--soft)">'+esc(o.product_summary||'\u2014')+'</div>';
+  const isOutside = /out|bair|\u09ac\u09be\u0987\u09b0|\u09ac\u09be\u09b9\u09bf\u09b0/i.test(String(o.delivery_area||''));
+
+  // স্ট্যাটাস বদলের ইতিহাস
+  let logHtml='';
+  try{
+    const {data:logs}=await SB.from('order_status_log').select('*')
+      .eq('order_ref',o.id).order('changed_at',{ascending:false}).limit(8);
+    if(logs&&logs.length){
+      logHtml='<div style="margin-top:14px;font-size:12px;color:var(--soft);line-height:1.9">'
+        + '<b style="color:var(--ink)">History</b><br>'
+        + logs.map(l=>fmtDate(l.changed_at)+' \u00b7 '
+            +(ORDER_LABEL[l.from_status]||l.from_status||'?')+' \u2192 '
+            +(ORDER_LABEL[l.to_status]||l.to_status)).join('<br>')
+        + '</div>';
+    }
+  }catch(e){}
+
+  const body=''
+    + '<div class="grid2">'
+    +   '<label class="fld"><span>Customer name</span><input id="o_name" value="'+esc(o.customer_name||'')+'"></label>'
+    +   '<label class="fld"><span>Phone</span><input id="o_phone" value="'+esc(o.phone||'')+'"></label>'
+    + '</div>'
+    + '<label class="fld"><span>Address</span><textarea id="o_addr" style="min-height:60px">'+esc(o.address||'')+'</textarea></label>'
+    + '<label class="fld"><span>Note</span><input id="o_note" value="'+esc(o.note||'')+'"></label>'
+    + '<div style="margin:14px 0">'+itemsHtml+'</div>'
+    + '<div style="font-size:14px;color:var(--soft);line-height:1.8;margin-bottom:8px">'
+    +   'Subtotal: '+bdt(o.subtotal)+'<br>'
+    +   (o.coupon?'Coupon ('+esc(o.coupon)+'): \u2212'+bdt(o.discount)+'<br>':'')
+    +   'Payment: '+esc(o.payment_method||'')+' '+(o.trx_id?'\u00b7 TrxID '+esc(o.trx_id):'')
+    +   (o.ip_address?'<br>IP: '+esc(o.ip_address):'')
+    + '</div>'
+    + '<div class="grid2">'
+    +   '<label class="fld"><span>Delivery zone</span><select id="o_zone">'
+    +     '<option value="dhaka"'+(isOutside?'':' selected')+'>Inside Dhaka</option>'
+    +     '<option value="outside"'+(isOutside?' selected':'')+'>Outside Dhaka</option></select></label>'
+    +   '<label class="fld"><span>Delivery charge (\u09f3)</span><input id="o_ship" type="number" value="'+(Number(o.delivery_charge)||0)+'"></label>'
+    + '</div>'
+    + '<div style="font-weight:800;font-size:16px;color:var(--ink);margin:2px">Total: <span id="o_total">'+bdt(o.total)+'</span></div>'
+    + '<div class="grid2" style="margin-top:14px">'
+    +   '<label class="fld"><span>Order status</span><select id="o_status">'
+    +     ORDER_STATES.map(s=>'<option value="'+s+'"'+(o.status===s?' selected':'')+'>'+ORDER_LABEL[s]+'</option>').join('')
+    +   '</select></label>'
+    +   '<label class="fld"><span>Payment status</span><select id="o_pay">'
+    +     ['','Pending','Paid'].map(s=>'<option value="'+s+'"'+((o.payment_status||'')===s?' selected':'')+'>'+(s||'\u2014')+'</option>').join('')
+    +   '</select></label>'
+    + '</div>'
+    + logHtml;
+
+  const ov=openModal('Order \u2014 '+o.order_id, body, async (ov)=>{
     const zone=$('#o_zone',ov).value;
     const ship=Number($('#o_ship',ov).value)||0;
     const subN=Number(o.subtotal)||0, discN=Number(o.discount)||0;
@@ -677,12 +984,13 @@ async function orderDetail(o){
       delivery_area: zone==='outside'?'Outside Dhaka':'Inside Dhaka',
       delivery_charge: ship,
       total: subN-discN+ship,
-      status:$('#o_status',ov).value
+      status:$('#o_status',ov).value,
+      payment_status:$('#o_pay',ov).value
     };
     if(!await dbSave('orders',obj,o.id)) return false;
-    toast('Order updated','ok'); renderOrders(); return true;
+    toast('Order updated','ok'); loadOrders(); return true;
   }, 'Save');
-  // live: zone বদলালে চার্জ বসে, চার্জ বদলালে total রিক্যালকুলেট
+
   const subN=Number(o.subtotal)||0, discN=Number(o.discount)||0;
   const zoneSel=$('#o_zone',ov), shipInp=$('#o_ship',ov), totOut=$('#o_total',ov);
   const recalc=()=>{ totOut.textContent=bdt(subN-discN+(Number(shipInp.value)||0)); };
