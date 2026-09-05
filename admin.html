@@ -328,7 +328,12 @@ async function dbDelete(table, id){
 /* maxW 1400 → 1200: সাইটের সবচেয়ে বড় CDN bucket-ও 1200, তাই এর বেশি রাখার
    মানে নেই। wsrv প্রতিবার cache ভরতে এই অরিজিনালটাই নামায়, তাই অরিজিনাল ছোট
    হলে Supabase egress সরাসরি কমে। quality 0.82 → 0.80, চোখে ধরা পড়ে না। */
-function compressImage(file, maxW=1200, quality=0.80){
+/* ছবি ছোট করার পাশাপাশি বর্গাকারও বানায় (১:১)।
+   কেন: সাইটের কার্ডের ছবির ঘর বর্গাকার। ছবি অন্য আকারের হলে
+   হয় চারপাশ কেটে ফেলতে হয়, নয়তো দুপাশে ফাঁকা থাকে — দুটোই দৃষ্টিকটু।
+   এখানে ছবিটা সাদা বর্গাকার ক্যানভাসের ঠিক মাঝখানে বসিয়ে দেওয়া হয়,
+   কিছুই কাটা যায় না, আর সাইটে প্রতিটা কার্ড একরকম দেখায়। */
+function compressImage(file, maxW=1200, quality=0.80, square=true){
   return new Promise(resolve=>{
     if(!/^image\//.test(file.type) || /gif|svg/i.test(file.type)) return resolve(file);
     const url=URL.createObjectURL(file);
@@ -336,14 +341,18 @@ function compressImage(file, maxW=1200, quality=0.80){
     img.onload=()=>{
       try{
         URL.revokeObjectURL(url);
-        const scale=Math.min(1, maxW/(img.naturalWidth||img.width||maxW));
+        const iw=img.naturalWidth||img.width, ih=img.naturalHeight||img.height;
+        const scale=Math.min(1, maxW/Math.max(iw,ih));
+        const dw=Math.max(1,Math.round(iw*scale)), dh=Math.max(1,Math.round(ih*scale));
         const c=document.createElement('canvas');
-        c.width =Math.max(1, Math.round((img.naturalWidth ||img.width )*scale));
-        c.height=Math.max(1, Math.round((img.naturalHeight||img.height)*scale));
+        // বর্গাকার ক্যানভাস = লম্বা দিকটার মাপ; ছবি মাঝখানে
+        c.width  = square ? Math.max(dw,dh) : dw;
+        c.height = square ? Math.max(dw,dh) : dh;
         const ctx=c.getContext('2d');
         ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);   // PNG-এর স্বচ্ছ অংশ কালো না হওয়ার জন্য
-        ctx.drawImage(img,0,0,c.width,c.height);
-        c.toBlob(b=>resolve((b && b.size < file.size) ? b : file), 'image/jpeg', quality);
+        ctx.drawImage(img, Math.round((c.width-dw)/2), Math.round((c.height-dh)/2), dw, dh);
+        // বর্গাকার করলে ফাইল বড় হতে পারে — তাই আকার তুলনা করে বাতিল করা যাবে না
+        c.toBlob(b=>resolve(b || file), 'image/jpeg', quality);
       }catch(e){ resolve(file); }
     };
     img.onerror=()=>{ URL.revokeObjectURL(url); resolve(file); };
