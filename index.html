@@ -2020,7 +2020,7 @@ async function submitCartOrder(){
     payMethodText = 'Online - ' + (__payProvider||'') + ' (' + payTypeLabel() + ')';
     payStatus = 'Pending';
   }
-  const orderId = 'IT-' + Date.now().toString(36).toUpperCase() + Math.floor(10 + Math.random()*89);
+  let orderId = 'IT-' + Date.now().toString(36).toUpperCase() + Math.floor(10 + Math.random()*89);  // সার্ভার নিজের আইডি ফেরত দিলে নিচে বদলে যাবে
   const c = calcCart();
   const note = document.getElementById("ccNote").value.trim();
   const locText = c.loc==='outside' ? 'Outside Dhaka' : 'Inside Dhaka';
@@ -2031,18 +2031,40 @@ async function submitCartOrder(){
   document.getElementById("cartSubmitBtn").disabled=true;
   let orderSaved = false;
   try{
-    const items = CART.map(x=>({ id:x.id, name:x.name, qty:x.qty, price:x.price }));
-    const { error } = await SBc.from('orders').insert({
-      order_id:orderId, customer_name:name, phone:phone, address:addr, note:note,
-      items:items, product_summary:productList, qty_total:qtyTotal,
-      subtotal:c.subtotal, coupon:couponCode, discount:c.discount,
-      delivery_area:locText, delivery_charge:c.ship, total:c.grand,
-      payment_method:payMethodText, trx_id:payTrxV, sender_number:paySenderV,
-      payment_status:payStatus
+    // শুধু id আর qty যাচ্ছে — দাম, ছাড়, ডেলিভারি চার্জ সার্ভার নিজে বের করবে
+    const items = CART.map(x=>({ id:x.id, qty:x.qty }));
+    const { data:res, error } = await SBc.rpc('place_order', {
+      p_items          : items,
+      p_name           : name,
+      p_phone          : phone,
+      p_address        : addr,
+      p_note           : note,
+      p_area           : (c.loc === 'outside' ? 'outside' : 'inside'),
+      p_coupon         : couponCode,
+      p_payment_method : (payEnabled() && __payMethod === 'online') ? 'online' : 'cod',
+      p_payment_label  : payMethodText,
+      p_trx_id         : payTrxV,
+      p_sender_number  : paySenderV
     });
-    if(error) console.warn('order insert', error.message);
-    else orderSaved = true;
-  }catch(e){ console.warn('order insert', e); }
+    if(error){
+      console.warn('place_order', error.message);
+      alert(error.message || 'অর্ডার নেওয়া যায়নি। আবার চেষ্টা করুন।');
+      document.getElementById("cartSubmitBtn").disabled = false;
+      return;
+    }
+    // সার্ভারের হিসাবই চূড়ান্ত — WhatsApp বার্তা ও Pixel ইভেন্টে এগুলোই যাবে
+    orderId    = res.order_id;
+    c.subtotal = Number(res.subtotal);
+    c.discount = Number(res.discount);
+    c.ship     = Number(res.delivery_charge);
+    c.grand    = Number(res.total);
+    orderSaved = true;
+  }catch(e){
+    console.warn('place_order', e);
+    alert('অর্ডার নেওয়া যায়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।');
+    document.getElementById("cartSubmitBtn").disabled = false;
+    return;
+  }
   // 📲 Settings শিটে order_whatsapp = on থাকলে অর্ডারটা WhatsApp-এও পাঠাবে
   try{
     const waOn = ['on','yes','true','1'].includes((S.order_whatsapp||'').toString().toLowerCase().trim());
