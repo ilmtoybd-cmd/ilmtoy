@@ -1011,9 +1011,22 @@ async function renderCoupons(){
   list.innerHTML='';
   rows.forEach(c=>{
     const val=c.type==='percent'?`${c.value}%`:bdt(c.value);
+    const exp=c.expires_at?new Date(c.expires_at):null;
+    const dead=exp&&exp<new Date();
+    const limit=Number(c.usage_limit)||0;
+    const used=Number(c.used_count)||0;
+    const spent=limit&&used>=limit;
+    let badge='<span class="pill gray">Off</span>';
+    if(c.active) badge = dead  ? '<span class="pill red">Expired</span>'
+                       : spent ? '<span class="pill red">Used up</span>'
+                       :         '<span class="pill green">On</span>';
+    const bits=[val+' off', 'min '+bdt(c.min_amount)];
+    if(Number(c.max_discount)) bits.push('max '+bdt(c.max_discount));
+    bits.push(limit ? `used ${used}/${limit}` : `used ${used}`);
+    if(exp) bits.push('till '+exp.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}));
     const row=el(`<div class="row"><div class="main">
-      <div class="title">${esc(c.code)} ${c.active?'<span class="pill green">On</span>':'<span class="pill gray">Off</span>'}</div>
-      <div class="meta">${val} off · min ${bdt(c.min_amount)}</div></div>
+      <div class="title">${esc(c.code)} ${badge}</div>
+      <div class="meta">${esc(bits.join(' · '))}</div></div>
       <div class="acts"><button class="icon-btn">✏️</button><button class="icon-btn del">🗑️</button></div></div>`);
     row.querySelector('.icon-btn:not(.del)').addEventListener('click',()=>couponForm(c));
     row.querySelector('.del').addEventListener('click',()=>confirmModal(`"${c.code}" — delete?`,async()=>{if(await dbDelete('coupons',c.id)){toast('Deleted','ok');renderCoupons();}}));
@@ -1030,11 +1043,32 @@ window.couponForm=function(c){ c=c||{};
       <label class="fld"><span>Value *</span><input id="c_val" type="number" value="${c.value??''}"></label>
     </div>
     <label class="fld"><span>Minimum order (৳)</span><input id="c_min" type="number" value="${c.min_amount??0}"></label>
+    <div class="grid2">
+      <label class="fld"><span>Max discount (৳) — percent coupons</span>
+        <input id="c_max" type="number" value="${c.max_discount??''}" placeholder="Leave blank for no cap"></label>
+      <label class="fld"><span>Expires on</span>
+        <input id="c_exp" type="date" value="${c.expires_at?String(c.expires_at).slice(0,10):''}"></label>
+    </div>
+    <div class="grid2">
+      <label class="fld"><span>Usage limit</span>
+        <input id="c_lim" type="number" value="${c.usage_limit??''}" placeholder="Blank = unlimited"></label>
+      <label class="fld"><span>Used so far</span>
+        <input id="c_used" type="number" value="${c.used_count??0}"></label>
+    </div>
+    <div class="hintbar">Expiry counts to the end of the chosen day. Leave a field blank to skip that limit.</div>
     <label class="fld"><span><input type="checkbox" id="c_active" ${c.active!==false?'checked':''} style="width:auto;margin-right:6px">On</span></label>`;
   openModal(c.id?'Edit Coupon':'New Coupon', body, async(ov)=>{
     const code=$('#c_code',ov).value.trim().toUpperCase(); if(!code){toast('Code is required','err');return false;}
+    const expV=$('#c_exp',ov).value;
+    const limV=$('#c_lim',ov).value.trim();
+    const maxV=$('#c_max',ov).value.trim();
     const obj={code,type:$('#c_type',ov).value,value:Number($('#c_val',ov).value||0),
-      min_amount:Number($('#c_min',ov).value||0),active:$('#c_active',ov).checked};
+      min_amount:Number($('#c_min',ov).value||0),active:$('#c_active',ov).checked,
+      // দিনের শেষ পর্যন্ত মেয়াদ — নইলে ওই দিনই সকালে কুপন মরে যেত
+      expires_at: expV ? new Date(expV+'T23:59:59').toISOString() : null,
+      usage_limit: limV==='' ? null : Number(limV),
+      max_discount: maxV==='' ? null : Number(maxV),
+      used_count: Number($('#c_used',ov).value||0)};
     if(await dbSave('coupons',obj,c.id)){toast('Saved','ok');renderCoupons();return true;} return false;
   });
 };

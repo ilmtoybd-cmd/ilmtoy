@@ -985,7 +985,7 @@ async function sbFetch(kind){
     let q;
     if(kind==='products')      q = SBc.from('products').select('*').order('sort_order',{ascending:true});
     else if(kind==='settings') q = SBc.from('settings').select('key,value');
-    else if(kind==='coupons')  q = SBc.from('coupons').select('code,type,value,min:min_amount').eq('active',true);
+    else if(kind==='coupons')  q = SBc.from('coupons').select('code,type,value,min:min_amount,max:max_discount').eq('active',true);
     else if(kind==='reviews')  q = SBc.from('reviews').select('name,profession,product,rating,review,photo,video,status,date:created_at');
     else if(kind==='pages')    q = SBc.from('pages').select('page,title,content,image');
     else if(kind==='blog')     q = SBc.from('blog_posts').select('title,date:post_date,image,content,status');
@@ -1971,6 +1971,8 @@ function calcCart(){
     discount = cartCoupon.type==='percent'
       ? Math.round(subtotal*cartCoupon.value/100)
       : cartCoupon.value;
+    // ছাড়ের ছাদ — সার্ভারও একই ছাদ বসায়, নইলে কার্টে বেশি ছাড় দেখাত
+    if(Number(cartCoupon.max) > 0 && discount > cartCoupon.max) discount = Number(cartCoupon.max);
     if(discount>subtotal) discount=subtotal;
   }
   const loc = document.getElementById("cDelivery").value;
