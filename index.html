@@ -1332,7 +1332,7 @@ function applyConfig(){
     slider.style.display="block";
     track.innerHTML="";
     const TRANS = "transform .6s cubic-bezier(.4,0,.2,1)";
-    const makeSlide = raw=>{
+    const makeSlide = (raw, eager)=>{
       const parts = (""+raw).split('|').map(x=>x.trim());
       const media=parts[0], title=parts[1]||"", sub=parts[2]||"", btnTxt=parts[3]||"", btnLink=parts[4]||"";
       const d=document.createElement('div');
@@ -1346,12 +1346,14 @@ function applyConfig(){
            + (btnTxt?`<a class="cta" href="${btnLink||'#'}"${tgt}>${btnTxt}</a>`:"")
            + `</div>`;
       }
-      d.innerHTML=`${bannerMediaHTML(media)}${ov}`;
+      d.innerHTML=`${bannerMediaHTML(media, eager)}${ov}`;
       return d;
     };
-    banners.forEach(raw=>track.appendChild(makeSlide(raw)));
+    /* আগে ৫টা ব্যানারই eager লোড হতো — প্রতি পেজভিউয়ে ৫টা বড় ছবি।
+       এখন শুধু প্রথমটা eager, বাকিগুলো স্লাইড হয়ে সামনে এলে তবেই নামে। */
+    banners.forEach((raw,i)=>track.appendChild(makeSlide(raw, i===0)));
     const multi = banners.length>1;
-    if(multi) track.appendChild(makeSlide(banners[0]));   // শেষে প্রথমটার ক্লোন → seamless লুপ
+    if(multi) track.appendChild(makeSlide(banners[0], false));   // শেষে প্রথমটার ক্লোন → seamless লুপ
     dots.innerHTML = banners.map((_,i)=>`<button class="${i===0?'on':''}" data-i="${i}"></button>`).join("");
     let idx=0;
     track.style.transition = TRANS;
@@ -1565,42 +1567,63 @@ function imgURL(url){
 }
 /* ============================================================
    🖼️ ছবি ফ্রি CDN (wsrv.nl) দিয়ে ছোট করে দেখায়
-   - ছবি Supabase থেকে একবারই নামে, তারপর CDN নিজে জমা রাখে
-   - ফলে Supabase-এর egress প্রায় শূন্যে নেমে আসে
+   - wsrv ছবি নামিয়ে resize করে নিজের কাছে জমা রাখে, পরে cache থেকে দেয়
+   - ⚠️ কিন্তু egress শূন্য হয় না: wsrv-এর cache ৭–৩১ দিনে expire হয়, আর
+     প্রতিটা আলাদা `w=` মান আলাদা cache entry — প্রতিটা ভরতে Supabase থেকে
+     ফুল-সাইজ অরিজিনাল নামে। তাই width কম রাখাটাই আসল সাশ্রয় (দেখুন cdnW)।
    - পুরনো ছবি নতুন করে আপলোড করার দরকার নেই
    ============================================================ */
+/* ছবির সাইজ মাত্র ৩টা ধাপে বাঁধা — আগে ১২টা আলাদা width ছিল (90,100,120,160,
+   200,250,400,480,700,800,900,1400)। wsrv-এ প্রতিটা width আলাদা cache entry,
+   আর প্রতিটা entry ভরতে Supabase থেকে ফুল-সাইজ অরিজিনাল নামে। ১২ → ৩ মানে
+   origin fetch প্রায় ৭৫% কম। call site বদলাতে হয় না, এখানেই snap হয়ে যায়। */
+function cdnW(w){
+  w = w || 600;
+  if(w <= 200) return 200;      // অ্যাভাটার, কার্ট থাম্ব, লোগো, গ্যালারি থাম্ব
+  if(w <= 600) return 600;      // প্রোডাক্ট গ্রিড, ব্লগ কার্ড, রিলেটেড
+  return 1200;                  // ব্যানার, গ্যালারির মূল ছবি, পেজ ইমেজ, অফার
+}
 function cdn(url, w){
   const u = imgURL(url);
   if(!u || !/^https?:\/\//i.test(u)) return u;
   if(/wsrv\.nl/i.test(u)) return u;                       // আগেই CDN হয়ে থাকলে আবার নয়
   if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(u)) return u;        // ভিডিও CDN দিয়ে নয়
+  /* default= বাদ দেওয়া হয়েছে: আগে fallback হিসেবে একই URL দেওয়া ছিল, ফলে ছবি
+     লোড না হলে Supabase-এ দ্বিতীয়বার হিট যেত — শুধু শুধু egress ডাবল হতো।
+     maxage=1y যোগ করা হয়েছে যাতে ব্রাউজার এক বছর ধরে রাখে। */
   return "https://wsrv.nl/?url=" + encodeURIComponent(u) +
-         "&w=" + (w||600) + "&q=80&output=webp&we&default=" + encodeURIComponent(u);
+         "&w=" + cdnW(w) + "&q=80&output=webp&we&maxage=1y";
 }
 /* ব্যানার ছবি লোড না হলে ধাপে ধাপে বিকল্প URL চেষ্টা করে — আর "সাদা" দেখায় না */
 function bannerImgFallback(img){
   const step = +(img.dataset.step||0);
   if(step===0 && img.dataset.fb1){ img.dataset.step=1; img.src=img.dataset.fb1; return; }
   if(step<=1 && img.dataset.fb2){ img.dataset.step=2; img.src=img.dataset.fb2; return; }
-  if(step<=2 && img.dataset.fb3==="1"){            // শেষ চেষ্টা: একই URL cache-buster দিয়ে আরেকবার (ক্ষণস্থায়ী ব্যর্থতা)
+  /* ⛔ আগে এখানে `?r=' + Date.now()` দিয়ে রিট্রাই হতো। প্রতিবার ইউনিক URL মানে
+     ব্রাউজার cache, wsrv cache, Supabase CDN cache — সব বাইপাস, সরাসরি origin
+     থেকে ফুল-সাইজ uncached ডাউনলোড। ব্যানার eager + সবচেয়ে বড় ছবি, তাই একটা
+     ব্যানার ভাঙা থাকলেই প্রতি ভিজিটরের প্রতি লোডে এটা ফায়ার করত। সরানো হলো।
+     শেষ চেষ্টা হিসেবে CDN বাদ দিয়ে অরিজিনাল URL একবার — cache-buster ছাড়া। */
+  if(step<=2 && img.dataset.orig){
+    const base = img.dataset.orig;
     img.dataset.step=3;
-    const base=img.dataset.orig||img.src;
-    img.src = base + (base.indexOf('?')>-1?'&':'?') + 'r=' + Date.now();
-    return;
+    if(img.src !== base){ img.src = base; return; }
   }
   img.onerror=null;   // আর চেষ্টা নয়
 }
 /* ব্যানারের মিডিয়া: YouTube → অটোপ্লে মিউট লুপ iframe; .mp4/.webm → ভিডিও; বাকি সব → ছবি */
-function bannerMediaHTML(url){
+function bannerMediaHTML(url, eager){
   const yt = ytId(url);
-  if(yt) return `<iframe class="slide-video" src="https://www.youtube.com/embed/${yt}?rel=0&autoplay=1&mute=1&loop=1&playlist=${yt}&controls=0&modestbranding=1&playsinline=1&disablekb=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-  if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)) return `<video class="slide-video" src="${url}" autoplay muted loop playsinline></video>`;
+  if(yt) return `<iframe class="slide-video" loading="${eager?'eager':'lazy'}" src="https://www.youtube.com/embed/${yt}?rel=0&autoplay=1&mute=1&loop=1&playlist=${yt}&controls=0&modestbranding=1&playsinline=1&disablekb=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  /* preload="none" — আগে ডিফল্ট ছিল, ফলে প্রতিটা স্লাইডের ভিডিও পুরোটা নামা শুরু করত */
+  if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)) return `<video class="slide-video" src="${url}" autoplay muted loop playsinline preload="${eager?'auto':'none'}"></video>`;
   const id  = driveId(url);
   const src = cdn(url, 1400);
   const fb1 = id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600` : "";   // Drive বিকল্প endpoint
   const fb2 = id ? `https://lh3.googleusercontent.com/d/${id}` : "";              // আকার ছাড়া lh3
-  const fb3 = id ? "" : "1";                                                      // Drive না হলে: একই URL আবার চেষ্টা
-  return `<img src="${src}" alt="banner" loading="eager"
+  const fb3 = "";                                                                 // (আর ব্যবহার হয় না — cache-buster রিট্রাই সরানো হয়েছে)
+  return `<img src="${src}" alt="banner" loading="${eager?'eager':'lazy'}" decoding="async"
+    fetchpriority="${eager?'high':'low'}"
     data-orig="${escAttr(String(url||""))}" data-fb1="${escAttr(fb1)}" data-fb2="${escAttr(fb2)}" data-fb3="${fb3}"
     onerror="bannerImgFallback(this)">`;
 }

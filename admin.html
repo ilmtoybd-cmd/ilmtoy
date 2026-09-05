@@ -291,7 +291,10 @@ async function dbDelete(table, id){
 }
 /* ---------- Storage: Image upload ---------- */
 /* আপলোডের আগে ছবি ছোট + কম্প্রেস করে — ৪ MB এর ছবি ~২০০ KB হয়ে যায় */
-function compressImage(file, maxW=1400, quality=0.82){
+/* maxW 1400 → 1200: সাইটের সবচেয়ে বড় CDN bucket-ও 1200, তাই এর বেশি রাখার
+   মানে নেই। wsrv প্রতিবার cache ভরতে এই অরিজিনালটাই নামায়, তাই অরিজিনাল ছোট
+   হলে Supabase egress সরাসরি কমে। quality 0.82 → 0.80, চোখে ধরা পড়ে না। */
+function compressImage(file, maxW=1200, quality=0.80){
   return new Promise(resolve=>{
     if(!/^image\//.test(file.type) || /gif|svg/i.test(file.type)) return resolve(file);
     const url=URL.createObjectURL(file);
