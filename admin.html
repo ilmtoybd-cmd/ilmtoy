@@ -145,6 +145,15 @@ main{flex:1;max-width:1120px;margin:0 auto;width:100%;padding:18px 16px 60px}
 .row.orow.sel{border-color:var(--accent);background:var(--accent-soft)}
 .row .rowck{flex:none}
 
+/* ---------- Category picker (product form) ---------- */
+.catbox{display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:var(--bg);
+  border:1.5px solid var(--line);border-radius:12px;max-height:190px;overflow:auto}
+.catpick{display:inline-flex;align-items:center;gap:6px;background:var(--card);
+  border:1.5px solid var(--line);border-radius:20px;padding:5px 12px;font-size:13px;
+  font-weight:600;color:var(--soft);cursor:pointer;user-select:none;transition:all .12s}
+.catpick input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex:none;margin:0}
+.catpick:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+
 .empty{text-align:center;color:var(--soft);padding:44px 20px}
 .empty .em-ic{font-size:38px;margin-bottom:8px}
 .empty p{margin:0 0 14px}
@@ -228,6 +237,7 @@ main{flex:1;max-width:1120px;margin:0 auto;width:100%;padding:18px 16px 60px}
   <div class="nav"><div class="nav-in" id="navTabs">
     <button data-tab="dashboard" class="active">Dashboard</button>
     <button data-tab="products">Products</button>
+    <button data-tab="categories">Categories</button>
     <button data-tab="orders">Orders</button>
     <button data-tab="coupons">Coupons</button>
     <button data-tab="reviews">Reviews</button>
@@ -291,7 +301,7 @@ function showApp(){
 }
 function setTab(tab){
   $('#navTabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-  ({dashboard:renderDashboard, products:renderProducts, orders:renderOrders, coupons:renderCoupons,
+  ({dashboard:renderDashboard, products:renderProducts, categories:renderCategories, orders:renderOrders, coupons:renderCoupons,
     reviews:renderReviews, pages:renderPages, blog:renderBlog, settings:renderSettings}[tab])();
 }
 function loadingView(){ $('#view').innerHTML='<div class="loading"><span class="spin" style="border-color:var(--accent);border-top-color:transparent"></span></div>'; }
@@ -418,6 +428,98 @@ async function renderDashboard(){
 }
 
 /* ============================================================
+   CATEGORIES
+   ============================================================ */
+let _cats=null, _catCounts={};
+
+/* product_categories-ই আসল উৎস; products.category টেক্সট
+   ডাটাবেসের ট্রিগার নিজে থেকে লিখে দেয় (step5) */
+async function loadCats(force){
+  if(_cats && !force) return _cats;
+  const {data,error}=await SB.from('categories').select('*').order('sort_order').order('name');
+  if(error){ toast(error.message,'err'); return _cats||[]; }
+  _cats=data||[];
+  const {data:links}=await SB.from('product_categories').select('category_id');
+  _catCounts={}; (links||[]).forEach(l=>{ _catCounts[l.category_id]=(_catCounts[l.category_id]||0)+1; });
+  return _cats;
+}
+
+async function renderCategories(){
+  loadingView();
+  const rows=await loadCats(true);
+  $('#view').innerHTML=head('Categories','<button class="btn" id="addCat">+ New Category</button>')
+    + '<div class="hintbar">Order here controls the homepage category bar. Categories with no products are hidden from the site automatically.</div>'
+    + '<div class="list" id="catList"></div>';
+  $('#addCat').addEventListener('click',()=>catForm());
+  const list=$('#catList');
+  if(!rows.length){ list.innerHTML=emptyBox('\ud83d\uddc2\ufe0f','No categories yet.','<button class="btn" onclick="catForm()">+ Add one</button>'); return; }
+  list.innerHTML='';
+  rows.forEach(c=>{
+    const n=_catCounts[c.id]||0;
+    const badge = !c.is_active ? '<span class="pill gray">Off</span>'
+                : n===0        ? '<span class="pill amber">Empty</span>' : '';
+    const row=el('<div class="row">'
+      + (c.image_url?'<img class="thumb" src="'+esc(c.image_url)+'" onerror="this.style.display=\'none\'">':'')
+      + '<div class="main">'
+      +   '<div class="title">'+esc(c.name)+' '+badge+'</div>'
+      +   '<div class="meta">#'+c.sort_order+' \u00b7 '+n+' product'+(n===1?'':'s')+' \u00b7 '+esc(c.slug||'')+'</div>'
+      + '</div>'
+      + '<div class="acts"><button class="icon-btn">\u270f\ufe0f</button><button class="icon-btn del">\ud83d\uddd1\ufe0f</button></div></div>');
+    row.querySelector('.icon-btn:not(.del)').addEventListener('click',()=>catForm(c));
+    row.querySelector('.del').addEventListener('click',()=>{
+      const warn = n ? '"'+c.name+'" \u2014 delete?\n\n'+n+' product(s) will lose this category. The products themselves stay.' : '"'+c.name+'" \u2014 delete?';
+      confirmModal(warn, async()=>{
+        if(await dbDelete('categories',c.id)){ toast('Deleted','ok'); _cats=null; renderCategories(); }
+      });
+    });
+    list.appendChild(row);
+  });
+}
+
+window.catForm=function(c){ c=c||{};
+  const body=''
+    + '<label class="fld"><span>Name *</span><input id="k_name" value="'+esc(c.name||'')+'" placeholder="e.g. Science Kits"></label>'
+    + '<div class="grid2">'
+    +   '<label class="fld"><span>Sort order</span><input id="k_sort" type="number" value="'+(c.sort_order??0)+'"></label>'
+    +   '<label class="fld"><span>Slug (URL)</span><input id="k_slug" value="'+esc(c.slug||'')+'" placeholder="auto"></label>'
+    + '</div>'
+    + '<label class="fld"><span>Image URL (optional)</span><input id="k_img" value="'+esc(c.image_url||'')+'" placeholder="https://..."></label>'
+    + '<div class="hintbar">Lower sort order shows first. Leave gaps (10, 20, 30) so you can slot new ones in later without renumbering everything.</div>'
+    + '<label class="fld"><span><input type="checkbox" id="k_active" '+(c.is_active!==false?'checked':'')+' style="width:auto;margin-right:6px">Active</span></label>';
+  openModal(c.id?'Edit Category':'New Category', body, async(ov)=>{
+    const name=$('#k_name',ov).value.trim();
+    if(!name){ toast('Name is required','err'); return false; }
+    const slug=$('#k_slug',ov).value.trim()
+      || name.toLowerCase().replace(/[^a-z0-9\u0980-\u09ff]+/g,'-').replace(/^-+|-+$/g,'');
+    const obj={ name, slug, sort_order:Number($('#k_sort',ov).value||0),
+                image_url:$('#k_img',ov).value.trim(), is_active:$('#k_active',ov).checked };
+    if(await dbSave('categories',obj,c.id)){ toast('Saved','ok'); _cats=null; renderCategories(); return true; }
+    return false;
+  });
+};
+
+/* প্রোডাক্ট ফর্মের চেকবক্স → product_categories টেবিল
+   শুধু যেটুকু বদলেছে সেটুকুই লেখে, পুরোটা মুছে আবার বসায় না —
+   নইলে প্রতিবার সেভে ট্রিগার অকারণে সব পণ্যের টেক্সট লিখত */
+async function saveProductCats(ov, pid){
+  if(pid==null || pid==='') return;
+  const want=[...ov.querySelectorAll('.catck')].filter(x=>x.checked).map(x=>Number(x.value));
+  const {data:cur}=await SB.from('product_categories').select('category_id').eq('product_id',pid);
+  const have=(cur||[]).map(r=>r.category_id);
+  const add=want.filter(id=>have.indexOf(id)<0);
+  const del=have.filter(id=>want.indexOf(id)<0);
+  if(del.length){
+    const {error}=await SB.from('product_categories').delete().eq('product_id',pid).in('category_id',del);
+    if(error) toast(error.message,'err');
+  }
+  if(add.length){
+    const {error}=await SB.from('product_categories').insert(add.map(id=>({product_id:pid,category_id:id})));
+    if(error) toast(error.message,'err');
+  }
+  _cats=null;   // গণনা পুরনো হয়ে গেল
+}
+
+/* ============================================================
    PRODUCTS
    ============================================================ */
 let _products=[];
@@ -517,7 +619,7 @@ window.productForm=function(p){
         <label class="fld"><span>Order (sort — smaller first)</span><input id="f_sort" type="number" value="${p.sort_order??0}"></label>
       </div>
       <label class="fld"><span>Name *</span><input id="f_name" value="${esc(p.name||'')}" placeholder="Product name"></label>
-      <label class="fld"><span>Category (comma-separated for multiple)</span><input id="f_cat" value="${esc(p.category||'')}" placeholder="e.g. Science Kits, Best Seller"></label>
+      <label class="fld"><span>Categories</span><div class="catbox" id="f_cats"><span style="color:var(--soft);font-size:13px">Loading…</span></div></label>
       <div class="grid2">
         <label class="fld"><span>Price (৳) *</span><input id="f_price" type="number" value="${p.price??''}"></label>
         <label class="fld"><span>Old price (৳)</span><input id="f_old" type="number" value="${p.old_price??''}"></label>
@@ -547,17 +649,38 @@ window.productForm=function(p){
     const joinLines=(id)=>$(id,ov).value.split('\n').map(s=>s.trim()).filter(Boolean).join(' | ');
     const obj={
       name, price:Number($('#f_price',ov).value||0), old_price:Number($('#f_old',ov).value||0),
-      category:$('#f_cat',ov).value.trim(), age:$('#f_age',ov).value.trim(),
+      age:$('#f_age',ov).value.trim(),
       status:$('#f_status',ov).value, image_url:joinLines('#f_img'), video:joinLines('#f_vid'),
       description:$('#f_desc',ov).value.trim(),
       battery:$('#f_bat',ov).value, battery_size:$('#f_batsz',ov).value.trim(),
       sort_order:Number($('#f_sort',ov).value||0),
       likes:Number($('#f_likes',ov).value||0), bestseller:$('#f_best',ov).checked,
     };
+    // category টেক্সট কলামটা আর এখান থেকে লেখা হয় না —
+    // product_categories বদলালে ডাটাবেসের ট্রিগার নিজেই লিখে দেয়
     if(isNew){ let pid=$('#f_pid',ov).value.trim(); if(!pid) pid=String(nextProductCode()); if(pid) obj.id=Number(pid); }
-    if(await dbSave('products',obj,p.id)){ toast(isNew?'Added':'Updated','ok'); renderProducts(); return true; }
+    if(await dbSave('products',obj,p.id)){
+      const pid = (p.id!=null && p.id!=='') ? p.id : obj.id;
+      await saveProductCats(ov, pid);
+      toast(isNew?'Added':'Updated','ok'); renderProducts(); return true;
+    }
     return false;
   }, 'Save', 'wide');
+
+  /* ক্যাটাগরির চেকবক্সগুলো বসানো (তালিকা আসতে একটু সময় লাগে) */
+  (async()=>{
+    const cats=await loadCats();
+    let mine=[];
+    if(p.id!=null && p.id!==''){
+      const {data}=await SB.from('product_categories').select('category_id').eq('product_id',p.id);
+      mine=(data||[]).map(r=>r.category_id);
+    }
+    const box=$('#f_cats',ov); if(!box) return;
+    box.innerHTML = cats.length
+      ? cats.map(c=>'<label class="catpick"><input type="checkbox" class="catck" value="'+c.id+'"'
+          +(mine.includes(c.id)?' checked':'')+'><span>'+esc(c.name)+'</span></label>').join('')
+      : '<span style="color:var(--soft);font-size:13px">No categories yet — add them in the Categories tab first.</span>';
+  })();
   const mkThumb=(u,i,removable,badge)=>{
     const item=el(`<span class="thumb-item"></span>`);
     // থাম্বনেইলগুলো <label>-এর ভেতরে; ক্লিক যেন label → file input-এ না যায় (ডায়ালগ না খোলে)

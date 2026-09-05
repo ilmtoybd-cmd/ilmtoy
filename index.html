@@ -985,6 +985,7 @@ async function sbFetch(kind){
     let q;
     if(kind==='products')      q = SBc.from('products').select('*').order('sort_order',{ascending:true});
     else if(kind==='settings') q = SBc.from('settings').select('key,value');
+    else if(kind==='categories') q = SBc.from('categories').select('name,slug,image_url,sort_order').order('sort_order').order('name');
     else if(kind==='coupons')  q = SBc.from('coupons').select('code,type,value,min:min_amount,max:max_discount').eq('active',true);
     else if(kind==='reviews')  q = SBc.from('reviews').select('name,profession,product,rating,review,photo,video,status,date:created_at');
     else if(kind==='pages')    q = SBc.from('pages').select('page,title,content,image');
@@ -1419,6 +1420,11 @@ async function loadSettings(){
   try{
     const rows = await sbFetch('settings');
     rows.forEach(r=>{ if(r.key) S[r.key.trim()] = (r.value||"").trim(); });
+  }catch(e){}
+  // ক্যাটাগরি এখন আলাদা টেবিলে — নাম, ক্রম আর ছবি সেখান থেকেই আসে
+  try{
+    const cats = await sbFetch('categories');
+    if(cats && cats.length) CATLIST = cats;
   }catch(e){}
 }
 
@@ -2419,9 +2425,16 @@ function prodInCat(p, c){
 }
 
 /* Settings শিটের key=categories লাইন থেকে পুরো তালিকা ও ক্রম (কমা/নতুন লাইন দিয়ে আলাদা) */
+/* ক্যাটেগরির তালিকা ও ক্রম — এখন categories টেবিল থেকে (step5)।
+   টেবিল খালি বা না পৌঁছালে পুরনো Settings লাইনেই ফিরে যায়। */
+let CATLIST = [];
 function catMasterList(){
-  const raw = (S.categories || S.category_order || S.category_list || "").toString();
-  return raw.split(/\s*[,|\n]\s*/).map(s=>s.trim()).filter(Boolean);
+  const fromTable = (CATLIST||[]).map(c=>String(c.name||"").trim()).filter(Boolean);
+  const list = fromTable.length ? fromTable
+    : (S.categories || S.category_order || S.category_list || "").toString()
+        .split(/\s*[,|\n]\s*/).map(s=>s.trim()).filter(Boolean);
+  // পণ্য নেই এমন ক্যাটেগরি বারে দেখানো হবে না
+  return list.filter(c => catCount(c) > 0);
 }
 /* একটা ক্যাটেগরিতে কয়টা দেখানোর মতো (non-hidden) প্রোডাক্ট আছে — ০ হলে চিপ ক্লিক হবে না */
 function catCount(c){ return PRODUCTS.filter(p=>prodInCat(p,c)).length; }
