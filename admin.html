@@ -578,7 +578,11 @@ function filterProducts(){
       <div class="thumb">${img?`<img src="${esc(img)}" style="width:100%;height:100%;border-radius:11px;object-fit:cover" onerror="this.replaceWith(document.createTextNode('📦'))">`:'📦'}</div>
       <div class="main">
         <div class="title">${p.bestseller?'🔥 ':''}${esc(p.name)}</div>
-        <div class="meta">${(p.id!=null&&p.id!=='')?`<span class="pcode">#${esc(String(p.id))}</span> `:''}${bdt(p.price)} ${p.old_price?`· <s>${bdt(p.old_price)}</s>`:''} · ${esc(p.category||'—')} ${stPill}</div>
+        <div class="meta">${(p.id!=null&&p.id!=='')?`<span class="pcode">#${esc(String(p.id))}</span> `:''}${bdt(p.price)} ${p.old_price?`· <s>${bdt(p.old_price)}</s>`:''} · ${esc(p.category||'—')} ${stPill} ${
+          p.stock==null ? ''
+          : Number(p.stock)<=0 ? '<span class="pill red">Out of stock</span>'
+          : Number(p.stock)<=3 ? `<span class="pill amber">Only ${p.stock} left</span>`
+          : `<span class="pill gray">${p.stock} in stock</span>`}</div>
       </div>
       <div class="acts">
         <button class="icon-btn" title="Edit">✏️</button>
@@ -620,6 +624,7 @@ window.productForm=function(p){
       </div>
       <label class="fld"><span>Name *</span><input id="f_name" value="${esc(p.name||'')}" placeholder="Product name"></label>
       <label class="fld"><span>Categories</span><div class="catbox" id="f_cats"><span style="color:var(--soft);font-size:13px">Loading…</span></div></label>
+      <label class="fld"><span>Stock</span><input id="f_stock" type="number" value="${p.stock??''}" placeholder="Blank = not tracked"></label>
       <div class="grid2">
         <label class="fld"><span>Price (৳) *</span><input id="f_price" type="number" value="${p.price??''}"></label>
         <label class="fld"><span>Old price (৳)</span><input id="f_old" type="number" value="${p.old_price??''}"></label>
@@ -655,6 +660,8 @@ window.productForm=function(p){
       battery:$('#f_bat',ov).value, battery_size:$('#f_batsz',ov).value.trim(),
       sort_order:Number($('#f_sort',ov).value||0),
       likes:Number($('#f_likes',ov).value||0), bestseller:$('#f_best',ov).checked,
+      // খালি রাখলে null — মানে ওই পণ্যের স্টক হিসাব রাখা হচ্ছে না
+      stock: $('#f_stock',ov).value.trim()==='' ? null : Number($('#f_stock',ov).value),
     };
     // category টেক্সট কলামটা আর এখান থেকে লেখা হয় না —
     // product_categories বদলালে ডাটাবেসের ট্রিগার নিজেই লিখে দেয়
