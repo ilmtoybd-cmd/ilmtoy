@@ -179,6 +179,18 @@ header{position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdro
 
 /* ---------- Categories ---------- */
 .cats-wrap{position:relative;max-width:1180px;margin:0 auto}
+/* ---------- নিচে স্ক্রলে ক্যাটাগরি লুকানো, উপরে স্ক্রলে ফিরে আসা ----------
+   হেডারের উচ্চতা বদলানো হয় না (বদলালে পুরো পেজ লাফিয়ে উঠত), শুধু
+   ক্যাটাগরির সারিটা লোগো-সার্চের লাইনের পেছনে উপরে সরে যায় আর
+   হেডারের নিচের ফাঁকা অংশটা স্বচ্ছ হয়ে ক্লিক পার হতে দেয়। */
+header{transition:background-color .2s ease,border-color .2s ease}
+header .bar{position:relative;z-index:2}
+header .cats-wrap{z-index:1;transition:transform .28s ease,opacity .2s ease}
+header.cats-hide{background:transparent;border-bottom-color:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;pointer-events:none}
+header.cats-hide .bar{pointer-events:auto;background:var(--bg);
+  box-shadow:0 0 0 100vmax var(--bg),0 1px 0 100vmax var(--line);
+  clip-path:inset(0 -100vmax -1px)}
+header.cats-hide .cats-wrap{transform:translateY(-100%);opacity:0}
 .cats{padding:14px 18px 4px;display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .cats::-webkit-scrollbar{display:none}
 /* মোবাইলে ডান পাশে হালকা ফেইড — বোঝাতে যে ডানে আরও ক্যাটেগরি আছে */
@@ -3070,6 +3082,34 @@ function reloadSite(e){
   try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){}
   location.reload();
 }
+/* ---------- স্ক্রলের দিক বুঝে ক্যাটাগরির সারি লুকানো/দেখানো ---------- */
+(function(){
+  const header=document.querySelector('header');
+  if(!header || !header.querySelector('.cats-wrap')) return;
+  const TOP_ZONE=120;   // পেজের একদম উপরের দিকে থাকলে সবসময় দেখাবে
+  const MIN_MOVE=8;     // সামান্য আঙুল কাঁপায় যেন লুকোচুরি না করে
+  /* হেডারের উপরের অ্যানাউন্সমেন্ট লাইন টাইপ হওয়ার সময় মোবাইলে কখনো ১ লাইন,
+     কখনো ২ লাইন হয়। তখন ব্রাউজার নিজেই scrollY একটু সরিয়ে দেয় — সেটাকে
+     "নিচে স্ক্রল" ভেবে ক্যাটাগরি যেন লুকিয়ে না যায়, তাই হেডারের নিচের
+     অংশের অবস্থান মেপে ওই সরে যাওয়াটুকু বাদ দেওয়া হয়। */
+  const anchor=header.nextElementSibling;
+  const docTop=()=>anchor ? anchor.getBoundingClientRect().top+(window.scrollY||0) : 0;
+  let lastY=window.scrollY||0, lastTop=docTop(), ticking=false;
+  function update(){
+    const y=window.scrollY||document.documentElement.scrollTop||0;
+    const top=docTop();
+    const d=(y-lastY)-(top-lastTop);   // আসল স্ক্রল = মোট সরা − লেআউট বদলে সরা
+    if(y<TOP_ZONE) header.classList.remove('cats-hide');
+    else if(d>MIN_MOVE) header.classList.add('cats-hide');
+    else if(d<-MIN_MOVE) header.classList.remove('cats-hide');
+    if(Math.abs(d)>MIN_MOVE || y<TOP_ZONE || top!==lastTop){ lastY=y; lastTop=top; }
+    ticking=false;
+  }
+  window.addEventListener('scroll',function(){
+    if(!ticking){ ticking=true; requestAnimationFrame(update); }
+  },{passive:true});
+})();
+
 /* ---------- Back to top ---------- */
 function scrollTopSmooth(){ window.scrollTo({top:0, behavior:'smooth'}); }
 (function(){
