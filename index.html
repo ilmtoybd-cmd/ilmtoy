@@ -1012,7 +1012,25 @@ const CONFIG = {
 const SB_URL = "https://oygxxkpwnbzlinxzqtxj.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95Z3h4a3B3bmJ6bGlueHpxdHhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NDc0NDMsImV4cCI6MjA5OTMyMzQ0M30.LonMKVT7fnh7HK0dz72rzw3_YYmZokrhUKg1c_B1tiw";
 const SBc = window.supabase.createClient(SB_URL, SB_KEY);
+/* ══ স্ট্যাটিক ডেটা আগে ══
+   GitHub Action প্রতি ৩০ মিনিটে Supabase থেকে সব ডেটা নিয়ে /data/site.json
+   বানায়। ভিজিটররা সেটা পড়ে, তাই অ্যাডে যত ট্রাফিকই আসুক Supabase-এ চাপ
+   পড়ে না। ফাইলটা না পাওয়া গেলে (বা ?live=1 দিয়ে খুললে) আগের মতো সরাসরি
+   Supabase থেকে পড়ে — নতুন পণ্য সাথে সাথে চেক করতে ?live=1 কাজে লাগবে। */
+let __snapPromise = null;
+function loadSnapshot(){
+  if(!__snapPromise){
+    const live = /[?&]live=1\b/.test(location.search);
+    __snapPromise = live ? Promise.resolve(null)
+      : fetch('/data/site.json', { cache:'no-cache' })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null);
+  }
+  return __snapPromise;
+}
 async function sbFetch(kind){
+  const snap = await loadSnapshot();
+  if(snap && Array.isArray(snap[kind])) return snap[kind];
   try{
     let q;
     if(kind==='products')      q = SBc.from('products').select('*').order('sort_order',{ascending:true});
