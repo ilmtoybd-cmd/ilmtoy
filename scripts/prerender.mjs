@@ -67,6 +67,47 @@ setRows.forEach(r => { if (r.key) S[r.key.trim()] = (r.value || '').trim(); });
 const STORE = S.store_name || 'ilm Toy';
 const live  = products.filter(p => p.name && p.status !== 'hidden');
 
+/* ---------- ৩ক) সাইটের পুরো ডেটার স্ট্যাটিক কপি: /data/site.json ----------
+   আগে প্রতিটা ভিজিটর পেজ খুললেই Supabase-এ ৭টা query যেত।
+   অ্যাডে একসাথে হাজার মানুষ এলে ফ্রি প্ল্যানের লিমিট পার হয়ে
+   সাইট বন্ধ হয়ে যেত। এখন ভিজিটররা এই ফাইলটা পড়ে (GitHub-এর
+   CDN থেকে, ফ্রি), আর Supabase-এ যায় শুধু অর্ডার, ট্র্যাকিং
+   আর নতুন রিভিউ। query-গুলো index.html-এর sbFetch()-এর হুবহু।
+   কোনো একটা fetch ব্যর্থ হলে sb() থ্রো করে, ফলে অর্ধেক ফাইল
+   লেখা হয় না — আগের site.json-টাই থেকে যায়। */
+{
+  const okReview = s => ['approved','approve','show','active','yes','published']
+                          .includes(String(s || '').toLowerCase().trim());
+  const hiddenPost = s => ['hidden','off','no','draft']
+                          .includes(String(s || 'active').toLowerCase().trim());
+
+  const [allProducts, categories, coupons, reviews, pages, blog] = await Promise.all([
+    sb('products?select=*&order=sort_order.asc'),
+    sb('categories?select=name,slug,image_url,sort_order&order=sort_order.asc,name.asc'),
+    sb('coupons?select=code,type,value,min:min_amount,max:max_discount&active=eq.true'),
+    sb('reviews?select=name,profession,product,rating,review,photo,video,status,date:created_at'),
+    sb('pages?select=page,title,content,image'),
+    sb('blog_posts?select=title,date:post_date,image,content,status')
+  ]);
+
+  const snapshot = {
+    // generated_at রাখা হয়নি: তাহলে প্রতিবার ফাইল বদলাত আর
+    // ডেটা একই থাকলেও প্রতি রানে অকারণে কমিট ও ডিপ্লয় হতো
+    settings:   setRows,
+    categories,
+    coupons,
+    // লুকানো পণ্য, পেন্ডিং রিভিউ আর ড্রাফট ব্লগ পাবলিক ফাইলে রাখা হয় না
+    products:   allProducts.filter(p => p.name && String(p.status || '').toLowerCase().trim() !== 'hidden'),
+    reviews:    reviews.filter(r => (r.name || r.review) && okReview(r.status)),
+    pages,
+    blog:       blog.filter(b => !hiddenPost(b.status))
+  };
+
+  mkdirSync(join(ROOT, 'data'), { recursive: true });
+  writeFileSync(join(ROOT, 'data', 'site.json'), JSON.stringify(snapshot), 'utf8');
+  console.log(`✓ data/site.json — ${snapshot.products.length} products, ${snapshot.reviews.length} reviews`);
+}
+
 /* ---------- ৪) সহায়ক ---------- */
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
