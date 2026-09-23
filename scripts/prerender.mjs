@@ -11,7 +11,8 @@
    চালানো:  node scripts/prerender.mjs
    ============================================================ */
 
-import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 const ROOT   = process.cwd();
@@ -49,6 +50,107 @@ new Function('scope', extractFn('bnToLatin') + extractFn('slugify')
   + ';scope.slugify=slugify;')(slugScope);
 const slugify = slugScope.slugify;
 
+/* ছবির লিংক ঠিক করার ফাংশনও index.html থেকেই — সাইট যে লিংক দিয়ে ছবি খোঁজে,
+   ম্যাপের চাবিও হুবহু সেটাই হতে হবে */
+const imgScope = {};
+new Function('scope', extractFn('driveId') + extractFn('imgURL')
+  + ';scope.imgURL=imgURL;')(imgScope);
+const imgURL = imgScope.imgURL;
+
+/* ---------- ছবির নিজস্ব কপি: /img/<id>-<200|600|1200>.webp ----------
+   সাইটের সব ছবি (পণ্য, ক্যাটাগরি, ব্যানার, পপআপ, লোগো, রিভিউ, ব্লগ) একবার নামিয়ে
+   WebP করে repo-তে রাখা হয়। এরপর ভিজিটররা ছবি পায় GitHub-এর CDN থেকে, Supabase
+   বা Google Drive-এর উপর কোনো চাপ পড়ে না। একবার বানানো ছবি আর বানানো হয় না;
+   সাইটে আর ব্যবহার না হওয়া ছবি মুছে ফেলা হয়। কোনো ছবি নামাতে ব্যর্থ হলে সেটা
+   শুধু বাদ পড়ে — সাইট তখন আগের মতো wsrv দিয়ে দেখায়। */
+const IMG_DIR = join(ROOT, 'img');
+const IMG_WIDTHS = [200, 600, 1200];     // index.html-এর cdnW()-এর তিনটা ধাপ
+
+function collectImageUrls(snap){
+  const out = new Set();
+  const add = (v, splitter) => {
+    if(!v) return;
+    String(v).split(splitter || /\s*\n\s*/).forEach(x => {
+      x = x.trim();
+      if(!/^https?:\/\//i.test(x)) return;
+      if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(x) || /youtu\.?be/i.test(x)) return;   // ভিডিও নয়
+      out.add(x);
+    });
+  };
+  snap.products.forEach(p => Object.keys(p).forEach(k => {
+    if(/^(image_url|image)\d*$/i.test(k)) add(p[k], /[|\n,]+/);   // index.html-এর gatherMedia-র মতো
+  }));
+  snap.categories.forEach(c => add(c.image_url));
+  snap.reviews.forEach(r => add(r.photo));
+  snap.blog.forEach(b => add(b.image));
+  snap.pages.forEach(pg => add(pg.image));
+  snap.settings.forEach(r => {
+    const k = (r.key || '').trim();
+    if(/^banner\d+$/.test(k)) add(String(r.value || '').split('|')[0]);   // "লিংক | শিরোনাম | …"
+    else if(k === 'popup_image' || k === 'logo_url') add(r.value);
+  });
+  return [...out];
+}
+
+async function mirrorImages(snap){
+  let sharp;
+  try{ sharp = (await import('sharp')).default; }
+  catch(e){ console.log('ℹ sharp নেই — ছবির কপি বানানো বাদ'); return {}; }
+  mkdirSync(IMG_DIR, { recursive: true });
+
+  const map = {}, keep = new Set();
+  const urls = collectImageUrls(snap);
+  let made = 0, failed = 0;
+
+  async function one(raw){
+    const src = imgURL(raw);                           // সাইট যে লিংক থেকে ছবি নেয়
+    const id  = createHash('sha1').update(src).digest('hex').slice(0, 16);
+    const files = IMG_WIDTHS.map(w => join(IMG_DIR, `${id}-${w}.webp`));
+    if(!files.every(f => existsSync(f))){
+      try{
+        const ctl = new AbortController();
+        const timer = setTimeout(() => ctl.abort(), 25000);
+        const r = await fetch(src, { signal: ctl.signal, redirect: 'follow' });
+        clearTimeout(timer);
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        if(!/^image\//i.test(r.headers.get('content-type') || '')) throw new Error('ছবি নয়: ' + r.headers.get('content-type'));
+        const buf = Buffer.from(await r.arrayBuffer());
+        for(let i = 0; i < IMG_WIDTHS.length; i++){
+          await sharp(buf, { failOn: 'none' }).rotate()
+            .resize({ width: IMG_WIDTHS[i], withoutEnlargement: true })
+            .webp({ quality: 80 }).toFile(files[i]);
+        }
+        made++;
+      }catch(e){
+        failed++;
+        files.forEach(f => { try{ unlinkSync(f); }catch(_){} });   // অর্ধেক বানানো ফাইল রাখা হয় না
+        console.log(`  ✗ ${src.slice(0, 90)} — ${e.message}`);
+        return;
+      }
+    }
+    keep.add(id);
+    // সাইট কখনো মূল লিংক, কখনো ঠিক করা লিংক দিয়ে খোঁজে — দুটোই রাখা
+    map[src] = id; map[raw] = id; map[imgURL(src)] = id;
+  }
+
+  // একসাথে ৬টা করে নামানো
+  const queue = urls.slice();
+  await Promise.all(Array.from({ length: 6 }, async () => {
+    while(queue.length) await one(queue.shift());
+  }));
+
+  // আর ব্যবহার হয় না এমন পুরোনো ছবি মুছে ফেলা
+  let removed = 0;
+  for(const f of readdirSync(IMG_DIR)){
+    const m = f.match(/^([0-9a-f]{16})-\d+\.webp$/);
+    if(m && !keep.has(m[1])){ unlinkSync(join(IMG_DIR, f)); removed++; }
+  }
+  console.log(`✓ images — ${keep.size} ready (${made} new), ${failed} failed, ${removed} old files removed`);
+
+  // কী ক্রমে ঢুকল তার উপর যেন ফাইল না বদলায় (নইলে অকারণে কমিট হতো)
+  return Object.fromEntries(Object.entries(map).sort(([a], [b]) => a < b ? -1 : 1));
+}
+
 /* ---------- ৩) ডেটা আনা ---------- */
 async function sb(path) {
   const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
@@ -84,7 +186,9 @@ const live  = products.filter(p => p.name && p.status !== 'hidden');
   const [allProducts, categories, coupons, reviews, pages, blog] = await Promise.all([
     sb('products?select=*&order=sort_order.asc'),
     sb('categories?select=name,slug,image_url,sort_order&order=sort_order.asc,name.asc'),
-    sb('coupons?select=code,type,value,min:min_amount,max:max_discount&active=eq.true'),
+    // মেয়াদ/সীমার কলাম পড়ার অনুমতি না থাকলে পুরো বিল্ড যেন না ভাঙে — তখন শুধু মূল তথ্য
+    sb('coupons?select=code,type,value,min:min_amount,max:max_discount,expires:expires_at,limit:usage_limit,used:used_count&active=eq.true')
+      .catch(() => sb('coupons?select=code,type,value,min:min_amount,max:max_discount&active=eq.true')),
     sb('reviews?select=name,profession,product,rating,review,photo,video,status,date:created_at'),
     sb('pages?select=page,title,content,image'),
     sb('blog_posts?select=title,date:post_date,image,content,status')
@@ -102,6 +206,8 @@ const live  = products.filter(p => p.name && p.status !== 'hidden');
     pages,
     blog:       blog.filter(b => !hiddenPost(b.status))
   };
+
+  snapshot.img_map = await mirrorImages(snapshot);
 
   mkdirSync(join(ROOT, 'data'), { recursive: true });
   writeFileSync(join(ROOT, 'data', 'site.json'), JSON.stringify(snapshot), 'utf8');
