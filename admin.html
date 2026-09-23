@@ -119,6 +119,8 @@ main{flex:1;max-width:1120px;margin:0 auto;width:100%;padding:18px 16px 60px}
 .pill.gray{background:var(--line);color:var(--soft)}
 .pill.red{background:var(--red-soft);color:var(--red)}
 .pill.amber{background:var(--amber-soft);color:var(--amber)}
+.phist{margin-top:4px;display:flex;gap:5px;flex-wrap:wrap}
+.phist:empty{display:none}
 .pill.blue{background:var(--blue-soft);color:var(--blue)}
 
 /* ---------- Order status tabs ---------- */
@@ -889,6 +891,7 @@ function drawOrders(){
       + '<div class="main">'
       +   '<div class="title">'+esc(o.customer_name)+' \u00b7 '+bdt(o.total)+' '+pill+' '+paid+'</div>'
       +   '<div class="meta">'+esc(o.phone)+' \u00b7 '+esc(o.order_id)+' \u00b7 '+fmtDate(o.created_at)+'</div>'
+      +   '<div class="phist" data-ph="'+esc(phoneKey(o.phone))+'"></div>'
       + '</div>'
       + '<div class="acts"><button class="icon-btn" title="Details">\ud83d\udc41\ufe0f</button></div></div>');
     const ck=row.querySelector('input[type=checkbox]');
@@ -903,6 +906,42 @@ function drawOrders(){
     list.appendChild(row);
   });
   refreshBulkBar();
+  loadPhoneHistory(list);
+}
+
+/* ---------- কাস্টমারের আগের রেকর্ড (একই মোবাইল নম্বরের সব অর্ডার) ----------
+   প্রতিটা অর্ডারের নিচে দেখায়: মোট কয়টা অর্ডার, কয়টা ডেলিভারি হয়েছে, কয়টা
+   বাতিল/ফেরত। বারবার ফেরত দেওয়া নম্বর চিনতে সুবিধা — কনফার্ম করার আগে কল করুন। */
+function phoneKey(ph){ return String(ph||'').replace(/[০-৯]/g,c=>String('০১২৩৪৫৬৭৮৯'.indexOf(c))).replace(/\D/g,'').slice(-10); }
+async function loadPhoneHistory(list){
+  const slots=[...list.querySelectorAll('.phist[data-ph]')];
+  const raw=[...new Set(_orders.map(o=>String(o.phone||'').trim()).filter(Boolean))];
+  if(!raw.length) return;
+  // নম্বর আগে যেভাবে লেখা হতো (01…, +880…, 880…) সব রূপেই খোঁজা
+  const variants=new Set(raw);
+  raw.forEach(r=>{ const k=phoneKey(r); if(k.length===10){ variants.add('0'+k); variants.add('+880'+k); variants.add('880'+k); } });
+  const all=[...variants], stats={};
+  try{
+    for(let i=0;i<all.length;i+=80){
+      const {data,error}=await SB.from('orders').select('phone,status').in('phone', all.slice(i,i+80));
+      if(error) return;
+      (data||[]).forEach(r=>{
+        const k=phoneKey(r.phone); if(!k) return;
+        const st=stats[k]||(stats[k]={total:0,ok:0,bad:0});
+        st.total++;
+        if(r.status==='delivered') st.ok++;
+        if(r.status==='cancelled'||r.status==='returned') st.bad++;
+      });
+    }
+  }catch(e){ return; }
+  slots.forEach(el=>{
+    const st=stats[el.getAttribute('data-ph')];
+    if(!st || (st.total<=1 && !st.bad)){ el.remove(); return; }
+    let h='<span class="pill gray">🔁 '+st.total+' অর্ডার</span>';
+    if(st.ok)  h+=' <span class="pill green">✓ '+st.ok+' ডেলিভারড</span>';
+    if(st.bad) h+=' <span class="pill red">⚠️ '+st.bad+' বাতিল/ফেরত</span>';
+    el.innerHTML=h;
+  });
 }
 
 /* ---------- Bulk actions ---------- */
