@@ -8,9 +8,10 @@ on:
       - 'index.html'
       - 'scripts/prerender.mjs'
       - '.github/workflows/prerender.yml'
-  # প্রতি ২ ঘণ্টায় — অ্যাডমিনে নতুন পণ্য যোগ করলে ধরার জন্য
+  # প্রতি ৩০ মিনিটে — অ্যাডমিনে পণ্য/দাম/স্টক বদলালে data/site.json হালনাগাদ করতে
+  # (তাড়া থাকলে Actions ট্যাব থেকে "Run workflow" চাপুন)
   schedule:
-    - cron: '0 */2 * * *'
+    - cron: '*/30 * * * *'
   # Actions ট্যাব থেকে হাতে চালানোর জন্য
   workflow_dispatch:
 
@@ -40,7 +41,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add p sitemap.xml robots.txt 404.html
+          git add p data sitemap.xml robots.txt 404.html
           if git diff --staged --quiet; then
             echo "কোনো পরিবর্তন নেই — কমিট করার দরকার নেই"
           else
