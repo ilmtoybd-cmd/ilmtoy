@@ -8,8 +8,11 @@ on:
       - 'index.html'
       - 'scripts/prerender.mjs'
       - '.github/workflows/prerender.yml'
-  # প্রতি ৩০ মিনিটে — অ্যাডমিনে পণ্য/দাম/স্টক বদলালে data/site.json হালনাগাদ করতে
-  # (তাড়া থাকলে Actions ট্যাব থেকে "Run workflow" চাপুন)
+  # অ্যাডমিনে কিছু সেভ করলে Supabase নিজেই এটা চালু করে (supabase-setup.sql দেখুন)
+  # — তাই পরিবর্তন ১–২ মিনিটে সাইটে চলে আসে
+  repository_dispatch:
+    types: [data-changed]
+  # ব্যাকআপ হিসেবে প্রতি ৩০ মিনিটেও চলে
   schedule:
     - cron: '*/30 * * * *'
   # Actions ট্যাব থেকে হাতে চালানোর জন্য
@@ -19,7 +22,7 @@ on:
 permissions:
   contents: write
 
-# দুটো রান একসাথে চললে পুশে সংঘর্ষ হয়
+# একসাথে একটাই চলে; এর মধ্যে আরও অনেকবার ডাক এলে শুধু সর্বশেষটা অপেক্ষায় থাকে
 concurrency:
   group: prerender
   cancel-in-progress: false
@@ -34,17 +37,23 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Generate pages
+      # ছবি ছোট করে WebP বানানোর টুল
+      - name: Install image tool
+        run: npm install --no-save --no-package-lock --silent sharp@0.33.5
+
+      - name: Generate pages, data and images
         run: node scripts/prerender.mjs
 
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add p data sitemap.xml robots.txt 404.html
+          git add -A p data img sitemap.xml robots.txt 404.html
           if git diff --staged --quiet; then
             echo "কোনো পরিবর্তন নেই — কমিট করার দরকার নেই"
           else
             git commit -m "chore: prerender product pages"
+            # এর মধ্যে আপনি কিছু কমিট করে থাকলে পুশ আটকে যেত — আগে সেটা টেনে নেওয়া
+            git pull --rebase -q origin main
             git push
           fi
