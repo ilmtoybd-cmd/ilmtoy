@@ -1,0 +1,67 @@
+name: Weekly database backup
+
+# প্রতি শনিবার রাত ২টায় (বাংলাদেশ সময়) Supabase-এর পুরো ডেটাবেসের ব্যাকআপ —
+# অর্ডার, কাস্টমার, পণ্য, সেটিংস, কুপন, রিভিউ, আর place_order-এর মতো ফাংশনও।
+#
+# ⚠️ repo পাবলিক, তাই ব্যাকআপ ফাইল পাসওয়ার্ড দিয়ে তালা দিয়ে (AES-256) রাখা হয়।
+#    পাসওয়ার্ড ছাড়া কেউ খুলতে পারবে না। পাসওয়ার্ড হারালে ব্যাকআপও কাজে আসবে না —
+#    তাই এটা নিরাপদ জায়গায় লিখে রাখুন।
+#
+# দরকারি দুটো Secret (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL   — Supabase-এর "Session pooler" connection string (পাসওয়ার্ডসহ)
+#   BACKUP_PASSWORD   — ব্যাকআপ তালা দেওয়ার পাসওয়ার্ড (আপনি নিজে বানাবেন)
+
+on:
+  schedule:
+    - cron: '0 20 * * 5'     # UTC শুক্রবার ২০:০০ = বাংলাদেশ শনিবার রাত ২:০০
+  workflow_dispatch:          # Actions ট্যাব থেকে যখন খুশি চালানো যায়
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check secrets
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASS:   ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$PASS" ]; then
+            echo "::error::SUPABASE_DB_URL বা BACKUP_PASSWORD secret দেওয়া হয়নি"
+            exit 1
+          fi
+
+      # Supabase-এর PostgreSQL ভার্সনের সাথে মেলানো pg_dump (17 দিয়ে 15/17 দুটোই চলে)
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17 > /dev/null
+
+      - name: Dump and encrypt
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASS:   ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          F="ilmtoy-backup-$(date -u +%Y-%m-%d)"
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" \
+            --schema=public --no-owner --no-privileges \
+            --format=custom --file="$F.dump"
+          SIZE=$(du -h "$F.dump" | cut -f1)
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PASS" \
+              --symmetric --cipher-algo AES256 -o "$F.dump.gpg" "$F.dump"
+          rm -f "$F.dump"
+          echo "FILE=$F.dump.gpg" >> "$GITHUB_ENV"
+          echo "✓ ব্যাকআপ তৈরি — $SIZE (তালা দেওয়া)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FILE }}
+          path: ${{ env.FILE }}
+          retention-days: 90     # শেষ ৯০ দিনের (প্রায় ১৩টা) ব্যাকআপ থাকে
+          if-no-files-found: error
