@@ -1040,6 +1040,7 @@ function loadSnapshot(){
     __snapPromise = live ? Promise.resolve(null)
       : fetch('/data/site.json', { cache:'no-cache' })
           .then(r => r.ok ? r.json() : null)
+          .then(j => { if(j && j.img_map) window.__IMG_MAP = j.img_map; return j; })
           .catch(() => null);
   }
   return __snapPromise;
@@ -1052,7 +1053,12 @@ async function sbFetch(kind){
     if(kind==='products')      q = SBc.from('products').select('*').order('sort_order',{ascending:true});
     else if(kind==='settings') q = SBc.from('settings').select('key,value');
     else if(kind==='categories') q = SBc.from('categories').select('name,slug,image_url,sort_order').order('sort_order').order('name');
-    else if(kind==='coupons')  q = SBc.from('coupons').select('code,type,value,min:min_amount,max:max_discount').eq('active',true);
+    else if(kind==='coupons'){
+      // মেয়াদ ও ব্যবহারের সীমাও আনে; কলামগুলো পড়ার অনুমতি না থাকলে আগের মতো শুধু মূল তথ্য
+      const r1 = await SBc.from('coupons').select('code,type,value,min:min_amount,max:max_discount,expires:expires_at,limit:usage_limit,used:used_count').eq('active',true);
+      if(!r1.error) return r1.data || [];
+      q = SBc.from('coupons').select('code,type,value,min:min_amount,max:max_discount').eq('active',true);
+    }
     else if(kind==='reviews')  q = SBc.from('reviews').select('name,profession,product,rating,review,photo,video,status,date:created_at');
     else if(kind==='pages')    q = SBc.from('pages').select('page,title,content,image');
     else if(kind==='blog')     q = SBc.from('blog_posts').select('title,date:post_date,image,content,status');
@@ -1518,7 +1524,11 @@ async function loadCoupons(){
       code:r.code.trim(),
       type:(r.type||"flat").trim().toLowerCase(),
       value:parseFloat(String(r.value).replace(/[^0-9.]/g,''))||0,
-      min:parseFloat(String(r.min).replace(/[^0-9.]/g,''))||0
+      min:parseFloat(String(r.min).replace(/[^0-9.]/g,''))||0,
+      max:parseFloat(String(r.max??'').replace(/[^0-9.]/g,''))||0,   // আগে বাদ পড়ত, তাই কার্টে ছাড়ের ছাদ কাজ করত না
+      expires:r.expires||null,
+      limit:Number(r.limit)||0,          // 0 বা খালি = সীমাহীন (অ্যাডমিনের তালিকার মতোই)
+      used:Number(r.used)||0
     }));
     if(list.length) COUPONS = list;
   }catch(e){}
@@ -1678,6 +1688,10 @@ function cdnW(w){
 function cdn(url, w){
   const u = imgURL(url);
   if(!u || !/^https?:\/\//i.test(u)) return u;
+  /* ছবির নিজস্ব কপি (GitHub Action বানায়: /img/<id>-<width>.webp) থাকলে সেটাই —
+     তখন Supabase বা wsrv কারো কাছে যেতে হয় না। না থাকলে আগের মতো wsrv। */
+  const M = window.__IMG_MAP;
+  if(M){ const id = M[u] || M[String(url||'').trim()]; if(id) return '/img/' + id + '-' + cdnW(w) + '.webp'; }
   if(/wsrv\.nl/i.test(u)) return u;                       // আগেই CDN হয়ে থাকলে আবার নয়
   if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(u)) return u;        // ভিডিও CDN দিয়ে নয়
   /* default= বাদ দেওয়া হয়েছে: আগে fallback হিসেবে একই URL দেওয়া ছিল, ফলে ছবি
@@ -2092,6 +2106,17 @@ function applyCartCoupon(){
   const found = (COUPONS||[]).find(c=>c.code.toUpperCase()===code);
   const sub = CART.reduce((s,x)=>s+x.price*x.qty,0);
   if(!found){ cartCoupon=null; m.style.color="var(--accent-deep)"; m.textContent=t('coupon_invalid'); updateCartTotal(); return; }
+  // মেয়াদ শেষ বা সীমা পূর্ণ হলে এখানেই জানিয়ে দেওয়া — নইলে কার্টে "প্রযোজ্য" দেখিয়ে অর্ডারে ছাড় দিত না
+  if(found.expires && new Date(found.expires) < new Date()){
+    cartCoupon=null; m.style.color="var(--accent-deep)";
+    m.textContent = LANG==='bn' ? '❌ এই কুপনের মেয়াদ শেষ হয়ে গেছে।' : '❌ This coupon has expired.';
+    updateCartTotal(); return;
+  }
+  if(found.limit && found.used >= found.limit){
+    cartCoupon=null; m.style.color="var(--accent-deep)";
+    m.textContent = LANG==='bn' ? '❌ এই কুপনের ব্যবহারের সীমা শেষ।' : '❌ This coupon has reached its usage limit.';
+    updateCartTotal(); return;
+  }
   if(found.min && sub<found.min){ cartCoupon=null; m.style.color="var(--accent-deep)"; m.textContent=t('coupon_min').replace('{x}', bnNum(found.min)+cur); updateCartTotal(); return; }
   cartCoupon=found; m.style.color="var(--green)";
   const off = found.type==='percent' ? t('off_percent').replace('{v}', found.value) : t('off_flat').replace('{v}', bnNum(found.value)+cur);
@@ -2099,11 +2124,27 @@ function applyCartCoupon(){
   updateCartTotal();
 }
 
+/* বাংলাদেশি মোবাইল নম্বর এক ফরম্যাটে: বাংলা অঙ্ক, +880/880, ফাঁকা, ড্যাশ সব সামলায়।
+   সঠিক হলে 01XXXXXXXXX ফেরত দেয়, না হলে "" */
+function normalizeBDPhone(v){
+  let d = String(v||'').replace(/[০-৯]/g, c => String('০১২৩৪৫৬৭৮৯'.indexOf(c))).replace(/\D/g,'');
+  if(d.startsWith('880')) d = d.slice(2);        // 8801XXXXXXXXX → 01XXXXXXXXX
+  else if(d.length===10 && d[0]==='1') d = '0' + d;
+  return /^01[3-9]\d{8}$/.test(d) ? d : '';
+}
+
 async function submitCartOrder(){
   const name = document.getElementById("ccName").value.trim();
-  const phone = document.getElementById("ccPhone").value.trim();
+  const phoneRaw = document.getElementById("ccPhone").value.trim();
   const addr = document.getElementById("ccAddr").value.trim();
-  if(!name||!phone||!addr){ alert(t('fill_required')); return; }
+  if(!name||!phoneRaw||!addr){ alert(t('fill_required')); return; }
+  const phone = normalizeBDPhone(phoneRaw);
+  if(!phone){
+    alert(LANG==='bn' ? 'সঠিক মোবাইল নম্বর দিন (যেমন 01712345678)।' : 'Please enter a valid mobile number (e.g. 01712345678).');
+    try{ document.getElementById("ccPhone").focus(); }catch(e){}
+    return;
+  }
+  document.getElementById("ccPhone").value = phone;
   if(!CART.length){ alert(t('cart_empty_alert')); return; }
   // অনলাইন পেমেন্ট হলে TrxID + প্রেরক নম্বর বাধ্যতামূলক
   let payTrxV='', paySenderV='', payMethodText='Cash on Delivery', payStatus='';
