@@ -3154,7 +3154,24 @@ function closePromo(){ const ov=document.getElementById('promoOverlay'); if(ov) 
 function promoShopNow(){
   closePromo();
   const link=(S.popup_link||'').toString().trim();
-  if(link){ if(/^https?:/i.test(link)) window.open(link,'_blank'); else location.href=link; return; }
+  if(link){
+    /* নিজের সাইটের লিংক (ilmtoy.com/…, www সহ বা ছাড়া) → একই ট্যাবে;
+       শুধু বাইরের লিংক (ফেসবুক, WhatsApp ইত্যাদি) → নতুন ট্যাবে */
+    let u=null;
+    try{ u=new URL(link, location.href); }catch(e){}
+    if(!u){ location.href=link; return; }
+    const host=h=>h.replace(/^www\./i,'').toLowerCase();
+    const own = host(u.hostname)===host(location.hostname) || host(u.hostname)==='ilmtoy.com';
+    if(!own && /^https?:$/i.test(u.protocol)){ window.open(u.href,'_blank'); return; }
+    if(own){
+      // শুধু #অংশ বদলালে পেজ রিলোড হয় না, প্রোডাক্টও খোলে না — তাই এই ক্ষেত্রে রিলোড
+      const samePage = u.pathname===location.pathname && u.search===location.search;
+      location.href = u.pathname + u.search + u.hash;
+      if(samePage && u.hash) location.reload();
+      return;
+    }
+    location.href=link; return;   // tel:, mailto: ইত্যাদি
+  }
   scrollToProducts();   // ডিফল্ট: প্রোডাক্ট সেকশনে স্ক্রল
 }
 // কালো ব্যাকগ্রাউন্ডে ক্লিক করলেও পপআপ বন্ধ হবে
