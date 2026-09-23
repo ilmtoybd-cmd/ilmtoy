@@ -359,17 +359,22 @@ function compressImage(file, maxW=1200, quality=0.80, square=true){
     img.src=url;
   });
 }
-async function uploadImages(fileList, statusEl, onUrl){
+/* opts (ঐচ্ছিক): প্রোডাক্টের জন্য কিছু না দিলে আগের মতোই (বর্গাকার, 1200px)।
+   ব্যানার: {square:false, folder:'products/banners'} → আসল অনুপাত থাকে, কাটা/ফাঁকা হয় না।
+   লোগো: {compress:false} → PNG-এর স্বচ্ছ ব্যাকগ্রাউন্ড সাদা হয়ে যায় না। */
+async function uploadImages(fileList, statusEl, onUrl, opts={}){
   const files=[...fileList];
+  const folder=opts.folder||'products';
   for(let i=0;i<files.length;i++){
     const orig=files[i];
     if(statusEl) statusEl.textContent=`Compressing... (${i+1}/${files.length})`;
-    const file=await compressImage(orig);
+    const file=opts.compress===false ? orig
+              : await compressImage(orig, opts.maxW||1200, 0.80, opts.square!==false);
     const isJpg=(file!==orig);
     const ext=isJpg?'jpg':((orig.name.split('.').pop()||'jpg').toLowerCase());
     const kb=Math.round(file.size/1024);
     if(statusEl) statusEl.textContent=`Uploading... (${i+1}/${files.length}) — ${kb} KB`;
-    const path='products/'+Date.now()+'-'+Math.random().toString(36).slice(2,7)+'.'+ext;
+    const path=folder+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,7)+'.'+ext;
     const {error}=await SB.storage.from('product-images').upload(path,file,{cacheControl:'31536000',contentType:isJpg?'image/jpeg':(orig.type||undefined),upsert:false});
     if(error){ toast('Upload failed: '+error.message,'err'); if(statusEl)statusEl.textContent='❌ Upload failed ('+error.message+')'; continue; }
     const {data}=SB.storage.from('product-images').getPublicUrl(path);
@@ -1319,7 +1324,7 @@ window.blogForm=function(b){ b=b||{};
 const SETTINGS_GROUPS = [
   { title:'Store info', fields:[
     {k:'store_name', l:'Store name'},
-    {k:'logo_url',   l:'Logo link'},
+    {k:'logo_url',   l:'Logo', img:'logo'},
     {k:'phone',      l:'Phone number'},
     {k:'whatsapp',   l:'WhatsApp number', hint:'8801XXXXXXXXX'},
     {k:'email',      l:'Email'},
@@ -1338,12 +1343,12 @@ const SETTINGS_GROUPS = [
     {k:'trust1', l:'Badge 1'}, {k:'trust2', l:'Badge 2'},
     {k:'trust3', l:'Badge 3'}, {k:'trust4', l:'Badge 4'},
   ]},
-  { title:'Banner images (links)', fields:[
-    {k:'banner1', l:'Banner 1'}, {k:'banner2', l:'Banner 2'},
-    {k:'banner3', l:'Banner 3'}, {k:'banner4', l:'Banner 4'}, {k:'banner5', l:'Banner 5'},
+  { title:'Banner images', note:'"Upload" চেপে ছবি দিন, বা লিংক পেস্ট করুন। ভালো মাপ: ১৫০০×৫০০ (৩:১) — জরুরি লেখা ছবির মাঝখানে রাখুন। ঘর খালি করলে ওই ব্যানার আর দেখাবে না। লেখা/বাটন যোগ করতে লিংকের পরে | দিয়ে লিখুন: লিংক | শিরোনাম | ছোট লেখা | বাটনের লেখা | বাটনের লিংক', fields:[
+    {k:'banner1', l:'Banner 1', img:'banner'}, {k:'banner2', l:'Banner 2', img:'banner'},
+    {k:'banner3', l:'Banner 3', img:'banner'}, {k:'banner4', l:'Banner 4', img:'banner'}, {k:'banner5', l:'Banner 5', img:'banner'},
   ]},
   { title:'Offer popup (optional)', fields:[
-    {k:'popup_image',  l:'Popup image link'},
+    {k:'popup_image',  l:'Popup image', img:'banner'},
     {k:'popup_title',  l:'Popup title'},
     {k:'popup_button', l:'Button text'},
     {k:'popup_link',   l:'Button link'},
@@ -1380,13 +1385,24 @@ async function renderSettings(){
   html += `<p class="hintbar" style="margin-bottom:14px">Store name, phone, delivery charge, etc. — the storefront reads these. Edit and click save below.</p>`;
   SETTINGS_GROUPS.forEach(g=>{
     html += `<div style="background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">
-      <div class="disp" style="font-size:16px;margin-bottom:10px">${esc(g.title)}</div><div class="grid2">`;
+      <div class="disp" style="font-size:16px;margin-bottom:10px">${esc(g.title)}</div>${g.note?`<p class="hintbar" style="margin:-4px 0 12px">${esc(g.note)}</p>`:''}<div class="grid2">`;
     g.fields.forEach(f=>{
       const cur = map[f.k]!=null ? map[f.k] : '';
       const v = esc(cur);
       let input, wide='';
       if(f.t==='textarea'){ input=`<textarea data-k="${f.k}">${v}</textarea>`; wide=' style="grid-column:1/-1"'; }
       else if(f.t==='select'){ input=`<select data-k="${f.k}">${f.o.map(o=>`<option value="${o[0]}"${(cur||f.o[0][0])===o[0]?' selected':''}>${esc(o[1])}</option>`).join('')}</select>`; }
+      else if(f.img){
+        input=`<input data-k="${f.k}" type="text" value="${v}" placeholder="লিংক পেস্ট করুন, বা নিচের বাটনে আপলোড করুন">
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap">
+            <label class="btn ghost sm" style="cursor:pointer;margin:0">📤 Upload
+              <input type="file" accept="image/*" data-up="${f.k}" data-kind="${f.img}" style="display:none"></label>
+            <button type="button" class="btn ghost sm" data-clr="${f.k}">✕ Remove</button>
+            <span class="hintbar" data-st="${f.k}" style="margin:0"></span>
+          </div>
+          <img data-pv="${f.k}" alt="" style="display:none;margin-top:8px;max-width:100%;max-height:${f.img==='logo'?'70px':'110px'};border-radius:10px;border:1px solid var(--line);background:var(--bg)">`;
+        if(f.img==='banner') wide=' style="grid-column:1/-1"';
+      }
       else input=`<input data-k="${f.k}" type="${f.t||'text'}" value="${v}" placeholder="${esc(f.hint||'')}">`;
       const note = f.note ? `<div class="hintbar">${esc(f.note)}</div>` : '';
       html += `<label class="fld"${wide}><span>${esc(f.l)}</span>${input}${note}</label>`;
@@ -1395,16 +1411,63 @@ async function renderSettings(){
   });
   html += `<button class="btn full" id="saveAllS2" style="margin-bottom:20px">💾 Save all settings</button>`;
   $('#view').innerHTML = html;
+  wireImageFields($('#view'));
   const doSave = async (btn)=>{
     btn.disabled=true; const t=btn.innerHTML; btn.innerHTML='<span class="spin"></span>';
     const payload = [...$('#view').querySelectorAll('[data-k]')].map(el=>({ key:el.getAttribute('data-k'), value:el.value }));
     const { error } = await SB.from('settings').upsert(payload);
     btn.disabled=false; btn.innerHTML=t;
     if(error){ toast(error.message,'err'); return; }
-    toast('All settings saved','ok');
+    toast('Saved ✓ — সাইটে দেখাতে ৩০ মিনিট পর্যন্ত লাগতে পারে','ok');
   };
   $('#saveAllS').addEventListener('click', e=>doSave(e.currentTarget));
   $('#saveAllS2').addEventListener('click', e=>doSave(e.currentTarget));
+}
+
+/* ---------- Settings: ছবির ঘর (ব্যানার/পপআপ/লোগো) — আপলোড, প্রিভিউ, মুছে ফেলা ---------- */
+function settingsPreviewSrc(u){
+  u=String(u||'').trim(); if(!u) return '';
+  const m=u.match(/\/file\/d\/([\w-]{20,})/)||u.match(/[?&]id=([\w-]{20,})/);
+  return m ? `https://lh3.googleusercontent.com/d/${m[1]}=w600` : u;   // Drive লিংক হলে দেখার মতো করে
+}
+function wireImageFields(root){
+  const splitVal=v=>{ const parts=String(v||'').split('|'); return { url:(parts[0]||'').trim(), rest:parts.slice(1) }; };
+  const refresh=k=>{
+    const inp=root.querySelector(`[data-k="${k}"]`), pv=root.querySelector(`[data-pv="${k}"]`);
+    if(!inp||!pv) return;
+    const src=settingsPreviewSrc(splitVal(inp.value).url);
+    if(src){ pv.src=src; pv.style.display='block'; pv.onerror=()=>{ pv.style.display='none'; }; }
+    else { pv.removeAttribute('src'); pv.style.display='none'; }
+  };
+  root.querySelectorAll('[data-pv]').forEach(pv=>{
+    const k=pv.getAttribute('data-pv');
+    refresh(k);
+    root.querySelector(`[data-k="${k}"]`).addEventListener('input',()=>refresh(k));
+  });
+  root.querySelectorAll('[data-up]').forEach(fi=>{
+    fi.addEventListener('change', async e=>{
+      if(!e.target.files.length) return;
+      const k=fi.getAttribute('data-up'), kind=fi.getAttribute('data-kind');
+      const inp=root.querySelector(`[data-k="${k}"]`), st=root.querySelector(`[data-st="${k}"]`);
+      const opts = kind==='logo' ? {compress:false, folder:'products/site'}
+                                 : {square:false, maxW:1200, folder:'products/banners'};
+      await uploadImages([e.target.files[0]], st, url=>{
+        const {rest}=splitVal(inp.value);            // শিরোনাম/বাটন লেখা থাকলে সেগুলো রেখে শুধু লিংক বদলায়
+        inp.value = url + (rest.length ? ' |' + rest.join('|') : '');
+        refresh(k);
+      }, opts);
+      if(st) st.textContent='✓ আপলোড হয়েছে — নিচে "Save all" চাপতে ভুলবেন না';
+      e.target.value='';
+    });
+  });
+  root.querySelectorAll('[data-clr]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const k=b.getAttribute('data-clr');
+      root.querySelector(`[data-k="${k}"]`).value='';
+      const st=root.querySelector(`[data-st="${k}"]`); if(st) st.textContent='মুছে ফেলা হয়েছে — "Save all" চাপুন';
+      refresh(k);
+    });
+  });
 }
 
 /* ---------- go ---------- */
