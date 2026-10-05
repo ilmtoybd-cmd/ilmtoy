@@ -177,6 +177,9 @@ const live  = products.filter(p => p.name && p.status !== 'hidden');
    আর নতুন রিভিউ। query-গুলো index.html-এর sbFetch()-এর হুবহু।
    কোনো একটা fetch ব্যর্থ হলে sb() থ্রো করে, ফলে অর্ধেক ফাইল
    লেখা হয় না — আগের site.json-টাই থেকে যায়। */
+/* 🔒 ক্লিক-অনলি ক্যাটেগরি (categories.hide_from_all) — নামগুলো ছোট হাতের অক্ষরে।
+   নিচে sitemap আর /p/ পাতায় কাজে লাগে, তাই ব্লকের বাইরে রাখা। */
+let EXCLUSIVE_CATS = new Set();
 {
   const okReview = s => ['approved','approve','show','active','yes','published']
                           .includes(String(s || '').toLowerCase().trim());
@@ -185,7 +188,9 @@ const live  = products.filter(p => p.name && p.status !== 'hidden');
 
   const [allProducts, categories, coupons, reviews, pages, blog] = await Promise.all([
     sb('products?select=*&order=sort_order.asc'),
-    sb('categories?select=name,slug,image_url,sort_order&order=sort_order.asc,name.asc'),
+    // hide_from_all কলামটা এখনো যোগ না হলে বিল্ড যেন না ভাঙে — তখন আগের মতো শুধু মূল তথ্য
+    sb('categories?select=name,slug,image_url,sort_order,hide_from_all&order=sort_order.asc,name.asc')
+      .catch(() => sb('categories?select=name,slug,image_url,sort_order&order=sort_order.asc,name.asc')),
     // মেয়াদ/সীমার কলাম পড়ার অনুমতি না থাকলে পুরো বিল্ড যেন না ভাঙে — তখন শুধু মূল তথ্য
     sb('coupons?select=code,type,value,min:min_amount,max:max_discount,expires:expires_at,limit:usage_limit,used:used_count&active=eq.true')
       .catch(() => sb('coupons?select=code,type,value,min:min_amount,max:max_discount&active=eq.true')),
@@ -193,6 +198,10 @@ const live  = products.filter(p => p.name && p.status !== 'hidden');
     sb('pages?select=page,title,content,image'),
     sb('blog_posts?select=title,date:post_date,image,content,status')
   ]);
+
+  EXCLUSIVE_CATS = new Set(categories
+    .filter(c => c.hide_from_all === true)
+    .map(c => String(c.name || '').trim().toLowerCase()));
 
   const snapshot = {
     // generated_at রাখা হয়নি: তাহলে প্রতিবার ফাইল বদলাত আর
@@ -227,6 +236,10 @@ const plain = (s) => String(s || '').replace(/\s+/g, ' ').trim();
 const clip  = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
 
 const productSlug = (p) => slugify(p.name) || ('product-' + p.id);
+
+/* 🔒 প্রোডাক্টটা কোনো ক্লিক-অনলি ক্যাটেগরিতে আছে কি না — category ঘরটা index.html-এর মতোই , | / দিয়ে ভাগ */
+const isExclusiveProduct = (p) => String(p.category || '')
+  .split(/\s*[,|/]\s*/).some(c => EXCLUSIVE_CATS.has(c.trim().toLowerCase()));
 
 /* ---------- ৫) একটা পণ্যের পাতা ---------- */
 function pageFor(p) {
@@ -269,6 +282,7 @@ function pageFor(p) {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${esc(url)}">
+${isExclusiveProduct(p) ? '<meta name="robots" content="noindex">' : ''}
 
 <meta property="og:type" content="product">
 <meta property="og:site_name" content="${esc(STORE)}">
@@ -308,25 +322,28 @@ if (existsSync(OUTDIR)) rmSync(OUTDIR, { recursive: true, force: true });
 mkdirSync(OUTDIR, { recursive: true });
 
 const seen = new Map();
-let written = 0;
+const sitemapSlugs = [];   // 🔒 ক্লিক-অনলি প্রোডাক্ট sitemap-এ যায় না (পাতা থাকে, শেয়ার করলে প্রিভিউ আসে)
+let written = 0, exclusive = 0;
 
 for (const p of live) {
   let slug = productSlug(p);
   // দুটো পণ্যের নাম হুবহু এক হলে slug-ও এক হবে
   if (seen.has(slug)) slug = `${slug}-${p.id}`;
   seen.set(slug, p.id);
+  if (isExclusiveProduct(p)) exclusive++; else sitemapSlugs.push(slug);
 
   const dir = join(OUTDIR, slug);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'index.html'), pageFor({ ...p, __slug: slug }), 'utf8');
   written++;
 }
+if (exclusive) console.log(`✓ ${exclusive} click-only product page(s) marked noindex and left out of the sitemap`);
 
 /* ---------- ৭) sitemap ও robots ---------- */
 const today = new Date().toISOString().slice(0, 10);
 const urls = [
   `  <url><loc>${SITE}/</loc><lastmod>${today}</lastmod><priority>1.0</priority></url>`,
-  ...[...seen.keys()].map(s =>
+  ...sitemapSlugs.map(s =>
     `  <url><loc>${SITE}/p/${s}/</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>`)
 ];
 writeFileSync(join(ROOT, 'sitemap.xml'),
