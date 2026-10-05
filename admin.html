@@ -464,7 +464,8 @@ async function renderCategories(){
   loadingView();
   const rows=await loadCats(true);
   $('#view').innerHTML=head('Categories','<button class="btn" id="addCat">+ New Category</button>')
-    + '<div class="hintbar">Order here controls the homepage category bar. Categories with no products are hidden from the site automatically.</div>'
+    + '<div class="hintbar">Order here controls the homepage category bar. Categories with no products are hidden from the site automatically. '
+    + '\ud83d\udd12 <b>Click-only</b> categories (e.g. Mother\'s Corner) keep their products out of All Products, other categories, age groups, search and related items \u2014 visitors see them only after tapping that category.</div>'
     + '<div class="list" id="catList"></div>';
   $('#addCat').addEventListener('click',()=>catForm());
   const list=$('#catList');
@@ -472,8 +473,9 @@ async function renderCategories(){
   list.innerHTML='';
   rows.forEach(c=>{
     const n=_catCounts[c.id]||0;
-    const badge = !c.is_active ? '<span class="pill gray">Off</span>'
-                : n===0        ? '<span class="pill amber">Empty</span>' : '';
+    const badge = (!c.is_active ? '<span class="pill gray">Off</span>'
+                : n===0        ? '<span class="pill amber">Empty</span>' : '')
+                + (c.hide_from_all ? ' <span class="pill blue">\ud83d\udd12 Click-only</span>' : '');
     const row=el('<div class="row">'
       + (c.image_url?'<img class="thumb" src="'+esc(c.image_url)+'" onerror="this.style.display=\'none\'">':'')
       + '<div class="main">'
@@ -501,16 +503,26 @@ window.catForm=function(c){ c=c||{};
     + '</div>'
     + '<label class="fld"><span>Image URL (optional)</span><input id="k_img" value="'+esc(c.image_url||'')+'" placeholder="https://..."></label>'
     + '<div class="hintbar">Lower sort order shows first. Leave gaps (10, 20, 30) so you can slot new ones in later without renumbering everything.</div>'
-    + '<label class="fld"><span><input type="checkbox" id="k_active" '+(c.is_active!==false?'checked':'')+' style="width:auto;margin-right:6px">Active</span></label>';
+    + '<label class="fld"><span><input type="checkbox" id="k_active" '+(c.is_active!==false?'checked':'')+' style="width:auto;margin-right:6px">Active</span></label>'
+    + '<label class="fld"><span><input type="checkbox" id="k_hide" '+(c.hide_from_all?'checked':'')+' style="width:auto;margin-right:6px">\ud83d\udd12 Click-only \u2014 hide these products everywhere; show them only when this category is tapped</span></label>'
+    + '<div class="hintbar">Click-only products stay out of All Products, other categories, age groups, search and related items. The category itself still appears in the category bar so visitors can open it. Direct product links keep working.</div>';
   openModal(c.id?'Edit Category':'New Category', body, async(ov)=>{
     const name=$('#k_name',ov).value.trim();
     if(!name){ toast('Name is required','err'); return false; }
     const slug=$('#k_slug',ov).value.trim()
       || name.toLowerCase().replace(/[^a-z0-9\u0980-\u09ff]+/g,'-').replace(/^-+|-+$/g,'');
     const obj={ name, slug, sort_order:Number($('#k_sort',ov).value||0),
-                image_url:$('#k_img',ov).value.trim(), is_active:$('#k_active',ov).checked };
-    if(await dbSave('categories',obj,c.id)){ toast('Saved','ok'); _cats=null; renderCategories(); return true; }
-    return false;
+                image_url:$('#k_img',ov).value.trim(), is_active:$('#k_active',ov).checked,
+                hide_from_all:$('#k_hide',ov).checked };
+    // hide_from_all কলামটা এখনো ডাটাবেসে যোগ না হলে পুরো সেভ যেন আটকে না যায় — বাকিটা সেভ করে জানিয়ে দাও
+    let res = c.id!=null && c.id!=='' ? await SB.from('categories').update(obj).eq('id',c.id) : await SB.from('categories').insert(obj);
+    if(res.error && /hide_from_all/i.test(res.error.message||'')){
+      delete obj.hide_from_all;
+      res = c.id!=null && c.id!=='' ? await SB.from('categories').update(obj).eq('id',c.id) : await SB.from('categories').insert(obj);
+      if(!res.error) toast('Saved, but the Click-only option is not set up yet \u2014 run the one-line SQL in Supabase first','err');
+    }
+    if(res.error){ toast(res.error.message,'err'); return false; }
+    toast('Saved','ok'); _cats=null; renderCategories(); return true;
   });
 };
 
@@ -700,8 +712,8 @@ window.productForm=function(p){
     }
     const box=$('#f_cats',ov); if(!box) return;
     box.innerHTML = cats.length
-      ? cats.map(c=>'<label class="catpick"><input type="checkbox" class="catck" value="'+c.id+'"'
-          +(mine.includes(c.id)?' checked':'')+'><span>'+esc(c.name)+'</span></label>').join('')
+      ? cats.map(c=>'<label class="catpick"'+(c.hide_from_all?' title="Click-only: products here are hidden everywhere except inside this category"':'')+'><input type="checkbox" class="catck" value="'+c.id+'"'
+          +(mine.includes(c.id)?' checked':'')+'><span>'+esc(c.name)+(c.hide_from_all?' \ud83d\udd12':'')+'</span></label>').join('')
       : '<span style="color:var(--soft);font-size:13px">No categories yet — add them in the Categories tab first.</span>';
   })();
   const mkThumb=(u,i,removable,badge)=>{

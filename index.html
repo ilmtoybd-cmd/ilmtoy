@@ -1052,7 +1052,12 @@ async function sbFetch(kind){
     let q;
     if(kind==='products')      q = SBc.from('products').select('*').order('sort_order',{ascending:true});
     else if(kind==='settings') q = SBc.from('settings').select('key,value');
-    else if(kind==='categories') q = SBc.from('categories').select('name,slug,image_url,sort_order').order('sort_order').order('name');
+    else if(kind==='categories'){
+      // hide_from_all ("শুধু ক্লিকে দেখা যায়") কলামটা নতুন — এখনো যোগ না হলে আগের মতো শুধু মূল তথ্য
+      const r1 = await SBc.from('categories').select('name,slug,image_url,sort_order,hide_from_all').order('sort_order').order('name');
+      if(!r1.error) return r1.data || [];
+      q = SBc.from('categories').select('name,slug,image_url,sort_order').order('sort_order').order('name');
+    }
     else if(kind==='coupons'){
       // মেয়াদ ও ব্যবহারের সীমাও আনে; কলামগুলো পড়ার অনুমতি না থাকলে আগের মতো শুধু মূল তথ্য
       const r1 = await SBc.from('coupons').select('code,type,value,min:min_amount,max:max_discount,expires:expires_at,limit:usage_limit,used:used_count').eq('active',true);
@@ -2288,7 +2293,7 @@ function initReviewModal(){
     if(rvProf) rvProf.value=""; if(rvProd) rvProd.value="";
     // প্রোডাক্ট সাজেশন লিস্ট (ঐচ্ছিক ফিল্ড — টাইপ করলে সাজেস্ট করবে)
     const dl=$("#rvProductList");
-    if(dl) dl.innerHTML = PRODUCTS.map(p=>`<option value="${escAttr(p.name)}"></option>`).join("");
+    if(dl) dl.innerHTML = PRODUCTS.filter(p=>!isExclusiveProd(p)).map(p=>`<option value="${escAttr(p.name)}"></option>`).join("");
     $("#reviewForm").style.display="block"; $("#reviewDone").style.display="none";
     $("#rvSubmit").disabled=false;
     ovPush();
@@ -2570,14 +2575,29 @@ function catMasterList(){
   // পণ্য নেই এমন ক্যাটেগরি বারে দেখানো হবে না
   return list.filter(c => catCount(c) > 0);
 }
+/* 🔒 "শুধু ক্লিকে দেখা যায়" ক্যাটেগরি — categories টেবিলের hide_from_all ঘর (অ্যাডমিন → Categories → চেকবক্স)।
+   এমন ক্যাটেগরির প্রোডাক্ট "সব পণ্য", অন্য ক্যাটেগরি, বয়স, সার্চ, রিলেটেড — কোথাও দেখায় না;
+   কেউ ক্যাটেগরিটা নিজে ক্লিক করলে তবেই দেখা যায়। (যেমন: Mother's Corner) */
+function isExclusiveCat(name){
+  const key = String(name||"").trim().toLowerCase();
+  const hit = (CATLIST||[]).find(c=>String(c.name||"").trim().toLowerCase()===key);
+  return !!(hit && (hit.hide_from_all===true || String(hit.hide_from_all).toLowerCase()==='true'));
+}
+/* প্রোডাক্টটা কোনো ক্লিক-অনলি ক্যাটেগরিতে আছে কি না */
+function isExclusiveProd(p){ return prodCats(p).some(isExclusiveCat); }
+/* ক্যাটেগরি c-এর ভিউতে প্রোডাক্ট p দেখানো যাবে কি না:
+   সাধারণ ক্যাটেগরি → ক্লিক-অনলি প্রোডাক্ট বাদ; ক্লিক-অনলি ক্যাটেগরি → তার নিজের প্রোডাক্ট */
+function showableIn(p, c){ return isExclusiveCat(c) ? true : !isExclusiveProd(p); }
+
 /* একটা ক্যাটেগরিতে কয়টা দেখানোর মতো (non-hidden) প্রোডাক্ট আছে — ০ হলে চিপ ক্লিক হবে না */
-function catCount(c){ return PRODUCTS.filter(p=>prodInCat(p,c)).length; }
+function catCount(c){ return PRODUCTS.filter(p=>prodInCat(p,c) && showableIn(p,c)).length; }
 
 /* উপরের ক্যাটেগরি চিপ — Settings এর তালিকা+ক্রম অনুযায়ী সব ক্যাটেগরি;
    যেগুলোতে প্রোডাক্ট নেই/হিডেন সেগুলো দেখাবে কিন্তু ক্লিক হবে না */
 /* ক্যাটেগরি → ইমোজি (টপ চিপ বার + Shop By Category টাইল — দুটোই এটা ব্যবহার করে) */
 function catEmoji(c){
   const s = (""+c).toLowerCase();
+  if(/mother|mom\b|maternity|মায়ের|মাদার|মাতৃ/.test(s)) return '🤱';
   if(/best|seller|বেস্ট/.test(s)) return '🔥';
   if(/early|preschool|educational|শিক্ষা|প্রি/.test(s)) return '🎓';
   if(/brain|puzzle|memory|ব্রেইন|ধাঁধা|focus|বুস্ট/.test(s)) return '🧠';
@@ -2704,17 +2724,19 @@ function buildShopCats(){
   const seen = new Set(), cats = [];
   catMasterList().forEach(c=>{ if(inProducts.has(c) && !seen.has(c)){ seen.add(c); cats.push(c); } });
   [...inProducts].forEach(c=>{ if(!seen.has(c)){ seen.add(c); cats.push(c); } });
-  if(cats.length < 2){ wrap.style.display="none"; return; }
+  // ক্লিক-অনলি প্রোডাক্ট বাদ দেওয়ার পর যে ক্যাটেগরিতে দেখানোর মতো কিছু নেই, তার টাইল নয়
+  const showCats = cats.filter(c => catCount(c) > 0);
+  if(showCats.length < 2){ wrap.style.display="none"; return; }
   wrap.style.display="";
-  const ccEl=document.getElementById("shopcatCount"); if(ccEl) ccEl.textContent=bnNum(cats.length);
+  const ccEl=document.getElementById("shopcatCount"); if(ccEl) ccEl.textContent=bnNum(showCats.length);
   const palette = ['#FF6B4A','#16A34A','#F59E0B','#6366F1','#EC4899','#0EA5E9','#8B5CF6','#EF4444'];
-  box.innerHTML = cats.map((c,i)=>{
+  box.innerHTML = showCats.map((c,i)=>{
     const col = palette[i % palette.length];
     const icon = catEmoji(c);
     const n = catCount(c);
-    return `<button class="scat" data-c="${c}">
+    return `<button class="scat" data-c="${escAttr(c)}">
       <span class="ic" style="background:${col}">${icon}</span>
-      <span class="nm">${c}</span>
+      <span class="nm">${esc(c)}</span>
       <span class="ct">${bnNum(n)} ${t('items')}</span>
     </button>`;
   }).join("");
@@ -2735,7 +2757,9 @@ function buildShopAges(){
   const wrap = document.getElementById("shopageWrap");
   const box = document.getElementById("shopage");
   if(!wrap || !box) return;
-  const ages = [...new Set(PRODUCTS.map(p=>p.age).filter(Boolean))]
+  // ক্লিক-অনলি ক্যাটেগরির প্রোডাক্ট বয়সের টাইলে গণনায় আসে না
+  const agePool = PRODUCTS.filter(p=>!isExclusiveProd(p));
+  const ages = [...new Set(agePool.map(p=>p.age).filter(Boolean))]
     .sort((a,b)=>ageStartNum(a)-ageStartNum(b));
   if(ages.length < 2){ wrap.style.display="none"; return; }
   wrap.style.display="";
@@ -2743,7 +2767,7 @@ function buildShopAges(){
   const palette = ['#0EA5E9','#16A34A','#F59E0B','#EC4899','#8B5CF6','#FF6B4A','#6366F1','#EF4444'];
   box.innerHTML = ages.map((a,i)=>{
     const col = palette[i % palette.length];
-    const n = PRODUCTS.filter(p=>p.age===a).length;
+    const n = agePool.filter(p=>p.age===a).length;
     return `<button class="scat" data-a="${a}">
       <span class="ic" style="background:${col}">${ageEmoji(a)}</span>
       <span class="nm">${a} ${t('years')}</span>
@@ -2767,7 +2791,13 @@ function discMode(){
 
 function render(){
   const q = $("#search").value.trim().toLowerCase();
-  let list = PRODUCTS.filter(p=>(activeCat==="all"||prodInCat(p,activeCat)) && (activeAge==="all"||p.age===activeAge));
+  let list = PRODUCTS.filter(p=>{
+    if(activeCat!=="all" && !prodInCat(p,activeCat)) return false;
+    if(activeAge!=="all" && p.age!==activeAge) return false;
+    // 🔒 ক্লিক-অনলি ক্যাটেগরির প্রোডাক্ট: সেই ক্যাটেগরিটাই খোলা না থাকলে (সব পণ্য / অন্য ক্যাটেগরি / বয়স / সার্চ) বাদ
+    if(isExclusiveProd(p) && !(activeCat!=="all" && isExclusiveCat(activeCat))) return false;
+    return true;
+  });
   if(q) list = list.filter(p=>p.name.toLowerCase().includes(q));
   if(sortMode==='low') list = list.slice().sort((a,b)=>a.price-b.price);
   else if(sortMode==='high') list = list.slice().sort((a,b)=>b.price-a.price);
@@ -2949,9 +2979,11 @@ function addBattery(id){ addToCart(id, 1); }
 /* রিলেটেড পণ্য — একই ক্যাটাগরির অন্য পণ্য (কম হলে বাকিগুলো) */
 function renderRelated(){
   const wrap = $("#mRelated"); if(!wrap || !current){ if(wrap){wrap.style.display="none";} return; }
-  let rel = PRODUCTS.filter(p=>String(p.id)!==String(current.id) && !p.soldout && prodCats(p).some(c=>prodCats(current).includes(c)));
+  // 🔒 ক্লিক-অনলি প্রোডাক্ট রিলেটেডে তখনই আসে যখন খোলা প্রোডাক্টটাও সেই একই ক্লিক-অনলি ক্যাটেগরিতে থাকে
+  const relOk = p => !isExclusiveProd(p) || prodCats(p).some(c=>isExclusiveCat(c) && prodCats(current).includes(c));
+  let rel = PRODUCTS.filter(p=>String(p.id)!==String(current.id) && !p.soldout && relOk(p) && prodCats(p).some(c=>prodCats(current).includes(c)));
   if(rel.length < 2){
-    const more = PRODUCTS.filter(p=>String(p.id)!==String(current.id) && !p.soldout && !rel.some(r=>String(r.id)===String(p.id)));
+    const more = PRODUCTS.filter(p=>String(p.id)!==String(current.id) && !p.soldout && relOk(p) && !rel.some(r=>String(r.id)===String(p.id)));
     rel = rel.concat(more);
   }
   rel = rel.slice(0,4);
